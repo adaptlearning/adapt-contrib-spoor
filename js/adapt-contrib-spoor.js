@@ -33,8 +33,9 @@ define(function(require) {
       } else {
         Adapt.on('app:dataReady', this.onDataReady, this);
       }
-      //Adapt.blocks.on('change:_isComplete', this.onItemComplete, this);
-      Adapt.on('itemComplete', this.onItemComplete, this);
+
+      
+      //Adapt.on('itemComplete', this.onItemComplete, this);
     },
 
     checkCompletionCriteria: function() {
@@ -136,6 +137,7 @@ define(function(require) {
       this.setSessionData();
       this.setupBlockCompletionData();
       this.repopulateCompletionData();
+      Adapt.blocks.on('change:_isComplete', this.onItemComplete, this);
       Adapt.trigger("spoorReady");
     },
 
