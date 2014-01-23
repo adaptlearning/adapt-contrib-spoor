@@ -1,11 +1,12 @@
 {
-    "tracking": {
-        "requireAllModulesCompleted": true,
-        "requireQuizPassed": false
+    "_tracking": {
+        "_requireCourseCompleted": true,
+        "_requireQuizPassed": false,
+        "_shouldSubmitScore": false
     },
-    "reporting": {
-        "comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
-        "onTrackingCriteriaMet": "completed",
-        "onQuizFailure": "incomplete"
+    "_reporting": {
+        "_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
+        "_onTrackingCriteriaMet": "completed",
+        "_onQuizFailure": "incomplete"
     }
 }
