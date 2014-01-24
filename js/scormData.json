@@ -1,0 +1,14 @@
+{
+    "_spoor": {
+        "_tracking": {
+            "_requireCourseCompleted": true,
+            "_requireQuizPassed": false,
+            "_shouldSubmitScore": false
+        },
+        "_reporting": {
+            "_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
+            "_onTrackingCriteriaMet": "completed",
+            "_onQuizFailure": "incomplete"
+        }
+    }
+}
