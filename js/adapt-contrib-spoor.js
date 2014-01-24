@@ -42,7 +42,7 @@ define(function(require) {
       }, this);
 
       if(criteriaMet) {
-        this.setLessonStatus(this.data._reporting.onTrackingCriteriaMet);
+        this.setLessonStatus(this.data._reporting._onTrackingCriteriaMet);
       }
     },
 
@@ -64,6 +64,9 @@ define(function(require) {
     },
 
     createCompletionString: function() {
+      if(Adapt.course.get('_isComplete')) {
+        return 'courseComplete';
+      }
       var _blockCompletionArray = this.get('_blockCompletionArray');
 
       _.each(Adapt.blocks.models, function(blockModel) {
@@ -113,7 +116,6 @@ define(function(require) {
       this.setupBlockCompletionData();
       this.repopulateCompletionData();
       this.listenToCompletionEvents();
-      console.log(Adapt.blocks);
       // may no longer be needed - DH
 //      Adapt.trigger("spoorReady");
     },
@@ -134,15 +136,16 @@ define(function(require) {
     },
     
     onAssessmentComplete: function(event) {
-      var _isAssessmentPassed = event.isPass;
-      console.info("Spoor::onAssessmentComplete: assessment: " + isAssessment + ", _isAssessmentPassed: " + _isAssessmentPassed);
-      if (_isAssessmentPassed) {
+      if (event.isPass) {
         this.onCriterionMet("_isAssessmentPassed");
       } else {
-        var onAssessmentFailure = this.data._reporting.onAssessmentFailure;
+        var onAssessmentFailure = this.data._reporting._onAssessmentFailure;
         if (onAssessmentFailure !== "" && onAssessmentFailure !== "incomplete") {
           this.setLessonStatus(onAssessmentFailure);
         }
+      }
+      if(this.data._tracking._shouldSubmitScore) {
+        scormWrapper.setScore(event.scoreAsPercent, 0, 100);
       }
     },
 
@@ -191,7 +194,6 @@ define(function(require) {
     },
 
     sendCompletionString: function(){
-      console.log('sendCompletionString');
       var suspendData = this.createCompletionObject();
       if (!this.getDataIsAlreadyReported(suspendData)) {
         if (this.get('_lastCompletedBlock') !== undefined) {

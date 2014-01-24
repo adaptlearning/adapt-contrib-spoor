@@ -1,17 +1,20 @@
 var API = {
 	LMSInitialize: function() {
+		this.data = {};
+		this.data["cmi.core.lesson_status"] = "not attempted";
+		this.data["cmi.suspend_data"] = "";
 		return "true";
 	},
 	LMSFinish: function() {
 		return "true";
 	},
 	LMSGetValue: function(key) {
-		if(key === "cmi.core.lesson_status") {
-			return "not attempted"
-		}
-		return "";
+		console.log('LMSGetValue("' + key + '") - ' + this.data[key]);
+		return this.data[key];
 	},
-	LMSSetValue: function() {
+	LMSSetValue: function(key, value) {
+		console.log('LMSSetValue("' + key + '") - ' + value);
+		this.data[key] = value;
 		return "true";
 	},
 	LMSCommit: function() {
