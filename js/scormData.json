@@ -2,7 +2,7 @@
     "_spoor": {
         "_tracking": {
             "_requireCourseCompleted": true,
-            "_requireQuizPassed": false,
+            "_requireAssessmentPassed": false,
             "_shouldSubmitScore": false
         },
         "_reporting": {
