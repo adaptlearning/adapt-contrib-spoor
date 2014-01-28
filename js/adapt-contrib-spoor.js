@@ -158,7 +158,8 @@ define(function(require) {
     },
 
     restoreProgress: function(suspendData) {
-      if (scormWrapper.getStatus() === "courseComplete") {
+      if (suspendData.spoor.completion === "courseComplete") {
+        Adapt.course.set('_isComplete', true);
         Adapt.course.setOnChildren('_isComplete', true);
       } else {
         _.each(this.get('_blockCompletionArray'), function(blockCompletion, blockTrackingId) {
