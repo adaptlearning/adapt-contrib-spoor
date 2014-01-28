@@ -115,15 +115,17 @@ define(function(require) {
       this.setSessionData();
       this.setupBlockCompletionData();
       this.repopulateCompletionData();
-      this.listenToCompletionEvents();
+      this.setupListeners();
       // may no longer be needed - DH
 //      Adapt.trigger("spoorReady");
     },
     
-    listenToCompletionEvents: function() {
+    setupListeners: function() {
       Adapt.blocks.on('change:_isComplete', this.onBlockComplete, this);
       Adapt.course.on('change:_isComplete', this.onCourseComplete, this);
       Adapt.on('assessment:complete', this.onAssessmentComplete, this);
+      Adapt.on('questionView:complete', this.onQuestionComplete, this);
+      Adapt.on('questionView:reset', this.onQuestionReset, this);
     },
       
     onCourseComplete: function() {
@@ -146,6 +148,17 @@ define(function(require) {
       }
       if(this.data._tracking._shouldSubmitScore) {
         scormWrapper.setScore(event.scoreAsPercent, 0, 100);
+      }
+    },
+
+    onQuestionComplete: function(questionView) {
+      questionView.model.set('_sessionID', this.get('_sessionID'));
+    }
+
+    onQuestionReset: function(questionView) {
+      var sameSession = this.get('_sessionID') === questionView.model.get('_sessionID');
+      if(!sameSession) {
+          questionView.model.set('_isEnabledOnRevisit', true);
       }
     },
 
@@ -247,7 +260,7 @@ define(function(require) {
       }
 
       this.set({
-        sessionID: this.generateRandomID(8)
+        _sessionID: this.generateRandomID(8)
       });
     },
 
