@@ -153,7 +153,7 @@ define(function(require) {
 
     onQuestionComplete: function(questionView) {
       questionView.model.set('_sessionID', this.get('_sessionID'));
-    }
+    },
 
     onQuestionReset: function(questionView) {
       var sameSession = this.get('_sessionID') === questionView.model.get('_sessionID');
