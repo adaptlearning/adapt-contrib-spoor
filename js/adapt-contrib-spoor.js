@@ -92,6 +92,9 @@ define(function(require) {
     },
 
     onAssessmentComplete: function(event) {
+      if(this.data._tracking._shouldSubmitScore) {
+        scormWrapper.setScore(event.scoreAsPercent, 0, 100);
+      }
       if (event.isPass) {
         Adapt.course.set('_isAssessmentPassed', event.isPass);
         this.persistSuspendData();
@@ -100,9 +103,6 @@ define(function(require) {
         if (onAssessmentFailure !== "" && onAssessmentFailure !== "incomplete") {
           this.setLessonStatus(onAssessmentFailure);
         }
-      }
-      if(this.data._tracking._shouldSubmitScore) {
-        scormWrapper.setScore(event.scoreAsPercent, 0, 100);
       }
     },
 
