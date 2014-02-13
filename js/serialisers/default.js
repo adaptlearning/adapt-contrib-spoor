@@ -16,15 +16,21 @@ define(['coreJS/adapt'], function (Adapt) {
                 var message = "This course is missing a latestTrackingID.\n\nPlease run the grunt process prior to deploying this module on LMS.\n\nScorm tracking will not work correctly until this is done.";
                 console.error(message);
             }
+            var excludeAssessments = Adapt.config.get('_spoor') && Adapt.config.get('_spoor')._tracking && Adapt.config.get('_spoor')._tracking._excludeAssessments,
+                data = new Array(Adapt.course.get('_latestTrackingId') + 1);
 
-            var data = new Array(Adapt.course.get('_latestTrackingId') + 1);
             for (var i = 0; i < data.length; i++) {
                 data[i] = -1;
             }
 
             _.each(Adapt.blocks.models, function(model, index) {
                 var _trackingId = model.get('_trackingId'),
+                    isPartOfAssessment = model.getParent().get('_assessment'),
                     state = model.get(attribute) ? 1: 0;
+
+                if(excludeAssessments && isPartOfAssessment) {
+                    state = 0;
+                }
 
                 if (_trackingId === undefined) {
                     var message = "Block '" + model.get('id') + "' doesn't have a tracking ID assigned.\n\nPlease run the grunt process prior to deploying this module on LMS.\n\nScorm tracking will not work correctly until this is done.";
