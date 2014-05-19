@@ -197,13 +197,12 @@ define(function(require) {
       // this.set('scormWrapper', this.data._testingMode') ? this.get('testingLMS : ScormWrapper.getInstance());
       var sw = scormWrapper;
       if (sw.initialize()) {
+				/**
+				* force use of version SCORM 1.2 as some LMSes (SABA, for instance) present both APIs and, if given the choice, 
+				* the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
+				*/
         sw.setVersion("1.2");
         this.set('initialised', true);
-        var lessonStatus = sw.getStatus().toLowerCase();
-
-        if (lessonStatus == "not attempted" || lessonStatus == "unknown") {
-          sw.setIncomplete();
-        }
       }
     },
 
