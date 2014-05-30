@@ -116,6 +116,49 @@ define(function(require) {
       }
     },
 
+    repopulateCompletionData: function() {
+      var suspendData = this.get('_suspendData');
+
+      if (suspendData.spoor.completion !== "") {
+        this.restoreProgress(suspendData);
+      }
+    },
+
+    restoreProgress: function(suspendData) {
+      if (suspendData.spoor.completion === "courseComplete") {
+        Adapt.course.set('_isComplete', true);
+        Adapt.course.setOnChildren('_isComplete', true);
+      } else {
+        _.each(this.get('_blockCompletionArray'), function(blockCompletion, blockTrackingId) {
+          if (blockCompletion === 1) {
+            this.markBlockAsComplete({block: Adapt.blocks.findWhere({_trackingId: blockTrackingId}), includeChildren: true});
+          }
+        }, this);
+      }
+      Adapt.course.set('_isAssessmentPassed', suspendData.spoor._isAssessmentPassed);
+      this.set('_suspendData', suspendData);
+      this.sendCompletionString();
+    },
+
+    SCOFinish:function() {
+      if (!this.get('_SCOFinishCalled')) {
+        this.set('SCOFinishCalled', true);
+        scormWrapper.finish();
+      }
+    },
+
+    SCOStart: function() {
+      // this.set('scormWrapper', this.data._testingMode') ? this.get('testingLMS : ScormWrapper.getInstance());
+      var sw = scormWrapper;
+      if (sw.initialize()) {
+				/**
+				* force use of version SCORM 1.2 as some LMSes (SABA, for instance) present both APIs and, if given the choice, 
+				* the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
+				*/
+        sw.setVersion("1.2");
+        this.set('initialised', true);
+      }
+    },
     persistSuspendData: function(){
       var courseCriteriaMet = this.data._tracking._requireCourseCompleted ? Adapt.course.get('_isComplete') : true,
           assessmentCriteriaMet = this.data._tracking._requireAssessmentPassed ? Adapt.course.get('_isAssessmentPassed') : true;
