@@ -140,25 +140,6 @@ define(function(require) {
       this.sendCompletionString();
     },
 
-    SCOFinish:function() {
-      if (!this.get('_SCOFinishCalled')) {
-        this.set('SCOFinishCalled', true);
-        scormWrapper.finish();
-      }
-    },
-
-    SCOStart: function() {
-      // this.set('scormWrapper', this.data._testingMode') ? this.get('testingLMS : ScormWrapper.getInstance());
-      var sw = scormWrapper;
-      if (sw.initialize()) {
-				/**
-				* force use of version SCORM 1.2 as some LMSes (SABA, for instance) present both APIs and, if given the choice, 
-				* the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
-				*/
-        sw.setVersion("1.2");
-        this.set('initialised', true);
-      }
-    },
     persistSuspendData: function(){
       var courseCriteriaMet = this.data._tracking._requireCourseCompleted ? Adapt.course.get('_isComplete') : true,
           assessmentCriteriaMet = this.data._tracking._requireAssessmentPassed ? Adapt.course.get('_isAssessmentPassed') : true;
