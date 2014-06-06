@@ -60,7 +60,7 @@ define (function(require) {
 			this.showDebugWindow();
 		
 		/**
-		 *  and also stop it from setting cmi.core.exit to suspend/logout. there doesn't seem to be any tangible benefit to doing this...
+		 *  stop the pipwerks code from setting cmi.core.exit to suspend/logout. there doesn't seem to be any tangible benefit to doing this...
 		 *  it can actually cause problems with some LMSes (e.g. setting 'logout' apparently causes Plateau to log out completely!)
 		 *  you can always switch it back on for an individual course if you think it's necessary.
 		 */
