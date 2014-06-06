@@ -28,15 +28,15 @@ define(function(require) {
     },
 
     SCOStart: function() {
-      var sw = scormWrapper;
-      if (sw.initialize()) {
-        sw.setVersion("1.2");
+      if (scormWrapper.initialize()) {
+				/**
+				* force use of SCORM 1.2 - as some LMSes (SABA, for instance) present both APIs to the SCO and, if given the choice, 
+				* the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
+				* this does obviously mean you'll have to manually change (or just remove) this next line if you want SCORM 2004 output
+				*/
+				//TODO allow version to be set via config.json
+        scormWrapper.setVersion("1.2");
         this.set('initialised', true);
-        var lessonStatus = sw.getStatus().toLowerCase();
-
-        if (lessonStatus === "not attempted" || lessonStatus === "unknown" || lessonStatus === undefined) {
-          sw.setIncomplete();
-        }
       }
     },
 
