@@ -99,7 +99,7 @@ define(function(require) {
       } else {
         var onAssessmentFailure = this.data._reporting._onAssessmentFailure;
         if (onAssessmentFailure !== "" && onAssessmentFailure !== "incomplete") {
-          this.setLessonStatus(onAssessmentFailure);
+          scormWrapper.setStatus(onAssessmentFailure);
         }
       }
     },
@@ -139,32 +139,14 @@ define(function(require) {
     },
 		
     persistSuspendData: function(){
-      var courseCriteriaMet = this.data._tracking._requireCourseCompleted ? Adapt.course.get('_isComplete') : true,
-          assessmentCriteriaMet = this.data._tracking._requireAssessmentPassed ? Adapt.course.get('_isAssessmentPassed') : true;
-
-      if(courseCriteriaMet && assessmentCriteriaMet) {
-        this.setLessonStatus(this.data._reporting._onTrackingCriteriaMet);
-      }
       scormWrapper.setSuspendData(JSON.stringify(serialiser.serialise()));
-    },
 
-    setLessonStatus:function(status){
-      switch (status){
-        case "incomplete":
-          scormWrapper.setIncomplete();
-          break;
-        case "completed":
-          scormWrapper.setCompleted();
-          break;
-        case "passed":
-          scormWrapper.setPassed();
-          break;
-        case "failed":
-          scormWrapper.setFailed();
-          break;
-        default:
-          console.warn("cmi.core.lesson_status of " + status + " is not supported.");
-          break;
+			//TODO should this really be here? It's nothing to do with setting the suspend_data and therefore breaks the 'does what it says on the tin' rule...
+			var courseCriteriaMet = this.data._tracking._requireCourseCompleted ? Adapt.course.get('_isComplete') : true;
+      var assessmentCriteriaMet = this.data._tracking._requireAssessmentPassed ? Adapt.course.get('_isAssessmentPassed') : true;
+			
+			if(courseCriteriaMet && assessmentCriteriaMet) {
+        scormWrapper.setStatus(this.data._reporting._onTrackingCriteriaMet);
       }
     }
     
