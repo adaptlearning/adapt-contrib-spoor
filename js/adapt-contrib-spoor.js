@@ -86,9 +86,7 @@ define(function(require) {
       if(Adapt.course.get('_isComplete') === true) {
         this.set('_attempts', this.get('_attempts')+1);
       }
-      _.defer(function waitForBlockComplete() {
-        this.persistSuspendData();
-      });
+      _.defer(_.bind(this.persistSuspendData, this));
     },
 
     onAssessmentComplete: function(event) {
