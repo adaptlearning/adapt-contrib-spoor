@@ -177,6 +177,26 @@ define (function(require) {
 		}
 	};
 
+	ScormWrapper.prototype.setStatus = function(status) {
+		switch (status.toLowerCase()){
+        case "incomplete":
+          this.setIncomplete();
+          break;
+        case "completed":
+          this.setCompleted();
+          break;
+        case "passed":
+          this.setPassed();
+          break;
+        case "failed":
+          this.setFailed();
+          break;
+        default:
+          this.handleError("ScormWrapper::setStatus: the status '" + status + "' is not supported.");
+          break;
+      }
+	}
+
 	ScormWrapper.prototype.getScore = function() {
 		return this.getValue(this.isSCORM2004() ? "cmi.score.raw" : "cmi.core.score.raw");
 	};
