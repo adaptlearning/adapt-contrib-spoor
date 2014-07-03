@@ -6,6 +6,8 @@
     "Kevin Corry <kevinc@learningpool.com>",
     "Kev Adsett <kev.adsett@kineo.com?"
   ],
+  "displayName" : "Spoor",
+  "extension" : "spoor",
   "description": "A basic scorm tracking plugin for Adapt",
   "main": "/js/adapt-contrib-spoor.js",
   "keywords": [

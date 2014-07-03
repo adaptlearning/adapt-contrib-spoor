@@ -16,8 +16,8 @@
     "url": "https://github.com/adaptlearning/adapt-contrib-spoor/issues"
   },
   "devDependencies": {
-    "karma": "~0.10",
-    "karma-mocha": "*",
-    "karma-expect": "*"
+    "karma": "0.10",
+    "karma-mocha": "0.1.0",
+    "karma-expect": "1.1.0"
   }
 }
