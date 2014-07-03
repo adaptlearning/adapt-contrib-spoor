@@ -8,11 +8,12 @@
   ],
   "displayName" : "Spoor",
   "extension" : "spoor",
-  "description": "A basic scorm tracking plugin for Adapt",
+  "description": "An extension which allows basic SCORM tracking",
   "main": "/js/adapt-contrib-spoor.js",
   "keywords": [
     "adapt-plugin",
     "adapt-extension"
   ],
-  "license": "GPLv3"
+  "license": "GPLv3",
+  "targetAttribute": "_spoor"
 }
