@@ -1,0 +1,82 @@
+{
+  "type":"object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "id": "http://jsonschema.net",
+  "required":false,
+  "properties":{
+    "pluginLocations": {
+      "type":"object",
+      "required":true,
+      "properties":{
+        "config": {
+          "type":"object",
+          "properties":{
+            "_spoor": {
+              "type":"object",
+              "required":false,
+              "properties":{
+                "_isEnabled": {
+                  "type":"boolean",
+                  "required":true
+                },
+                "_tracking": {
+                  "type":"object",
+                  "required":false,
+                  "properties":{
+                    "_requireAssessmentPassed": {
+                      "type":"boolean",
+                      "required":false
+                    },
+                    "_requireCourseCompleted": {
+                      "type":"boolean",
+                      "required":false
+                    },
+                    "_shouldSubmitScore": {
+                      "type":"boolean",
+                      "required":false
+                    }
+                  }
+                },
+                "_reporting": {
+                  "type":"object",
+                  "required":false,
+                  "properties":{
+                    "_comment": {
+                      "type":"string",
+                      "required":false
+                    },
+                    "_onTrackingCriteriaMet": {
+                      "type":"string",
+                      "required":false,
+                      "enum": ["completed", "passed", "failed", "incomplete"]
+                    },
+                    "_onQuizFailure": {
+                      "type":"string",
+                      "required":false,
+                      "enum": ["completed", "passed", "failed", "incomplete"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "course": {
+          "type":"object"
+        },
+        "contentobject": {
+          "type":"object"
+        },
+        "article": {
+          "type":"object"
+        },
+        "block": {
+          "type":"object"
+        },
+        "component": {
+          "type":"object"
+        }
+      }
+    }
+  }
+}
