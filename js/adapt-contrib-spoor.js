@@ -113,30 +113,6 @@ define(function(require) {
           questionView.model.set('_isEnabledOnRevisit', true);
       }
     },
-
-    repopulateCompletionData: function() {
-      var suspendData = this.get('_suspendData');
-
-      if (suspendData.spoor.completion !== "") {
-        this.restoreProgress(suspendData);
-      }
-    },
-
-    restoreProgress: function(suspendData) {
-      if (suspendData.spoor.completion === "courseComplete") {
-        Adapt.course.set('_isComplete', true);
-        Adapt.course.setOnChildren('_isComplete', true);
-      } else {
-        _.each(this.get('_blockCompletionArray'), function(blockCompletion, blockTrackingId) {
-          if (blockCompletion === 1) {
-            this.markBlockAsComplete({block: Adapt.blocks.findWhere({_trackingId: blockTrackingId}), includeChildren: true});
-          }
-        }, this);
-      }
-      Adapt.course.set('_isAssessmentPassed', suspendData.spoor._isAssessmentPassed);
-      this.set('_suspendData', suspendData);
-      this.sendCompletionString();
-    },
 		
     persistSuspendData: function(){
       scormWrapper.setSuspendData(JSON.stringify(serialiser.serialise()));
