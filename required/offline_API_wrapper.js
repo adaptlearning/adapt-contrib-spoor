@@ -9,11 +9,11 @@ var API = {
 		return "true";
 	},
 	LMSGetValue: function(key) {
-		console.log('LMSGetValue("' + key + '") - ' + this.data[key]);
+		window.console && console.log('LMSGetValue("' + key + '") - ' + this.data[key]);
 		return this.data[key];
 	},
 	LMSSetValue: function(key, value) {
-		console.log('LMSSetValue("' + key + '") - ' + value);
+		window.console && console.log('LMSSetValue("' + key + '") - ' + value);
 		this.data[key] = value;
 		return "true";
 	},
