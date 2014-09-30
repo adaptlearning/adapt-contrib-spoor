@@ -4,14 +4,18 @@ define (function(require) {
 		IMPORTANT: This wrapper uses the Pipwerks SCORM wrapper and should therefore support both SCORM 1.2 and 2004. Ensure any changes support both versions.
 	*/
 
-	var ScormWrapper = function()
-	{
+	var ScormWrapper = function() {
 		/* configuration */
 		this.setCompletedWhenFailed = true;// this only applies to SCORM 2004
 		/**
 		 * whether to commit each time there's a change to lesson_status or not
 		 */
 		this.commitOnStatusChange = true;
+		/**
+		 * allows you to deactivate tracking to cmi.interactions - useful in instances where the code to detect when cmi.interactions are 
+		 * are supported isn't working due to inconsistent LMS behaviour
+		 */
+		this.disableInteractionTracking = false;
 		/**
 		 * how frequently (in minutes) to commit automatically. set to 0 to disable.
 		 */
@@ -54,13 +58,9 @@ define (function(require) {
 		
 		if (window.__debug)
 			this.showDebugWindow();
-
-		/*
-		stop pipwerks from auto-setting the SCO to incomplete, otherwise we can never let the course know when it is being run for the first time....
-		*/
-		this.scorm.handleCompletionStatus = false;
+		
 		/**
-	         *  and also stop it from setting cmi.core.exit to suspend/logout. there doesn't seem to be any tangible benefit to doing this...
+		 *  stop the pipwerks code from setting cmi.core.exit to suspend/logout. there doesn't seem to be any tangible benefit to doing this...
 		 *  it can actually cause problems with some LMSes (e.g. setting 'logout' apparently causes Plateau to log out completely!)
 		 *  you can always switch it back on for an individual course if you think it's necessary.
 		 */
@@ -73,105 +73,94 @@ define (function(require) {
 	/******************************* public methods *******************************/
 
 	// static
-	ScormWrapper.getInstance = function()
-	{
-		if (ScormWrapper.instance == null)
+	ScormWrapper.getInstance = function() {
+		if (ScormWrapper.instance === null)
 			ScormWrapper.instance = new ScormWrapper();
 		return ScormWrapper.instance;
 	};
 
-	ScormWrapper.prototype.getVersion = function()
-	{
+	ScormWrapper.prototype.getVersion = function() {
 		return this.scorm.version;
 	};
 
-	ScormWrapper.prototype.setVersion = function(value)
-	{
+	ScormWrapper.prototype.setVersion = function(value) {
 		this.scorm.version = value;
 	};
 
-	ScormWrapper.prototype.registerView = function(_view)
-	{
+	ScormWrapper.prototype.registerView = function(_view) {
 		this.registeredViews[this.registeredViews.length] = _view;
 	};
 
-	ScormWrapper.prototype.updateViews = function()
-	{
+	ScormWrapper.prototype.updateViews = function() {
 		for (var i = 0; i < this.registeredViews.length; i++) {
 			this.registeredViews[i].update(this);
 		}
 	};
 
-	ScormWrapper.prototype.initialize = function()
-	{
+	ScormWrapper.prototype.initialize = function() {
 		this.lmsConnected = this.scorm.init();
 
-		if (this.lmsConnected)
-		{
+		if (this.lmsConnected) {
 			this.startTime = new Date();
 			
 			this.initTimedCommit();
 		}
-		else
-		{
+		else {
 			this.handleError("Course could not connect to the LMS");
 		}
 	    
 	    return this.lmsConnected;
 	};
 
-	ScormWrapper.prototype.setIncomplete = function()
-	{
+	/**
+	* allows you to check if this is the user's first ever 'session' of a SCO, even after the lesson_status has been set to 'incomplete'
+	*/
+	ScormWrapper.prototype.isFirstSession = function() {
+		return (this.getValue("cmi.core.entry") === "ab-initio");
+	};
+
+	ScormWrapper.prototype.setIncomplete = function() {
 		this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", "incomplete");
 
 		if(this.commitOnStatusChange) this.commit();
 	};
 
-	ScormWrapper.prototype.setCompleted = function()
-	{
+	ScormWrapper.prototype.setCompleted = function() {
 		this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", "completed");
 		
 		if(this.commitOnStatusChange) this.commit();
 	};
 
-	ScormWrapper.prototype.setPassed = function()
-	{
-		if (this.isSCORM2004())
-		{
+	ScormWrapper.prototype.setPassed = function() {
+		if (this.isSCORM2004()) {
 			this.setValue("cmi.completion_status", "completed");
 			this.setValue("cmi.success_status", "passed");
 		}
-		else
-		{
+		else {
 			this.setValue("cmi.core.lesson_status", "passed");
 		}
 
 		if(this.commitOnStatusChange) this.commit();
 	};
 
-	ScormWrapper.prototype.setFailed = function()
-	{
-		if (this.isSCORM2004())
-		{
+	ScormWrapper.prototype.setFailed = function() {
+		if (this.isSCORM2004()) {
 			this.setValue("cmi.success_status", "failed");
 			
 			if(this.setCompletedWhenFailed)
 				this.setValue("cmi.completion_status", "completed");
 		}
-		else
-		{
+		else {
 			this.setValue("cmi.core.lesson_status", "failed");
 		}
 
-		if(this.commitOnStatusChange) this.commit();
+			if(this.commitOnStatusChange) this.commit();
 	};
 
-	ScormWrapper.prototype.getStatus = function()
-	{
+	ScormWrapper.prototype.getStatus = function() {
 		var status = this.getValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status");
 
-		switch(status.toLowerCase())// workaround for some LMSes (e.g. Arena) not adhering to the all-lowercase rule
-		{
+		switch(status.toLowerCase()) {// workaround for some LMSes (e.g. Arena) not adhering to the all-lowercase rule
 			case "passed":
 			case "completed":
 			case "incomplete":
@@ -188,19 +177,35 @@ define (function(require) {
 		}
 	};
 
-	ScormWrapper.prototype.getScore = function()
-	{
+	ScormWrapper.prototype.setStatus = function(status) {
+		switch (status.toLowerCase()){
+        case "incomplete":
+          this.setIncomplete();
+          break;
+        case "completed":
+          this.setCompleted();
+          break;
+        case "passed":
+          this.setPassed();
+          break;
+        case "failed":
+          this.setFailed();
+          break;
+        default:
+          this.handleError("ScormWrapper::setStatus: the status '" + status + "' is not supported.");
+          break;
+      }
+	}
+
+	ScormWrapper.prototype.getScore = function() {
 		return this.getValue(this.isSCORM2004() ? "cmi.score.raw" : "cmi.core.score.raw");
 	};
 
-	ScormWrapper.prototype.setScore = function(_score, _minScore, _maxScore)
-	{
-		if (this.isSCORM2004())
-		{
+	ScormWrapper.prototype.setScore = function(_score, _minScore, _maxScore) {
+		if (this.isSCORM2004()) {
 			this.setValue("cmi.score.raw", _score) && this.setValue("cmi.score.min", _minScore) && this.setValue("cmi.score.max", _maxScore) && this.setValue("cmi.score.scaled", _score / 100);
 		}
-		else
-		{
+		else {
 			this.setValue("cmi.core.score.raw", _score);
 
 			if(this.isSupported("cmi.core.score.min")) this.setValue("cmi.core.score.min", _minScore);
@@ -209,57 +214,44 @@ define (function(require) {
 		}
 	};
 
-	ScormWrapper.prototype.getLessonLocation = function()
-	{
+	ScormWrapper.prototype.getLessonLocation = function() {
 		return this.getValue(this.isSCORM2004() ? "cmi.location" : "cmi.core.lesson_location");
 	};
 
-	ScormWrapper.prototype.setLessonLocation = function(_location)
-	{
+	ScormWrapper.prototype.setLessonLocation = function(_location) {
 		this.setValue(this.isSCORM2004() ? "cmi.location" : "cmi.core.lesson_location", _location);
 	};
 
-	ScormWrapper.prototype.getSuspendData = function()
-	{
+	ScormWrapper.prototype.getSuspendData = function() {
 		return this.getValue("cmi.suspend_data");
 	};
 
-	ScormWrapper.prototype.setSuspendData = function(_data)
-	{
+	ScormWrapper.prototype.setSuspendData = function(_data) {
 		this.setValue("cmi.suspend_data", _data);
 	};
 
-	ScormWrapper.prototype.getStudentName = function()
-	{
+	ScormWrapper.prototype.getStudentName = function() {
 		return this.getValue(this.isSCORM2004() ? "cmi.learner_name" : "cmi.core.student_name");
 	};
 
-	ScormWrapper.prototype.commit = function()
-	{
+	ScormWrapper.prototype.commit = function() {
 		this.logger.debug("ScormWrapper::commit");
 		
-		if (this.lmsConnected)
-		{
-			if (this.commitRetryPending)
-			{
-				this.logger.debug("ScormWrapper::commit: skipping this commit call as one is already pending.")
+		if (this.lmsConnected) {
+			if (this.commitRetryPending) {
+				this.logger.debug("ScormWrapper::commit: skipping this commit call as one is already pending.");
 			}
-			else
-			{		
-				if (this.scorm.save())
-				{
+			else {		
+				if (this.scorm.save()) {
 					this.commitRetries = 0;
 					this.lastCommitSuccessTime = new Date();
 				}
-				else
-				{
-					if (this.commitRetries <= this.maxCommitRetries && !this.finishCalled)
-					{
+				else {
+					if (this.commitRetries <= this.maxCommitRetries && !this.finishCalled) {
 						this.commitRetries++;
 						this.initRetryCommit();
 					}
-					else
-					{
+					else {
 						var _errorCode = this.scorm.debug.getCode();
 
 						var _errorMsg = "Course could not commit data to the LMS";
@@ -271,89 +263,80 @@ define (function(require) {
 				}
 			}
 		}
-		else
-		{
+		else {
 			this.handleError("Course is not connected to the LMS");
 		}
 	};
 
-	ScormWrapper.prototype.finish = function()
-	{
+	ScormWrapper.prototype.finish = function() {
 		this.logger.debug("ScormWrapper::finish");
 		
-		if (this.lmsConnected && !this.finishCalled)
-		{
+		if (this.lmsConnected && !this.finishCalled) {
 			this.finishCalled = true;
 			
-			if(this.timedCommitIntervalID != null)
-			{
+			if(this.timedCommitIntervalID != null) {
 				window.clearInterval(this.timedCommitIntervalID);
 			}
 			
-			if(this.commitRetryPending)
-			{
+			if(this.commitRetryPending) {
 				window.clearTimeout(this.retryCommitTimeoutID);
 				this.commitRetryPending = false;
 			}
 			
-			if (this.logOutputWin && !this.logOutputWin.closed)
-			{
+			if (this.logOutputWin && !this.logOutputWin.closed) {
 				this.logOutputWin.close();
 			}
 			
 			this.endTime = new Date();
 			
-			if (this.isSCORM2004())
-			{
+			if (this.isSCORM2004()) {
 				this.scorm.set("cmi.session_time", this.convertMilliSecondsToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
 				this.scorm.set("cmi.exit", "normal");
 			}
-			else
-			{
+			else {
 				this.scorm.set("cmi.core.session_time", this.convertMilliSecondsToSCORMTime(this.endTime.getTime() - this.startTime.getTime()));
 				this.scorm.set("cmi.core.exit", "");
 			}
 			
-			this.commit();
-			
 			// api no longer available from this point
 			this.lmsConnected = false;
 			
-			if (!this.scorm.quit())
-			{
+			if (!this.scorm.quit()) {
 				this.handleError("Course could not finish");
 			}
 		}
-		else
-		{
+		else {
 			this.handleError("Course is not connected to the LMS");
 		}
 	};
 
-	ScormWrapper.prototype.recordInteraction = function(strID, strResponse, strCorrect, strLatency, scormInteractionType)
-	{
-		if(this.isSupported("cmi.interactions._count"))
-		{
-			if (scormInteractionType == "choice")
-			{
+	ScormWrapper.prototype.recordInteraction = function(strID, strResponse, strCorrect, strLatency, scormInteractionType) {
+		/*
+		* because some LMSes (e.g. Learning Core, Syntrio) - report cmi.interactions._count as being supported even though
+		* no other cmi.interactions data fields are... so this flag gives us an option to switch off tracking to 
+		* cmi.interactions altogether in these rare instances.
+		*/
+		if(this.disableInteractionTracking === true) {
+			return;
+		}
+
+		if(this.isSupported("cmi.interactions._count")) {
+			if (scormInteractionType === "choice") {
 				var responseIdentifiers = new Array();
 				var answers = strResponse.split("#");
 				
-				for (var i = 0; i < answers.length; i++)
-				{
+				for (var i = 0; i < answers.length; i++) {
 					responseIdentifiers.push(new ResponseIdentifier(answers[i], answers[i]));
 				}
 				
 				this.recordMultipleChoiceInteraction(strID, responseIdentifiers, strCorrect, null, null, null, strLatency, null);
 			}
-			else if (scormInteractionType == "matching")
-			{
+			else if (scormInteractionType === "matching") {
 				var matchingResponses = new Array();
 				var sourceTargetPairs = strResponse.split("#");
 				var sourceTarget = null;
 				
-				for (var i = 0; i < sourceTargetPairs.length; i++)
-				{
+				for (var i = 0; i < sourceTargetPairs.length; i++) {
 					sourceTarget = sourceTargetPairs[i].split(".");
 					matchingResponses.push(new MatchingResponse(sourceTarget[0], sourceTarget[1]));
 				}
@@ -361,37 +344,30 @@ define (function(require) {
 				this.recordMatchingInteraction(strID, matchingResponses, strCorrect, null, null, null, strLatency, null);
 			}
 		}
-		else
-		{
+		else {
 			this.logger.info("ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...");
 		}
 	}
 
 	/****************************** private methods ******************************/
-	ScormWrapper.prototype.getValue = function(_property)
-	{
+	ScormWrapper.prototype.getValue = function(_property) {
 		this.logger.debug("ScormWrapper::getValue: _property=" + _property);
 
-		if(this.finishCalled)
-		{
+		if(this.finishCalled) {
 			this.logger.debug("ScormWrapper::getValue: ignoring request as 'finish' has been called");
 			return;
 		}
 		
-		if (this.lmsConnected)
-		{
+		if (this.lmsConnected) {
 			var _value = this.scorm.get(_property);
 			var _errorCode = this.scorm.debug.getCode();
 			var _errorMsg = "";
 			
-			if (_errorCode !== 0)
-			{
-				if (_errorCode === 403)
-				{
+			if (_errorCode !== 0) {
+				if (_errorCode === 403) {
 					this.logger.warn("ScormWrapper::getValue: data model element not initialized");
 				}
-				else
-				{
+				else {
 					_errorMsg += "Course could not get " + _property;
 					_errorMsg += "\nError Info: " + this.scorm.debug.getInfo(_errorCode);
 					_errorMsg += "\nLMS Error Info: " + this.scorm.debug.getDiagnosticInfo(_errorCode);
@@ -402,53 +378,44 @@ define (function(require) {
 			this.logger.debug("ScormWrapper::getValue: returning " + _value);
 			return _value + "";
 		}
-		else
-		{
+		else {
 			this.handleError("Course is not connected to the LMS");
 		}
 	};
 
-	ScormWrapper.prototype.setValue = function(_property, _value)
-	{
+	ScormWrapper.prototype.setValue = function(_property, _value) {
 		this.logger.debug("ScormWrapper::setValue: _property=" + _property + " _value=" + _value);
 
-		if(this.finishCalled)
-		{
+		if(this.finishCalled)	{
 			this.logger.debug("ScormWrapper::setValue: ignoring request as 'finish' has been called");
 			return;
 		}
 		
-		if (this.lmsConnected)
-		{
+		if (this.lmsConnected) {
 			var _success = this.scorm.set(_property, _value);
 			var _errorCode = this.scorm.debug.getCode();
 			var _errorMsg = "";
 			
-			if (!_success)
-			{
-				/*
-				* Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine...
-				* So we need to throw an error only if there was a valid error code. Grr.
-				* http://www.madcrew.se/wordpress/wp-content/uploads/2008/09/stupid_final_01.jpg
-				*/
-				if(_errorCode !== 0)
-				{
+			if (!_success) {
+			/*
+			* Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
+			* So, we should throw an error _only_ if there was a valid error code...
+			*/
+				if(_errorCode !== 0) {
 					_errorMsg += "Course could not set " + _property + " to " + _value;
 					_errorMsg += "\nError Info: " + this.scorm.debug.getInfo(_errorCode);
 					_errorMsg += "\nLMS Error Info: " + this.scorm.debug.getDiagnosticInfo(_errorCode);
 					
 					this.handleError(_errorMsg);
 				}
-				else
-				{
+				else {
 					this.logger.warn("ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!");
 				}
 			}
 			
 			return _success;
 		}
-		else
-		{
+		else {
 			this.handleError("Course is not connected to the LMS");
 		}
 	};
@@ -459,43 +426,36 @@ define (function(require) {
 	* Note that the way this check is being performed means it wouldn't work for any element that is
 	* 'write only', but so far we've not had a requirement to check for any optional elements that are.
 	*/
-	ScormWrapper.prototype.isSupported = function(_property)
-	{
+	ScormWrapper.prototype.isSupported = function(_property) {
 		this.logger.debug("ScormWrapper::isSupported: _property=" + _property);
 
-		if(this.finishCalled)
-		{
+		if(this.finishCalled) {
 			this.logger.debug("ScormWrapper::isSupported: ignoring request as 'finish' has been called");
 			return;
 		}
 		
-		if (this.lmsConnected)
-		{
+		if (this.lmsConnected) {
 			var _value = this.scorm.get(_property);
 			var _errorCode = this.scorm.debug.getCode();
 			
 			return (_errorCode === 401 ? false : true);
 		}
-		else
-		{
+		else {
 			this.handleError("Course is not connected to the LMS");
 			return false;
 		}
 	};
 
-	ScormWrapper.prototype.initTimedCommit = function()
-	{
+	ScormWrapper.prototype.initTimedCommit = function() {
 		this.logger.debug("ScormWrapper::initTimedCommit");
 		
-		if(this.timedCommitFrequency > 0)
-		{
+		if(this.timedCommitFrequency > 0) {
 			var delay = this.timedCommitFrequency * (60 * 1000);
 			this.timedCommitIntervalID = window.setInterval(delegate(this, this.commit), delay);
 		}
 	};
 
-	ScormWrapper.prototype.initRetryCommit = function()
-	{
+	ScormWrapper.prototype.initRetryCommit = function() {
 		this.logger.debug("ScormWrapper::initRetryCommit");
 		
 		this.commitRetryPending = true;// stop anything else from calling commit until this is done
@@ -503,8 +463,7 @@ define (function(require) {
 		this.retryCommitTimeoutID = window.setTimeout(delegate(this, this.doRetryCommit), this.commitRetryDelay);
 	};
 
-	ScormWrapper.prototype.doRetryCommit = function()
-	{
+	ScormWrapper.prototype.doRetryCommit = function() {
 		this.logger.debug("ScormWrapper::doRetryCommit");
 
 		this.commitRetryPending = false;
@@ -512,8 +471,7 @@ define (function(require) {
 		this.commit();
 	};
 
-	ScormWrapper.prototype.handleError = function(_msg)
-	{
+	ScormWrapper.prototype.handleError = function(_msg) {
 		this.logger.error(_msg);
 		
 		if ((!this.logOutputWin || this.logOutputWin.closed) && confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support."))
@@ -524,8 +482,7 @@ define (function(require) {
 	{
 		str = this.trim(new String(str));
 
-		if (_.indexOf(str.toLowerCase(), "urn:") === 0)
-		{
+		if (_.indexOf(str.toLowerCase(), "urn:") === 0) {
 			str = str.substr(4);
 		}
 		
@@ -536,15 +493,12 @@ define (function(require) {
 		return str;
 	};
 
-	ScormWrapper.prototype.createResponseIdentifier = function(strShort, strLong)
-	{
+	ScormWrapper.prototype.createResponseIdentifier = function(strShort, strLong) {
 		
-		if (strShort.length != 1 || strShort.search(/\w/) < 0)
-		{
+		if (strShort.length != 1 || strShort.search(/\w/) < 0) {
 			strShort = "";
 		}
-		else
-		{
+		else {
 			strShort = strShort.toLowerCase();
 		}
 		
@@ -553,8 +507,7 @@ define (function(require) {
 		return new ResponseIdentifier(strShort, strLong);
 	};
 
-	ScormWrapper.prototype.recordInteraction12 = function(strID, strResponse, bCorrect, strCorrectResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, scormInteractionType, strAlternateResponse, strAlternateCorrectResponse)
-	{
+	ScormWrapper.prototype.recordInteraction12 = function(strID, strResponse, bCorrect, strCorrectResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, scormInteractionType, strAlternateResponse, strAlternateCorrectResponse) {
 		var bResult;
 		var bTempResult;
 		var interactionIndex;
@@ -563,25 +516,20 @@ define (function(require) {
 		// in SCORM 1.2, add a new interaction rather than updating an old one, because some LMS vendors have misinterpreted the "write only" rule regarding interactions to mean "write once"
 		interactionIndex = this.getValue("cmi.interactions._count");
 		
-		if (interactionIndex === "")
-		{
+		if (interactionIndex === "") {
 			interactionIndex = 0;
 		}
 		
-		if (bCorrect === true || bCorrect == "correct")
-		{
+		if (bCorrect === true || bCorrect === "true" || bCorrect === "correct") {
 			strResult = "correct";
 		}
-		else if (bCorrect == "false" || bCorrect == "wrong")
-		{
+		else if (bCorrect === false || bCorrect === "false" || bCorrect === "wrong") {
 			strResult = "wrong";
 		}
-		else if (bCorrect == "unanticipated")
-		{
+		else if (bCorrect === "unanticipated") {
 			strResult = "unanticipated";
 		}
-		else if (bCorrect == "neutral")
-		{
+		else if (bCorrect === "neutral") {
 			strResult = "neutral";
 		}
 		
@@ -590,43 +538,36 @@ define (function(require) {
 		
 		bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".student_response", strResponse);
 		
-		if (bTempResult === false)
-		{
+		if (bTempResult === false) {
 			bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".student_response", strAlternateResponse);
 		}
 		
 		bResult = bResult && bTempResult;
 		
-		if (strCorrectResponse !== undefined && strCorrectResponse !== null && strCorrectResponse !== "")
-		{
+		if (strCorrectResponse !== undefined && strCorrectResponse !== null && strCorrectResponse !== "") {
 			bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".correct_responses.0.pattern", strCorrectResponse);
-			if (bTempResult === false)
-			{
+			if (bTempResult === false) {
 				bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".correct_responses.0.pattern", strAlternateCorrectResponse);
 			}
 			
 			bResult = bResult && bTempResult;
 		}
 
-		if (strResult !== undefined && strResult !== null && strResult !== "")
-		{
+		if (strResult !== undefined && strResult !== null && strResult !== "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".result", strResult);
 		}
 		
 		// ignore the description parameter in SCORM 1.2, there is nothing we can do with it
 		
-		if (intWeighting !== undefined && intWeighting !== null && intWeighting !== "")
-		{
+		if (intWeighting !== undefined && intWeighting !== null && intWeighting !== "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".weighting", intWeighting);
 		}
 
-		if (intLatency !== undefined && intLatency !== null && intLatency !== "")
-		{
+		if (intLatency !== undefined && intLatency !== null && intLatency !== "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".latency", this.convertMilliSecondsToSCORMTime(intLatency));
 		}
 		
-		if (strLearningObjectiveID !== undefined && strLearningObjectiveID !== null && strLearningObjectiveID !== "")
-		{
+		if (strLearningObjectiveID !== undefined && strLearningObjectiveID !== null && strLearningObjectiveID !== "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".objectives.0.id", strLearningObjectiveID);
 		}
 		
@@ -635,9 +576,7 @@ define (function(require) {
 		return bResult;
 	};
 
-	ScormWrapper.prototype.recordInteraction2004 = function(strID, strResponse, bCorrect, strCorrectResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, scormInteractionType)
-	{
-		
+	ScormWrapper.prototype.recordInteraction2004 = function(strID, strResponse, bCorrect, strCorrectResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, scormInteractionType) {	
 		var bResult;
 		var interactionIndex;
 		var strResult;
@@ -646,29 +585,23 @@ define (function(require) {
 		
 		interactionIndex = this.getValue("cmi.interactions._count");
 		
-		if (interactionIndex == "")
-		{
+		if (interactionIndex === "") {
 			interactionIndex = 0;
 		}
 		
-		if (bCorrect == true || bCorrect == "true" || bCorrect == "correct")
-		{
+		if (bCorrect === true || bCorrect === "true" || bCorrect === "correct") {
 			strResult = "correct";
 		}
-		else if (bCorrect == "false" || bCorrect == "wrong")
-		{
+		else if (bCorrect === false || bCorrect == "false" || bCorrect === "wrong") {
 			strResult = "incorrect";
 		}
-		else if (bCorrect == "unanticipated")
-		{
+		else if (bCorrect === "unanticipated") {
 			strResult = "unanticipated";
 		}
-		else if (bCorrect == "neutral")
-		{
+		else if (bCorrect === "neutral") {
 			strResult = "neutral";
 		}
-		else
-		{
+		else {
 			strResult = "";
 		}
 		
@@ -678,35 +611,29 @@ define (function(require) {
 		bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".type", scormInteractionType);
 		bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".learner_response", strResponse);
 		
-		if (strResult != undefined && strResult != null && strResult != "")
-		{
+		if (strResult != undefined && strResult != null && strResult != "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".result", strResult);
 		}
 		
-		if (strCorrectResponse != undefined && strCorrectResponse != null && strCorrectResponse != "")
-		{
+		if (strCorrectResponse != undefined && strCorrectResponse != null && strCorrectResponse != "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".correct_responses.0.pattern", strCorrectResponse);
 		}
 		
-		if (strDescription != undefined && strDescription != null && strDescription != "")
-		{
+		if (strDescription != undefined && strDescription != null && strDescription != "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".description", strDescription);
 		}
 		
 		// ignore the description parameter in SCORM 1.2, there is nothing we can do with it
 		
-		if (intWeighting != undefined && intWeighting != null && intWeighting != "")
-		{
+		if (intWeighting != undefined && intWeighting != null && intWeighting != "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".weighting", intWeighting);
 		}
 
-		if (intLatency != undefined && intLatency != null && intLatency != "")
-		{
+		if (intLatency != undefined && intLatency != null && intLatency != "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".latency", this.convertMilliSecondsToSCORM2004Time(intLatency));
 		}
 		
-		if (strLearningObjectiveID != undefined && strLearningObjectiveID != null && strLearningObjectiveID != "")
-		{
+		if (strLearningObjectiveID != undefined && strLearningObjectiveID != null && strLearningObjectiveID != "") {
 			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".objectives.0.id", strLearningObjectiveID);
 		}
 		
@@ -715,59 +642,46 @@ define (function(require) {
 		return bResult;
 	};
 
-	ScormWrapper.prototype.recordMultipleChoiceInteraction = function(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID)
-	{
+	ScormWrapper.prototype.recordMultipleChoiceInteraction = function(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID) {
 		var _responseArray = null;
 		var _correctResponseArray = null;
 		
-		if (response.constructor == String)
-		{
+		if (response.constructor == String) {
 			_responseArray = new Array(this.createResponseIdentifier(response, response));
 		}
-		else if (response.constructor == ResponseIdentifier)
-		{
+		else if (response.constructor == ResponseIdentifier) {
 			_responseArray = new Array(response);
 		}
-		else if (response.constructor == Array || response.constructor.toString().search("Array") > 0)
-		{
+		else if (response.constructor == Array || response.constructor.toString().search("Array") > 0) {
 			_responseArray = response;
 		}
-		else if (window.console && response.constructor.toString() == "(Internal Function)" && response.length > 0)
-		{
+		else if (window.console && response.constructor.toString() == "(Internal Function)" && response.length > 0) {
 			_responseArray = response;
 		}
-		else
-		{
+		else {
 			this.handleError("ScormWrapper::recordMultipleChoiceInteraction: response is not in the correct format");
 			return false;
 		}
 		
-		if (correctResponse != null && correctResponse != undefined && correctResponse != "")
-		{
-			if (correctResponse.constructor == String)
-			{
+		if (correctResponse != null && correctResponse != undefined && correctResponse != "") {
+			if (correctResponse.constructor == String) {
 				_correctResponseArray = new Array(this.createResponseIdentifier(correctResponse, correctResponse));
 			}
-			else if (correctResponse.constructor == ResponseIdentifier)
-			{
+			else if (correctResponse.constructor == ResponseIdentifier) {
 				_correctResponseArray = new Array(correctResponse);
 			}
-			else if (correctResponse.constructor == Array || correctResponse.constructor.toString().search("Array") > 0)
-			{
+			else if (correctResponse.constructor == Array || correctResponse.constructor.toString().search("Array") > 0) {
 				_correctResponseArray = correctResponse;
 			}
-			else if (window.console && correctResponse.constructor.toString() == "(Internal Function)" && correctResponse.length > 0)
-			{
+			else if (window.console && correctResponse.constructor.toString() == "(Internal Function)" && correctResponse.length > 0) {
 				_correctResponseArray = correctResponse;
 			}
-			else
-			{
+			else {
 				this.handleError("ScormWrapper::recordMultipleChoiceInteraction: correct response is not in the correct format");
 				return false;
 			}
 		}
-		else
-		{
+		else {
 			_correctResponseArray = new Array();
 		}
 		
@@ -779,8 +693,7 @@ define (function(require) {
 		var strCorrectResponse = "";
 		var strCorrectResponseLong = "";
 		
-		for (var i = 0; i < _responseArray.length; i++)
-		{
+		for (var i = 0; i < _responseArray.length; i++)	{
 			if (strResponse.length > 0) {strResponse += this.isSCORM2004() ? "[,]" : ",";}
 			if (strResponseLong.length > 0) {strResponseLong += ",";}
 			
@@ -788,8 +701,7 @@ define (function(require) {
 			strResponseLong += _responseArray[i].Long;
 		}
 
-		for (var i = 0; i < _correctResponseArray.length; i++)
-		{
+		for (var i = 0; i < _correctResponseArray.length; i++)	{
 			if (strCorrectResponse.length > 0) {strCorrectResponse += this.isSCORM2004() ? "[,]" : ",";}
 			if (strCorrectResponseLong.length > 0) {strCorrectResponseLong += ",";}
 			
@@ -803,51 +715,40 @@ define (function(require) {
 		return this.recordInteraction12(strID, strResponseLong, blnCorrect, strCorrectResponseLong, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "choice",  strResponse, strCorrectResponse);
 	};
 
-	ScormWrapper.prototype.recordMatchingInteraction = function(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID)
-	{
+	ScormWrapper.prototype.recordMatchingInteraction = function(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID) {
 		var _responseArray = null;
 		var _correctResponseArray = null;
 		
-		if (response.constructor == MatchingResponse)
-		{
+		if (response.constructor == MatchingResponse) {
 			_responseArray = new Array(response);
 		}
-		else if (response.constructor == Array || response.constructor.toString().search("Array") > 0)
-		{
+		else if (response.constructor == Array || response.constructor.toString().search("Array") > 0) {
 			_responseArray = response;
 		}
-		else if (window.console && response.constructor.toString() == "(Internal Function)" && response.length > 0)
-		{
+		else if (window.console && response.constructor.toString() == "(Internal Function)" && response.length > 0) {
 			_responseArray = response;
 		}
-		else
-		{
+		else {
 			this.handleError("ScormWrapper::recordMatchingInteraction: response is not in the correct format");
 			return false;
 		}
 		
-		if (correctResponse != null && correctResponse != undefined)
-		{
-			if (correctResponse.constructor == MatchingResponse)
-			{
+		if (correctResponse != null && correctResponse != undefined) {
+			if (correctResponse.constructor == MatchingResponse) {
 				_correctResponseArray = new Array(correctResponse);
 			}
-			else if (correctResponse.constructor == Array || correctResponse.constructor.toString().search("Array") > 0)
-			{
+			else if (correctResponse.constructor == Array || correctResponse.constructor.toString().search("Array") > 0) {
 				_correctResponseArray = correctResponse;
 			}
-			else if (window.console && correctResponse.constructor.toString() == "(Internal Function)" && correctResponse.length > 0)
-			{
+			else if (window.console && correctResponse.constructor.toString() == "(Internal Function)" && correctResponse.length > 0)	{
 				_correctResponseArray = correctResponse;
 			}
-			else
-			{
+			else {
 				this.handleError("ScormWrapper::recordMatchingInteraction: correct response is not in the correct format");
 				return false;
 			}
 		}
-		else
-		{
+		else {
 			_correctResponseArray = new Array();
 		}
 		
@@ -859,8 +760,7 @@ define (function(require) {
 		var strCorrectResponse = "";
 		var strCorrectResponseLong = "";
 		
-		for (var i = 0; i < _responseArray.length; i++)
-		{
+		for (var i = 0; i < _responseArray.length; i++) {
 			if (strResponse.length > 0) {strResponse += ",";}
 			if (strResponseLong.length > 0) {strResponseLong += this.isSCORM2004() ? "[,]" : ",";}
 			
@@ -868,8 +768,7 @@ define (function(require) {
 			strResponseLong += _responseArray[i].Source.Long + (this.isSCORM2004() ? "[.]" : ".") + _responseArray[i].Target.Long;
 		}
 
-		for (var i = 0; i < _correctResponseArray.length; i++)
-		{
+		for (var i = 0; i < _correctResponseArray.length; i++) {
 			if (strCorrectResponse.length > 0) {strCorrectResponse += ",";}
 			if (strCorrectResponseLong.length > 0) {strCorrectResponseLong += this.isSCORM2004() ? "[,]" : ",";}
 			
@@ -883,8 +782,7 @@ define (function(require) {
 		return this.recordInteraction12(strID, strResponseLong, blnCorrect, strCorrectResponseLong, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "matching", strResponse, strCorrectResponse);
 	};
 
-	ScormWrapper.prototype.showDebugWindow = function()
-	{
+	ScormWrapper.prototype.showDebugWindow = function() {
 		
 		if (this.logOutputWin && !this.logOutputWin.closed) {
 			this.logOutputWin.close();
@@ -898,8 +796,7 @@ define (function(require) {
 		return;
 	};
 
-	ScormWrapper.prototype.convertMilliSecondsToSCORMTime = function(value)
-	{
+	ScormWrapper.prototype.convertMilliSecondsToSCORMTime = function(value) {
 		var h;
 		var m;
 		var s;
@@ -915,20 +812,17 @@ define (function(require) {
 
 		h = (value - ms - (s * 1000) - (m * 60000)) / 3600000;
 		
-		if (h == 10000)
-		{
+		if (h === 10000)	{
 			h = 9999;
 			
 			m = (value - (h * 3600000)) / 60000;
-			if (m == 100)
-			{
+			if (m === 100)	{
 				m = 99;
 			}
 			m = Math.floor(m);
 			
 			s = (value - (h * 3600000) - (m * 60000)) / 1000;
-			if (s == 100)
-			{
+			if (s === 100)	{
 				s = 99;
 			}
 			s = Math.floor(s);
@@ -941,8 +835,7 @@ define (function(require) {
 		CMITimeSpan = this.zeroPad(h, 4) + ":" + this.zeroPad(m, 2) + ":" +	this.zeroPad(s, 2);
 		CMITimeSpan += "." + cs;
 		
-		if (h > 9999)
-		{
+	if (h > 9999) {
 			CMITimeSpan = "9999:99:99";
 			
 			CMITimeSpan += ".99";
@@ -951,13 +844,12 @@ define (function(require) {
 		return CMITimeSpan;
 	};
 
-	ScormWrapper.prototype.convertDateToCMITime = function(_value)
-	{
+	ScormWrapper.prototype.convertDateToCMITime = function(_value) {
 		var h;
 		var m;
 		var s;
 		
-		dtmDate = new Date(_value);
+		var dtmDate = new Date(_value);
 		
 		h = dtmDate.getHours();
 		m = dtmDate.getMinutes();
@@ -966,8 +858,7 @@ define (function(require) {
 		return this.zeroPad(h, 2) + ":" + this.zeroPad(m, 2) + ":" + this.zeroPad(s, 2);
 	};
 
-	ScormWrapper.prototype.convertMilliSecondsToSCORM2004Time = function(_value)
-	{
+	ScormWrapper.prototype.convertMilliSecondsToSCORM2004Time = function(_value) {
 		var str = "";
 		var cs;
 		var s;
@@ -1012,8 +903,7 @@ define (function(require) {
 			str += d + "D";
 		
 		// check to see if we have any time before adding the "T"
-		if ((cs + s + m + h) > 0 )
-		{
+		if ((cs + s + m + h) > 0 ) {
 			
 			str += "T";
 			
@@ -1023,8 +913,7 @@ define (function(require) {
 			if (m > 0)
 				str += m + "M";
 			
-			if ((cs + s) > 0)
-			{
+			if ((cs + s) > 0) {
 				str += s;
 				
 				if (cs > 0)
@@ -1034,7 +923,7 @@ define (function(require) {
 			}
 		}
 		
-		if (str == "")
+		if (str === "")
 			str = "0S";
 		
 		str = "P" + str;
@@ -1042,11 +931,10 @@ define (function(require) {
 		return str;
 	};
 
-	ScormWrapper.prototype.convertDateToISO8601Timestamp = function(_value)
-	{
+	ScormWrapper.prototype.convertDateToISO8601Timestamp = function(_value) {
 		var str;
 		
-		dtm = new Date(_value);
+		var dtm = new Date(_value);
 		
 		var y = dtm.getFullYear();
 		var mo = dtm.getMonth() + 1;
@@ -1066,8 +954,7 @@ define (function(require) {
 		return str;
 	};
 
-	ScormWrapper.prototype.zeroPad = function(intNum, intNumDigits)
-	{
+	ScormWrapper.prototype.zeroPad = function(intNum, intNumDigits) {
 		var strTemp;
 		var intLen;
 		var i;
@@ -1075,12 +962,10 @@ define (function(require) {
 		strTemp = new String(intNum);
 		intLen = strTemp.length;
 		
-		if (intLen > intNumDigits)
-		{
+		if (intLen > intNumDigits) {
 			strTemp = strTemp.substr(0, intNumDigits);
 		}
-		else
-		{
+		else {
 			for (i = intLen; i < intNumDigits; i++)
 				strTemp = "0" + strTemp;
 		}
@@ -1088,20 +973,17 @@ define (function(require) {
 		return strTemp;
 	};
 
-	ScormWrapper.prototype.trim = function(str)
-	{
+	ScormWrapper.prototype.trim = function(str) {
 		return str.replace(/^\s*|\s*$/g, "");
 	};
 
-	ScormWrapper.prototype.isSCORM2004 = function()
-	{
-		return this.scorm.version == "2004";
+	ScormWrapper.prototype.isSCORM2004 = function() {
+		return this.scorm.version === "2004";
 	};
 
-	function delegate(obj, func)
-	{
-	  return function() {return func.apply(obj, arguments); };
-	}
+	function delegate(obj, func) {
+		return function() { return func.apply(obj, arguments); };
+	};
 
 	return ScormWrapper;
 });
