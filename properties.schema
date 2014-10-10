@@ -1,0 +1,91 @@
+{
+  "type":"object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "id": "http://jsonschema.net",
+  "required":false,
+  "properties":{
+    "pluginLocations": {
+      "type":"object",
+      "required":true,
+      "properties":{
+        "config": {
+          "type":"object",
+          "properties":{
+            "_spoor": {
+              "type":"object",
+              "required":false,
+              "properties":{
+                "_isEnabled": {
+                  "type":"boolean",
+                  "required":true,
+                  "title":"Enabled"
+                },
+                "_tracking": {
+                  "type":"object",
+                  "required":false,
+                  "title": "Tracking",
+                  "properties":{
+                    "_requireAssessmentPassed": {
+                      "type":"boolean",
+                      "required":false,
+                      "title":"Assessment pass required"
+                    },
+                    "_requireCourseCompleted": {
+                      "type":"boolean",
+                      "required":false,
+                      "title":"Course completion required"
+                    },
+                    "_shouldSubmitScore": {
+                      "type":"boolean",
+                      "required":false,
+                      "title":"Submit score"
+                    }
+                  }
+                },
+                "_reporting": {
+                  "type":"object",
+                  "required":false,
+                  "title": "Reporting",
+                  "properties":{
+                    "_comment": {
+                      "type":"string",
+                      "required":false,
+                      "title": "Comment"
+                    },
+                    "_onTrackingCriteriaMet": {
+                      "type":"string",
+                      "required":false,
+                      "title":"Tracking success status",
+                      "enum": ["completed", "passed", "failed", "incomplete"]
+                    },
+                    "_onAssessmentFailure": {
+                      "type":"string",
+                      "required":false,
+                      "title":"Assessment failure status",
+                      "enum": ["completed", "passed", "failed", "incomplete"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "course": {
+          "type":"object"
+        },
+        "contentobject": {
+          "type":"object"
+        },
+        "article": {
+          "type":"object"
+        },
+        "block": {
+          "type":"object"
+        },
+        "component": {
+          "type":"object"
+        }
+      }
+    }
+  }
+}
