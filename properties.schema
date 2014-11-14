@@ -18,7 +18,10 @@
                 "_isEnabled": {
                   "type":"boolean",
                   "required":true,
-                  "title":"Enabled"
+                  "title":"Is Enabled",
+                  "inputType": {"type": "Boolean", "options": [true, false]},
+                  "validators": [],
+                  "help": "If set to 'true', this course will be tracked by SCORM"
                 },
                 "_tracking": {
                   "type":"object",
@@ -28,17 +31,26 @@
                     "_requireAssessmentPassed": {
                       "type":"boolean",
                       "required":false,
-                      "title":"Assessment pass required"
+                      "title":"Assessment pass required",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": ""
                     },
                     "_requireCourseCompleted": {
                       "type":"boolean",
                       "required":false,
-                      "title":"Course completion required"
+                      "title":"Course completion required",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": ""
                     },
                     "_shouldSubmitScore": {
                       "type":"boolean",
                       "required":false,
-                      "title":"Submit score"
+                      "title":"Submit score",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": ""
                     }
                   }
                 },
@@ -47,22 +59,29 @@
                   "required":false,
                   "title": "Reporting",
                   "properties":{
-                    "_comment": {
-                      "type":"string",
-                      "required":false,
-                      "title": "Comment"
-                    },
                     "_onTrackingCriteriaMet": {
                       "type":"string",
                       "required":false,
                       "title":"Tracking success status",
-                      "enum": ["completed", "passed", "failed", "incomplete"]
+                      "enum": ["completed", "passed", "failed", "incomplete"],
+                      "inputType": {
+                        "type": "Select", 
+                        "options": ["completed", "passed", "failed", "incomplete"]
+                      },
+                      "validators": [],
+                      "help": ""
                     },
                     "_onAssessmentFailure": {
                       "type":"string",
                       "required":false,
                       "title":"Assessment failure status",
-                      "enum": ["completed", "passed", "failed", "incomplete"]
+                      "enum": ["completed", "passed", "failed", "incomplete"],
+                      "inputType": {
+                        "type": "Select", 
+                        "options": ["completed", "passed", "failed", "incomplete"]
+                      },
+                      "validators": [],
+                      "help": ""
                     }
                   }
                 }
