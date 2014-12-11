@@ -100,6 +100,11 @@ define (function(require) {
 	ScormWrapper.prototype.initialize = function() {
 		this.lmsConnected = this.scorm.init();
 
+		// the pipwerks code will set the course to 'incomplete' automatically, but it doesn't commit that change
+		if(this.scorm.handleCompletionStatus && this.commitOnStatusChange && this.isFirstSession()) {
+			this.commit();
+		}
+
 		if (this.lmsConnected) {
 			this.startTime = new Date();
 			
