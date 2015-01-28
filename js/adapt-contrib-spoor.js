@@ -29,37 +29,38 @@ define(function(require) {
     },
 
     SCOStart: function() {
-      var sw = scormWrapper;
-      if (sw.initialize()) {
-        sw.setVersion("1.2");
-        this.set('initialised', true);
-        var lessonStatus = sw.getStatus().toLowerCase();
+		/**
+		* force use of SCORM 1.2 - as some LMSes (SABA, for instance) present both APIs to the SCO and, if given the choice, 
+		* the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
+		* this does obviously mean you'll have to manually change (or just remove) this next line if you want SCORM 2004 output
+		*/
+		//TODO allow version to be set via config.json
+        scormWrapper.setVersion("1.2");
 
-        if (lessonStatus === "not attempted" || lessonStatus === "unknown" || lessonStatus === undefined) {
-          sw.setIncomplete();
-        }
-      }
+		if (scormWrapper.initialize()) {
+			this.set('initialised', true);
+		}
     },
 
-    SCOFinish:function() {
-      if (!this.get('_SCOFinishCalled')) {
-        this.set('SCOFinishCalled', true);
-        scormWrapper.finish();
-      }
+    SCOFinish: function() {
+		if (!this.get('_SCOFinishCalled')) {
+			this.set('SCOFinishCalled', true);
+			scormWrapper.finish();
+		}
     },
 
     onDataReady: function() {
-      this.loadSuspendData();
-      this.assignSessionId();
-      this.setupListeners();
+		this.loadSuspendData();
+		this.assignSessionId();
+		this.setupListeners();
     },
 
     setupListeners: function() {
-      Adapt.blocks.on('change:_isComplete', this.onBlockComplete, this);
-      Adapt.course.on('change:_isComplete', this.onCourseComplete, this);
-      Adapt.on('assessment:complete', this.onAssessmentComplete, this);
-      Adapt.on('questionView:complete', this.onQuestionComplete, this);
-      Adapt.on('questionView:reset', this.onQuestionReset, this);
+		Adapt.blocks.on('change:_isComplete', this.onBlockComplete, this);
+		Adapt.course.on('change:_isComplete', this.onCourseComplete, this);
+		Adapt.on('assessment:complete', this.onAssessmentComplete, this);
+		Adapt.on('questionView:complete', this.onQuestionComplete, this);
+		Adapt.on('questionView:reset', this.onQuestionReset, this);
     },
 
     loadSuspendData: function() {
@@ -79,7 +80,7 @@ define(function(require) {
     },
 
     onBlockComplete: function(block) {
-      this.set('lastCompletedBlock', block);
+	  this.set('lastCompletedBlock', block);
       this.persistSuspendData();
     },
 
@@ -87,24 +88,27 @@ define(function(require) {
       if(Adapt.course.get('_isComplete') === true) {
         this.set('_attempts', this.get('_attempts')+1);
       }
-      _.defer(_.bind(function waitForBlockComplete() {
-        this.persistSuspendData();
-      }, this));
+      _.defer(_.bind(this.checkTrackingCriteriaMet, this));
     },
 
     onAssessmentComplete: function(event) {
-      if(this.data._tracking._shouldSubmitScore) {
-        scormWrapper.setScore(event.scoreAsPercent, 0, 100);
-      }
-      if (event.isPass) {
-        Adapt.course.set('_isAssessmentPassed', event.isPass);
-        this.persistSuspendData();
-      } else {
-        var onAssessmentFailure = this.data._reporting._onAssessmentFailure;
-        if (onAssessmentFailure !== "" && onAssessmentFailure !== "incomplete") {
-          this.setLessonStatus(onAssessmentFailure);
-        }
-      }
+		Adapt.course.set('_isAssessmentPassed', event.isPass)
+		
+		this.persistSuspendData();
+
+		if(this.data._tracking._shouldSubmitScore) {
+			scormWrapper.setScore(event.scoreAsPercent, 0, 100);
+		}
+
+		if (event.isPass) {
+			_.defer(_.bind(this.checkTrackingCriteriaMet, this));
+		} else {
+			var onAssessmentFailure = this.data._reporting._onAssessmentFailure;
+			if (onAssessmentFailure !== "") {
+				this.persistSuspendData();
+				scormWrapper.setStatus(onAssessmentFailure);
+			}
+		}
     },
 
     onQuestionComplete: function(questionView) {
@@ -117,59 +121,18 @@ define(function(require) {
       }
     },
 
-    repopulateCompletionData: function() {
-      var suspendData = this.get('_suspendData');
-
-      if (suspendData.spoor.completion !== "") {
-        this.restoreProgress(suspendData);
-      }
-    },
-
-    restoreProgress: function(suspendData) {
-      if (suspendData.spoor.completion === "courseComplete") {
-        Adapt.course.set('_isComplete', true);
-        Adapt.course.setOnChildren('_isComplete', true);
-      } else {
-        _.each(this.get('_blockCompletionArray'), function(blockCompletion, blockTrackingId) {
-          if (blockCompletion === 1) {
-            this.markBlockAsComplete({block: Adapt.blocks.findWhere({_trackingId: blockTrackingId}), includeChildren: true});
-          }
-        }, this);
-      }
-      Adapt.course.set('_isAssessmentPassed', suspendData.spoor._isAssessmentPassed);
-      this.set('_suspendData', suspendData);
-      this.sendCompletionString();
-    },
-
-    persistSuspendData: function(){
-      var courseCriteriaMet = this.data._tracking._requireCourseCompleted ? Adapt.course.get('_isComplete') : true,
-          assessmentCriteriaMet = this.data._tracking._requireAssessmentPassed ? Adapt.course.get('_isAssessmentPassed') : true;
-
-      if(courseCriteriaMet && assessmentCriteriaMet) {
-        this.setLessonStatus(this.data._reporting._onTrackingCriteriaMet);
-      }
-      scormWrapper.setSuspendData(JSON.stringify(serialiser.serialise()));
-    },
-
-    setLessonStatus:function(status){
-      switch (status){
-        case "incomplete":
-          scormWrapper.setIncomplete();
-          break;
-        case "completed":
-          scormWrapper.setCompleted();
-          break;
-        case "passed":
-          scormWrapper.setPassed();
-          break;
-        case "failed":
-          scormWrapper.setFailed();
-          break;
-        default:
-          console.warn("cmi.core.lesson_status of " + status + " is not supported.");
-          break;
-      }
-    }
+    persistSuspendData: function() {
+		scormWrapper.setSuspendData(JSON.stringify(serialiser.serialise()));
+	},
+	
+	checkTrackingCriteriaMet: function() {
+		var courseCriteriaMet = this.data._tracking._requireCourseCompleted ? Adapt.course.get('_isComplete') : true;
+		var assessmentCriteriaMet = this.data._tracking._requireAssessmentPassed ? Adapt.course.get('_isAssessmentPassed') : true;
+		
+		if(courseCriteriaMet && assessmentCriteriaMet) {
+			scormWrapper.setStatus(this.data._reporting._onTrackingCriteriaMet);
+		}
+	}
     
   });
   Adapt.on('app:dataReady', function() {

@@ -16,13 +16,17 @@ define(['coreJS/adapt'], function (Adapt) {
                 var message = "This course is missing a latestTrackingID.\n\nPlease run the grunt process prior to deploying this module on LMS.\n\nScorm tracking will not work correctly until this is done.";
                 console.error(message);
             }
-            var excludeAssessments = Adapt.config.get('_spoor') && Adapt.config.get('_spoor')._tracking && Adapt.config.get('_spoor')._tracking._excludeAssessments,
-                data = new Array(Adapt.course.get('_latestTrackingId') + 1);
 
-            for (var i = 0; i < data.length; i++) {
-                data[i] = -1;
+            var excludeAssessments = Adapt.config.get('_spoor') && Adapt.config.get('_spoor')._tracking && Adapt.config.get('_spoor')._tracking._excludeAssessments;
+
+            // create the array to be serialised, pre-populated with dashes that represent unused tracking ids - because we'll never re-use a tracking id in the same course
+            var data = [];
+            var length = Adapt.course.get('_latestTrackingId') + 1;
+            for (var i = 0; i < length; i++) {
+                data[i] = "-";
             }
 
+            // now go through all the blocks, replacing the appropriate dashes with 0 (incomplete) or 1 (completed) for each of the blocks
             _.each(Adapt.blocks.models, function(model, index) {
                 var _trackingId = model.get('_trackingId'),
                     isPartOfAssessment = model.getParent().get('_assessment'),
@@ -33,14 +37,14 @@ define(['coreJS/adapt'], function (Adapt) {
                 }
 
                 if (_trackingId === undefined) {
-                    var message = "Block '" + model.get('id') + "' doesn't have a tracking ID assigned.\n\nPlease run the grunt process prior to deploying this module on LMS.\n\nScorm tracking will not work correctly until this is done.";
+                    var message = "Block '" + model.get('_id') + "' doesn't have a tracking ID assigned.\n\nPlease run the grunt process prior to deploying this module on LMS.\n\nScorm tracking will not work correctly until this is done.";
                     console.error(message);
+                } else {
+                    data[_trackingId] = state;
                 }
-
-                data[_trackingId] = state;
             }, this);
 
-            return data.join("").replace(/-1/g, "-");
+            return data.join("");
         },
 
         deserialise: function (data) {
