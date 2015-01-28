@@ -29,7 +29,7 @@ A full description of the many ways this file can be set up and populated is bey
 
 ##Settings overview
  
-A complete example of this plugin's settings can be found in the [example.json](/adaptlearning/adapt-contrib-spoor/blob/master/example.json) file.
+A complete example of this plugin's settings can be found in the [example.json](example.json) file.
 
 ##Settings explained
 ####_isEnabled
