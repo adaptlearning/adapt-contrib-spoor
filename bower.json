@@ -1,10 +1,10 @@
 {
   "name": "adapt-contrib-spoor",
-  "version": "1.1.4",
+  "version": "1.1.7",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-spoor",
   "authors": [
     "Kevin Corry <kevinc@learningpool.com>",
-    "Kev Adsett <kev.adsett@kineo.com?"
+    "Kev Adsett <kev.adsett@kineo.com>"
   ],
   "displayName" : "Spoor",
   "extension" : "spoor",
