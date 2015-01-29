@@ -41,12 +41,12 @@ If you wish to switch off tracking without uninstalling the plugin - for example
 This section lists completion criteria and other tracking features such as whether to save a score back to the LMS or not.
 
 #####_requireCourseCompleted
-If set to `true`, the plugin will require that the user must complete all the components in the course (as well as any other completion criteria) before the course can be marked as finished in the LMS. 
+If set to `true`, the plugin will require that the user must complete all the components in the course before the course can be marked as finished in the LMS. 
 
 Note that if this setting and `_requireAssessmentPassed` (see below) are both set to `true`, the user must pass the course assessment as well as complete all components in order to meet the completion criteria.
 
 #####_requireAssessmentPassed
-If set to `true`, the plugin will require that the user pass the course assessment before the course can be marked as finished in the LMS. 
+If set to `true`, the plugin will require that the user must pass the course assessment before the course can be marked as finished in the LMS.
 
 Note that if this setting and `_requireCourseCompleted` are both set to `true`, the user must complete all the components in the course as well as pass the assessment in order to meet the completion criteria.
 
