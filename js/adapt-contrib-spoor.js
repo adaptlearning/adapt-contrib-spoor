@@ -22,7 +22,7 @@ define(function(require) {
 
     initialize: function() {
       this.data = Adapt.config.get('_spoor');
-      if (this.data._isEnabled === false) return;
+      if (!this.data || this.data._isEnabled === false) return;
       this.SCOStart() ;
       $(window).unload(_.bind(this.SCOFinish, this));
       this.onDataReady();
