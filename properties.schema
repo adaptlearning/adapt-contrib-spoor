@@ -85,6 +85,58 @@
                       "help": ""
                     }
                   }
+                },
+                "_advancedSettings":{
+                  "type":"object",
+                  "required":false,
+                  "title": "Advanced Settings",
+                  "properties":{
+                    "commitOnStatusChange": {
+                      "type":"boolean",
+                      "required":false,
+                      "default":true,
+                      "title":"Commit on status change",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": "Whether to commit each time there's a change to lesson_status or not"
+                    },
+                    "disableInteractionTracking": {
+                      "type":"boolean",
+                      "required":false,
+                      "default":false,
+                      "title":"Disable interaction tracking",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": "Allows you to deactivate tracking to cmi.interactions - useful in instances where the code to detect when cmi.interactions are supported isn't working due to inconsistent LMS behaviour"
+                    },
+                    "timedCommitFrequency": {
+                      "type":"number",
+                      "required":false,
+                      "default":10,
+                      "title":"Frequency of commits",
+                      "inputType": "Number",
+                      "validators": ["number"],
+                      "help": "How frequently (in minutes) to commit automatically. Set to 0 to disable."
+                    },
+                    "maxCommitRetries": {
+                      "type":"number",
+                      "required":false,
+                      "default":5,
+                      "title":"Maximum commit retries",
+                      "inputType": "Number",
+                      "validators": ["number"],
+                      "help": "How many times to retry if a commit fails."
+                    },
+                    "commitRetryDelay": {
+                      "type":"number",
+                      "required":false,
+                      "default":1000,
+                      "title":"Delay between commit retries",
+                      "inputType": "Number",
+                      "validators": ["number"],
+                      "help": "Time (in milliseconds) to wait between retries."
+                    }
+                  }
                 }
               }
             }
