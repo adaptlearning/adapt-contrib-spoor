@@ -12,7 +12,7 @@
 			"_onTrackingCriteriaMet": "completed",
 			"_onAssessmentFailure": "incomplete"
 		},
-	        "_scormWrapper": {
+	        "_advancedSettings": {
 	            "setCompletedWhenFailed":true,
 	            "commitOnStatusChange":true,
 	            "disableInteractionTracking":false,
