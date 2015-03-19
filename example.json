@@ -13,7 +13,6 @@
 			"_onAssessmentFailure": "incomplete"
 		},
 	        "_advancedSettings": {
-	            "setCompletedWhenFailed":true,
 	            "commitOnStatusChange":true,
 	            "disableInteractionTracking":false,
 	            "timedCommitFrequency":10,
