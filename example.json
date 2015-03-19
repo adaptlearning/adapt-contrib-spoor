@@ -18,8 +18,7 @@
 	            "disableInteractionTracking":false,
 	            "timedCommitFrequency":10,
 	            "maxCommitRetries":5,
-	            "commitRetryDelay":2000,
-	            "commitRetryPending":false
+	            "commitRetryDelay":2000
 	        }
 	}
 }
