@@ -11,6 +11,15 @@
 			"_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
 			"_onTrackingCriteriaMet": "completed",
 			"_onAssessmentFailure": "incomplete"
-		}
+		},
+	        "_scormWrapper": {
+	            "setCompletedWhenFailed":true,
+	            "commitOnStatusChange":true,
+	            "disableInteractionTracking":false,
+	            "timedCommitFrequency":10,
+	            "maxCommitRetries":5,
+	            "commitRetryDelay":2000,
+	            "commitRetryPending":false
+	        }
 	}
 }
