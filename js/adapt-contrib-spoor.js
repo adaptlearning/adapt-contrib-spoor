@@ -36,7 +36,7 @@ define(function(require) {
 	*/
 	//TODO allow version to be set via config.json
         scormWrapper.setVersion("1.2");
-	var settings = this.data && this.data._scormWrapper ? this.data._scormWrapper:null;
+	var settings = this.data && this.data._advancedSettings ? this.data._advancedSettings:null;
 	if (scormWrapper.initialize(settings)) {
 		this.set('initialised', true);
 	}
