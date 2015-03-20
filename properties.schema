@@ -91,6 +91,15 @@
                   "required":false,
                   "title": "Advanced Settings",
                   "properties":{
+                    "showDebug": {
+                      "type":"boolean",
+                      "required":false,
+                      "default":false,
+                      "title":"Show debug window",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": "Whether to display debug window"
+                    },
                     "commitOnStatusChange": {
                       "type":"boolean",
                       "required":false,
