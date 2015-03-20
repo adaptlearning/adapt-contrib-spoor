@@ -477,10 +477,11 @@ define (function(require) {
 	ScormWrapper.prototype.handleError = function(_msg) {
 		this.logger.error(_msg);
 		
+		var logWinClosed = (!this.logOutputWin || this.logOutputWin.closed);
 		if (this.userRejectedDebugWindow) return;
-        	this.userRejectedDebugWindow = !confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support.");
+        	if (logWinClosed) this.userRejectedDebugWindow = !confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support.");
         
-		if ((!this.logOutputWin || this.logOutputWin.closed) && !this.userRejectedDebugWindow)
+		if (logWinClosed && !this.userRejectedDebugWindow)
 			this.showDebugWindow();
 	};
 
