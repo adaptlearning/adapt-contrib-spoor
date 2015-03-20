@@ -97,7 +97,17 @@ define (function(require) {
 		}
 	};
 
-	ScormWrapper.prototype.initialize = function() {
+	ScormWrapper.prototype.initialize = function(settings) {
+		if (settings) {
+			if (settings.hasOwnProperty("setCompletedWhenFailed")) { this.setCompletedWhenFailed = settings.setCompletedWhenFailed; }
+			if (settings.hasOwnProperty("commitOnStatusChange")) { this.commitOnStatusChange = settings.commitOnStatusChange; }
+			if (settings.hasOwnProperty("disableInteractionTracking")) { this.disableInteractionTracking = settings.disableInteractionTracking; }
+			if (settings.hasOwnProperty("timedCommitFrequency")) { this.timedCommitFrequency = settings.timedCommitFrequency; }
+			if (settings.hasOwnProperty("maxCommitRetries")) { this.maxCommitRetries = settings.maxCommitRetries; }
+			if (settings.hasOwnProperty("commitRetryDelay")) { this.commitRetryDelay = settings.commitRetryDelay; }
+            
+			if (settings.hasOwnProperty("showDebug") && settings.showDebug === true) { this.showDebugWindow(); }
+		}		
 		this.lmsConnected = this.scorm.init();
 
 		if (this.lmsConnected) {
