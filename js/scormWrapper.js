@@ -105,6 +105,8 @@ define (function(require) {
 			if (settings.hasOwnProperty("timedCommitFrequency")) { this.timedCommitFrequency = settings.timedCommitFrequency; }
 			if (settings.hasOwnProperty("maxCommitRetries")) { this.maxCommitRetries = settings.maxCommitRetries; }
 			if (settings.hasOwnProperty("commitRetryDelay")) { this.commitRetryDelay = settings.commitRetryDelay; }
+            
+			if (settings.hasOwnProperty("showDebug") && settings.showDebug === true) { this.showDebugWindow(); }
 		}		
 		this.lmsConnected = this.scorm.init();
 
