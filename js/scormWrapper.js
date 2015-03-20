@@ -56,6 +56,9 @@ define (function(require) {
 
 		this.registeredViews = [];
 		
+		//flag that is set to true when user has clicked 'cancel' in the "confirm" dialogue
+        	this.userRejectedDebugWindow = false;
+        
 		if (window.__debug)
 			this.showDebugWindow();
 		
@@ -474,7 +477,10 @@ define (function(require) {
 	ScormWrapper.prototype.handleError = function(_msg) {
 		this.logger.error(_msg);
 		
-		if ((!this.logOutputWin || this.logOutputWin.closed) && confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support."))
+		if (this.userRejectedDebugWindow) return;
+        	this.userRejectedDebugWindow = !confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support.");
+        
+		if ((!this.logOutputWin || this.logOutputWin.closed) && !this.userRejectedDebugWindow)
 			this.showDebugWindow();
 	};
 
