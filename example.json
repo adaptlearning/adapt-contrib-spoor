@@ -12,12 +12,13 @@
 			"_onTrackingCriteriaMet": "completed",
 			"_onAssessmentFailure": "incomplete"
 		},
-	        "_advancedSettings": {
-	            "commitOnStatusChange":true,
-	            "disableInteractionTracking":false,
-	            "timedCommitFrequency":10,
-	            "maxCommitRetries":5,
-	            "commitRetryDelay":2000
-	        }
+		"_advancedSettings": {
+			"showDebug":true,
+			"commitOnStatusChange":true,
+			"disableInteractionTracking":false,
+			"timedCommitFrequency":10,
+			"maxCommitRetries":5,
+			"commitRetryDelay":2000
+		}
 	}
 }
