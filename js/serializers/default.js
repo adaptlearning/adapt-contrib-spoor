@@ -1,17 +1,22 @@
-define(['coreJS/adapt'], function (Adapt) {
-    return {
+/*
+* adapt-contrib-spoor
+* License - http://github.com/adaptlearning/adapt_framework/LICENSE
+* Maintainers - Kevin Corry <kevinc@learningpool.com>, Oliver Foster <oliver.foster@kineo.com>
+*/
 
-        serialise: function () {
-            return {
-                spoor: {
-                    completion: this.serialiseSaveState('_isComplete'),
-                    _isCourseComplete: Adapt.course.get('_isComplete') || false,
-                    _isAssessmentPassed: Adapt.course.get('_isAssessmentPassed') || false
-                }
-          };
+define([
+    'coreJS/adapt'
+], function (Adapt) {
+
+    //Captures the completion status of the blocks
+    //Returns and parses a '1010101' style string
+
+    var serializer = {
+        serialize: function () {
+            return this.serializeSaveState('_isComplete');
         },
 
-        serialiseSaveState: function(attribute) {
+        serializeSaveState: function(attribute) {
             if (Adapt.course.get('_latestTrackingId') === undefined) {
                 var message = "This course is missing a latestTrackingID.\n\nPlease run the grunt process prior to deploying this module on LMS.\n\nScorm tracking will not work correctly until this is done.";
                 console.error(message);
@@ -47,32 +52,17 @@ define(['coreJS/adapt'], function (Adapt) {
             return data.join("");
         },
 
-        deserialise: function (data) {
-            var suspendData = JSON.parse(data);
+        deserialize: function (completion) {
 
-            _.each(this.deserialiseSaveState(suspendData.spoor.completion), function(state, blockTrackingId) {
+            _.each(this.deserializeSaveState(completion), function(state, blockTrackingId) {
                 if (state === 1) {
                     this.markBlockAsComplete(Adapt.blocks.findWhere({_trackingId: blockTrackingId}));
                 }
             }, this);
 
-            Adapt.course.set('_isComplete', suspendData.spoor._isCourseComplete);
-            Adapt.course.set('_isAssessmentPassed', suspendData.spoor._isAssessmentPassed);
+        },    
 
-            return suspendData;
-        },
-
-        markBlockAsComplete: function(block) {
-            if (!block || block.get('_isComplete')) {
-                return;
-            }
-        
-            block.getChildren().each(function(child) {
-                child.set('_isComplete', true);
-            }, this);
-        },
-
-        deserialiseSaveState: function (string) {
+        deserializeSaveState: function (string) {
             var completionArray = string.split("");
 
             for (var i = 0; i < completionArray.length; i++) {
@@ -84,7 +74,19 @@ define(['coreJS/adapt'], function (Adapt) {
             }
 
             return completionArray;
+        },
+
+        markBlockAsComplete: function(block) {
+            if (!block || block.get('_isComplete')) {
+                return;
+            }
+        
+            block.getChildren().each(function(child) {
+                child.set('_isComplete', true);
+            }, this);
         }
 
     };
+
+    return serializer;
 });
