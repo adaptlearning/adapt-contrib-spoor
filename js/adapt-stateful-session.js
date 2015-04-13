@@ -46,7 +46,7 @@ define([
 
 			if (sessionPairs.completion) serializer.deserialize(sessionPairs.completion);
 			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
-	        if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
+	        	if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
 		},
 
 		getSessionState: function() {
