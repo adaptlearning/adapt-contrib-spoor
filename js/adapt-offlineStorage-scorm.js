@@ -52,7 +52,7 @@ define([
 		set: function(name, value) {
 			
 			//Convert arguments to array and drop the 'name' parameter
-			var args = [].slice(arguments, 1);
+			var args = [].slice.call(arguments, 1);
 
 			if (typeof name == "object") {
 

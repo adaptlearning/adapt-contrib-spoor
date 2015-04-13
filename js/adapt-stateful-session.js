@@ -6,8 +6,7 @@
 
 define([
 	'coreJS/adapt',
-	'./serializers/default',
-	'./adapt-offlineStorage-scorm'
+	'./serializers/default'
 ], function(Adapt, serializer) {
 
 	//Implements Adapt session statefulness
@@ -115,7 +114,7 @@ define([
 
 		onQuestionReset: function(questionView) {
 			if(this._sessionID !== questionView.model.get('_sessionID')) {
-					questionView.model.set('_isEnabledOnRevisit', true);
+				questionView.model.set('_isEnabledOnRevisit', true);
 			}
 		},
 		

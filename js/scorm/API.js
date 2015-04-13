@@ -1,7 +1,9 @@
+/*global console*/
+
 /* ===========================================================
 
 pipwerks SCORM Wrapper for JavaScript
-v1.1.20140217
+v1.1.20141226
 
 Created by Philip Hutchison, January 2008-2014
 https://github.com/pipwerks/scorm-api-wrapper
@@ -173,11 +175,13 @@ pipwerks.SCORM.API.get = function(){
         find = scorm.API.find,
         trace = pipwerks.UTILS.trace;
 
-    if(win.parent && win.parent != win){
+    API = find(win);
+
+    if(!API && win.parent && win.parent != win){
         API = find(win.parent);
     }
 
-    if(!API && win.top.opener){
+    if(!API && win.top && win.top.opener){
         API = find(win.top.opener);
     }
 
@@ -291,6 +295,9 @@ pipwerks.SCORM.connection.initialize = function(){
                                 //case "browsed"    : break;    //SCORM 1.2 only
 
                             }
+
+                            //Commit changes
+                            scorm.save();
 
                         }
 
@@ -543,6 +550,8 @@ pipwerks.SCORM.data.set = function(parameter, value){
                 }
 
             } else {
+
+                errorCode = debug.getCode();
 
                 trace(traceMsgPrefix +"failed. \nError code: " +errorCode +". \nError info: " +debug.getInfo(errorCode));
 
@@ -823,7 +832,7 @@ pipwerks.UTILS.trace = function(msg){
      if(pipwerks.debug.isActive){
 
         if(window.console && window.console.log){
-            console.log(msg);
+            window.console.log(msg);
         } else {
             //alert(msg);
         }

@@ -7,7 +7,8 @@
 define([
 	'coreJS/adapt',
 	'./scorm',
-	'./adapt-stateful-session'
+	'./adapt-stateful-session',
+	'./adapt-offlineStorage-scorm'
 ], function(Adapt, scorm, adaptStatefulSession) {
 
 	//SCORM session manager
