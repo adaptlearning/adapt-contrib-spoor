@@ -33,10 +33,15 @@ var API = {
 		return "Fake diagnostic information."
 	},
 	LMSStore: function(force) {
+		if (window.ISCOOKIELMS === false) return;
 		if (!force && API.cookie("_spoor") === undefined) return;
 		API.cookie("_spoor", JSON.stringify(this.data));
 	},
 	LMSFetch: function() {
+		if (window.ISCOOKIELMS === false) {
+			this.data = {};
+			return;
+		}
 		this.data = API.cookie("_spoor");
 		if (this.data === undefined) {
 			this.data = {}
