@@ -1,3 +1,9 @@
+/*
+* adapt-contrib-spoor
+* License - http://github.com/adaptlearning/adapt_framework/LICENSE
+* Maintainers - Kevin Corry <kevinc@learningpool.com>, Oliver Foster <oliver.foster@kineo.com>
+*/
+
 define (function(require) {
 
 	/*
@@ -99,6 +105,7 @@ define (function(require) {
 
 	ScormWrapper.prototype.initialize = function() {
 		this.lmsConnected = this.scorm.init();
+
 
 		if (this.lmsConnected) {
 			this.startTime = new Date();
@@ -228,6 +235,34 @@ define (function(require) {
 
 	ScormWrapper.prototype.setSuspendData = function(_data) {
 		this.setValue("cmi.suspend_data", _data);
+	};
+
+	ScormWrapper.prototype.getCustomStates = function(name) {
+		var dataAsString = this.getSuspendData();
+		if (dataAsString === "" || dataAsString === " " || dataAsString === undefined) return {};
+
+		var dataAsJSON = JSON.parse(dataAsString);
+		return dataAsJSON;
+	};
+
+	ScormWrapper.prototype.getCustomState = function(name) {
+		var dataAsJSON = this.getCustomStates();
+		return dataAsJSON[name];
+	};
+
+	ScormWrapper.prototype.setCustomStates = function(obj) {
+		var dataAsJSON = this.getCustomStates();
+		var combinedDataAsJSON = _.extend(dataAsJSON, obj);
+		var dataAsString = JSON.stringify(combinedDataAsJSON);
+		return this.setSuspendData(dataAsString);
+	};
+
+	ScormWrapper.prototype.setCustomState = function(name, value) {
+		var dataAsJSON = this.getCustomStates();
+		dataAsJSON[name] = value;
+		var dataAsString = JSON.stringify(dataAsJSON);
+		
+		return this.setSuspendData(dataAsString);
 	};
 
 	ScormWrapper.prototype.getStudentName = function() {

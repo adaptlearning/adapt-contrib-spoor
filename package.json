@@ -3,9 +3,6 @@
   "version": "1.1.7",
   "description": "A basic scorm tracking plugin for Adapt",
   "main": "",
-  "scripts": {
-    "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/adaptlearning/adapt-contrib-spoor.git"
@@ -14,10 +11,5 @@
   "license": "GPL v3",
   "bugs": {
     "url": "https://github.com/adaptlearning/adapt-contrib-spoor/issues"
-  },
-  "devDependencies": {
-    "karma": "0.10",
-    "karma-mocha": "0.1.0",
-    "karma-expect": "1.1.0"
   }
 }

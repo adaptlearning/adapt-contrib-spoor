@@ -70,3 +70,10 @@ Some Learning Management Systems will prevent the user from making further attem
 
 #####References
 This plugin uses the excellent :sparkles: [pipwerks SCORM API Wrapper](https://github.com/pipwerks/scorm-api-wrapper/) for JavaScript :sparkles:
+
+####Running a course with no tracking
+When spoor is installed, main.html can be used instead of index.html to allow non-LMS use without any warning logs.
+
+####Client Local Storage / Fake LMS / Adapt LMS Behaviour Testing
+When spoor is installed, scorm_test_harness.html can be used instead of index.html to allow the browser to store LMS states inside a browser cookie. This allows developer to test LMS specified behaviour outside of an LMS environment.
+
