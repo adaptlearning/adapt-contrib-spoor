@@ -1,6 +1,7 @@
 {
   "name": "adapt-contrib-spoor",
-  "version": "1.1.7",
+  "version": "2.0.0",
+  "framework": "^2.0.0",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-spoor",
   "authors": [
     "Kevin Corry <kevinc@learningpool.com>",
