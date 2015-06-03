@@ -20,12 +20,13 @@ define(function(require) {
 			testingMode: false
 		},
 
-		initialize: function() {
-			this.data = Adapt.config.get('_spoor');
-			this.SCOStart() ;
-			$(window).unload(_.bind(this.SCOFinish, this));
-			this.onDataReady();
-		},
+    initialize: function() {
+      this.data = Adapt.config.get('_spoor');
+      if (!this.data || this.data._isEnabled === false) return;
+      this.SCOStart() ;
+      $(window).unload(_.bind(this.SCOFinish, this));
+      this.onDataReady();
+    },
 
 		SCOStart: function() {
 			/**

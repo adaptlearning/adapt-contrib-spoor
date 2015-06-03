@@ -49,12 +49,16 @@ define(['coreJS/adapt'], function (Adapt) {
 
         deserialise: function (data) {
             var suspendData = JSON.parse(data);
+            
+            _.defer(_.bind(function() {
 
-            _.each(this.deserialiseSaveState(suspendData.spoor.completion), function(state, blockTrackingId) {
-                if (state === 1) {
-                    this.markBlockAsComplete(Adapt.blocks.findWhere({_trackingId: blockTrackingId}));
-                }
-            }, this);
+                _.each(this.deserialiseSaveState(suspendData.spoor.completion), function(state, blockTrackingId) {
+                    if (state === 1) {
+                        this.markBlockAsComplete(Adapt.blocks.findWhere({_trackingId: blockTrackingId}));
+                    }
+                }, this);
+
+            }, this));
 
             Adapt.course.set('_isComplete', suspendData.spoor._isCourseComplete);
             Adapt.course.set('_isAssessmentPassed', suspendData.spoor._isAssessmentPassed);

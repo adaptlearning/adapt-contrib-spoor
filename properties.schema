@@ -1,0 +1,111 @@
+{
+  "type":"object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "id": "http://jsonschema.net",
+  "required":false,
+  "properties":{
+    "pluginLocations": {
+      "type":"object",
+      "required":true,
+      "properties":{
+        "config": {
+          "type":"object",
+          "properties":{
+            "_spoor": {
+              "type":"object",
+              "required":false,
+              "legend": "Spoor",
+              "properties":{
+                "_isEnabled": {
+                  "type":"boolean",
+                  "required":true,
+                  "title":"Is Enabled",
+                  "inputType": {"type": "Boolean", "options": [true, false]},
+                  "validators": [],
+                  "help": "If set to 'true', this course will be tracked by SCORM"
+                },
+                "_tracking": {
+                  "type":"object",
+                  "required":false,
+                  "title": "Tracking",
+                  "properties":{
+                    "_requireAssessmentPassed": {
+                      "type":"boolean",
+                      "required":false,
+                      "title":"Assessment pass required",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": ""
+                    },
+                    "_requireCourseCompleted": {
+                      "type":"boolean",
+                      "required":false,
+                      "title":"Course completion required",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": ""
+                    },
+                    "_shouldSubmitScore": {
+                      "type":"boolean",
+                      "required":false,
+                      "title":"Submit score",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": ""
+                    }
+                  }
+                },
+                "_reporting": {
+                  "type":"object",
+                  "required":false,
+                  "title": "Reporting",
+                  "properties":{
+                    "_onTrackingCriteriaMet": {
+                      "type":"string",
+                      "required":false,
+                      "title":"Tracking success status",
+                      "enum": ["completed", "passed", "failed", "incomplete"],
+                      "inputType": {
+                        "type": "Select", 
+                        "options": ["completed", "passed", "failed", "incomplete"]
+                      },
+                      "validators": [],
+                      "help": ""
+                    },
+                    "_onAssessmentFailure": {
+                      "type":"string",
+                      "required":false,
+                      "title":"Assessment failure status",
+                      "enum": ["completed", "passed", "failed", "incomplete"],
+                      "inputType": {
+                        "type": "Select", 
+                        "options": ["completed", "passed", "failed", "incomplete"]
+                      },
+                      "validators": [],
+                      "help": ""
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "course": {
+          "type":"object"
+        },
+        "contentobject": {
+          "type":"object"
+        },
+        "article": {
+          "type":"object"
+        },
+        "block": {
+          "type":"object"
+        },
+        "component": {
+          "type":"object"
+        }
+      }
+    }
+  }
+}
