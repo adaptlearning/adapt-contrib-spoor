@@ -45,8 +45,10 @@ define([
 			var sessionPairs = Adapt.offlineStorage.get();
 
 			if (sessionPairs.completion) serializer.deserialize(sessionPairs.completion);
+			
 			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
-	        	if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
+			
+			if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
 		},
 
 		getSessionState: function() {
@@ -68,17 +70,17 @@ define([
 			$(window).on('unload', this._onWindowUnload);
 
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
-			this.listenTo(Adapt.course, 'change:_isComplete', this.onCourseComplete);
+			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
 			this.listenTo(Adapt, 'questionView:complete', this.onQuestionComplete);
 			this.listenTo(Adapt, 'questionView:reset', this.onQuestionReset);
-		},		
+		},
 
 		onBlockComplete: function(block) {
 			this.saveSessionState();
 		},
 
-		onCourseComplete: function() {
+		onCompletion: function() {
 			if (!this.checkTrackingCriteriaMet()) return;
 			
 			Adapt.offlineStorage.set("status", this._config._reporting._onTrackingCriteriaMet);
@@ -91,8 +93,11 @@ define([
 
 			this.submitScore(stateModel.scoreAsPercent);
 
-			if (stateModel.isPass) this.onCourseComplete();
-			else submitAssessmentFailed();
+			if (stateModel.isPass) {
+				this.onCompletion();
+			} else if(this._config._tracking._requireAssessmentPassed) {
+				this.submitAssessmentFailed();
+			}
 		},
 
 		submitScore: function(score) {
@@ -119,20 +124,23 @@ define([
 		},
 		
 		checkTrackingCriteriaMet: function() {
-			var courseCriteriaMet = this._config._tracking._requireCourseCompleted ? Adapt.course.get('_isComplete') : true;
-			var assessmentCriteriaMet = this._config._tracking._requireAssessmentPassed ? Adapt.course.get('_isAssessmentPassed') : true;
-			
-			if(courseCriteriaMet && assessmentCriteriaMet) return true;
-			return false;
+			var criteriaMet = false;
+
+			if (this._config._tracking._requireCourseCompleted && this._config._tracking._requireAssessmentPassed) { // user must complete all blocks AND pass the assessment
+				criteriaMet = (Adapt.course.get('_isComplete') && Adapt.course.get('_isAssessmentPassed'));
+			} else if (this._config._tracking._requireCourseCompleted) { //user only needs to complete all blocks
+				criteriaMet = Adapt.course.get('_isComplete');
+			} else if (this._config._tracking._requireAssessmentPassed) { // user only needs to pass the assessment
+				criteriaMet = Adapt.course.get('_isAssessmentPassed');
+			}
+
+			return criteriaMet;
 		},
 
 	//Session End
 		onWindowUnload: function() {
-			this.removeEventListeners();
-		},
-
-		removeEventListeners: function() {
 			$(window).off('unload', this._onWindowUnload);
+
 			this.stopListening();
 		}
 		

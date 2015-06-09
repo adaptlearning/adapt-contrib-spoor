@@ -123,7 +123,7 @@ define (function(require) {
 	* allows you to check if this is the user's first ever 'session' of a SCO, even after the lesson_status has been set to 'incomplete'
 	*/
 	ScormWrapper.prototype.isFirstSession = function() {
-		return (this.getValue("cmi.core.entry") === "ab-initio");
+		return (this.getValue(this.isSCORM2004() ? "cmi.entry" :"cmi.core.entry") === "ab-initio");
 	};
 
 	ScormWrapper.prototype.setIncomplete = function() {

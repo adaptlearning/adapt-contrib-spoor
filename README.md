@@ -20,7 +20,7 @@ Additionally, you must update your course to include tracking IDs in blocks.json
 ```
 $ grunt tracking-insert
 ```
-from the command line.
+from the command line. N.B. if you add more blocks, you will need to run this again to assign tracking ids to the new blocks.
 
 ###SCORM manifest file
 You will also need to edit the manifest file [imsmanifest.xml](required/imsmanifest.xml) to contain information specific to your course. 
