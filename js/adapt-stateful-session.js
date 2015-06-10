@@ -107,10 +107,12 @@ define([
 		},
 
 		submitAssessmentFailed: function() {
-			var onAssessmentFailure = this._config._reporting._onAssessmentFailure;
-			if (onAssessmentFailure === "") return;
-				
-			Adapt.offlineStorage.set("status", onAssessmentFailure);
+			if(this._config._reporting.hasOwnProperty("_onAssessmentFailure")) {
+				var onAssessmentFailure = this._config._reporting._onAssessmentFailure;
+				if (onAssessmentFailure === "") return;
+					
+				Adapt.offlineStorage.set("status", onAssessmentFailure);
+			}
 		},
 
 		onQuestionComplete: function(questionView) {
