@@ -64,13 +64,6 @@ define (function(require) {
 		
 		if (window.__debug)
 			this.showDebugWindow();
-		
-		/**
-		 *  stop the pipwerks code from setting cmi.core.exit to suspend/logout. there doesn't seem to be any tangible benefit to doing this...
-		 *  it can actually cause problems with some LMSes (e.g. setting 'logout' apparently causes Plateau to log out completely!)
-		 *  you can always switch it back on for an individual course if you think it's necessary.
-		 */
-		this.scorm.handleExitMode = false;
 	};
 
 	// static
@@ -91,6 +84,13 @@ define (function(require) {
 
 	ScormWrapper.prototype.setVersion = function(value) {
 		this.scorm.version = value;
+		/**
+		 * stop the pipwerks code from setting cmi.core.exit to suspend/logout when targeting SCORM 1.2.
+		 * there doesn't seem to be any tangible benefit to doing this in 1.2 and it can actually cause problems with some LMSes
+		 * (e.g. setting it to 'logout' apparently causes Plateau to log the user completely out of the LMS!)
+		 * It needs to be on for SCORM 2004 though, otherwise the LMS might not restore the suspend_data
+		 */
+		this.scorm.handleExitMode(this.scorm.version === "2004");
 	};
 
 	ScormWrapper.prototype.registerView = function(_view) {
@@ -106,7 +106,6 @@ define (function(require) {
 	ScormWrapper.prototype.initialize = function() {
 		this.lmsConnected = this.scorm.init();
 
-
 		if (this.lmsConnected) {
 			this.startTime = new Date();
 			
@@ -115,8 +114,8 @@ define (function(require) {
 		else {
 			this.handleError("Course could not connect to the LMS");
 		}
-	    
-	    return this.lmsConnected;
+		
+		return this.lmsConnected;
 	};
 
 	/**
@@ -276,7 +275,7 @@ define (function(require) {
 			if (this.commitRetryPending) {
 				this.logger.debug("ScormWrapper::commit: skipping this commit call as one is already pending.");
 			}
-			else {		
+			else {
 				if (this.scorm.save()) {
 					this.commitRetries = 0;
 					this.lastCommitSuccessTime = new Date();
@@ -293,8 +292,8 @@ define (function(require) {
 						_errorMsg += "\nError " + _errorCode + ": " + this.scorm.debug.getInfo(_errorCode);
 						_errorMsg += "\nLMS Error Info: " + this.scorm.debug.getDiagnosticInfo(_errorCode);
 
-						this.handleError(_errorMsg);	
-					}	
+						this.handleError(_errorMsg);
+					}
 				}
 			}
 		}
@@ -326,7 +325,6 @@ define (function(require) {
 			
 			if (this.isSCORM2004()) {
 				this.scorm.set("cmi.session_time", this.convertMilliSecondsToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
-				this.scorm.set("cmi.exit", "normal");
 			}
 			else {
 				this.scorm.set("cmi.core.session_time", this.convertMilliSecondsToSCORMTime(this.endTime.getTime() - this.startTime.getTime()));
@@ -348,7 +346,7 @@ define (function(require) {
 	ScormWrapper.prototype.recordInteraction = function(strID, strResponse, strCorrect, strLatency, scormInteractionType) {
 		/*
 		* because some LMSes (e.g. Learning Core, Syntrio) - report cmi.interactions._count as being supported even though
-		* no other cmi.interactions data fields are... so this flag gives us an option to switch off tracking to 
+		* no other cmi.interactions data fields are... so this flag gives us an option to switch off tracking to
 		* cmi.interactions altogether in these rare instances.
 		*/
 		if(this.disableInteractionTracking === true) {
@@ -456,8 +454,7 @@ define (function(require) {
 	};
 
 	/**
-	* used for checking any data field that is not 'LMS Mandatory' to see whether
-	* the LMS we're running on supports it or not. 
+	* used for checking any data field that is not 'LMS Mandatory' to see whether the LMS we're running on supports it or not.
 	* Note that the way this check is being performed means it wouldn't work for any element that is
 	* 'write only', but so far we've not had a requirement to check for any optional elements that are.
 	*/
