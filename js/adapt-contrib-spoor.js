@@ -26,7 +26,9 @@ define([
 		onDataReady: function() {
 			if (!this.checkConfig()) return;
 
-			this.startSCO();
+			this.configureAdvancedSettings();
+
+			scorm.initialize();
 
 			adaptStatefulSession.initialize();
 
@@ -39,15 +41,35 @@ define([
 			return false;
 		},
 
-		startSCO: function() {
-			/**
-			* force use of SCORM 1.2 - as some LMSes (SABA, for instance) present both APIs to the SCO and, if given the choice,
-			* the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
-			* this does obviously mean you'll have to manually change (or just remove) this next line if you want SCORM 2004 output
-			*/
-			//TODO allow version to be set via config.json
-			scorm.setVersion("1.2");
-			scorm.initialize()
+		configureAdvancedSettings: function() {
+			if(this._config._advancedSettings) {
+				var settings = this._config._advancedSettings;
+
+				if(settings._showDebugWindow) scorm.showDebugWindow();
+
+				this.scorm.setVersion(settings._scormVersion || "1.2");
+
+				if(settings.hasOwnProperty("_commitOnStatusChange")) {
+					scorm.commitOnStatusChange = settings._commitOnStatusChange;
+				}
+
+				if(settings.hasOwnProperty("_timedCommitFrequency")) {
+					scorm.timedCommitFrequency = settings._timedCommitFrequency;
+				}
+
+				if(settings.hasOwnProperty("_maxCommitRetries")) {
+					scorm.maxCommitRetries = settings._maxCommitRetries;
+				}
+
+				if(settings.hasOwnProperty("_commitRetryDelay")) {
+					scorm.commitRetryDelay = settings._commitRetryDelay;
+				}
+				/**
+				* Adapt doesn't yet support cmi.interactions, uncomment this when support is added
+				if(settings.hasOwnProperty("_disableInteractionTracking")) {
+					scorm.disableInteractionTracking = settings._disableInteractionTracking;
+				}*/
+			}
 		},
 
 		setupEventListeners: function() {
@@ -58,15 +80,8 @@ define([
 	//Session End
 
 		onWindowUnload: function() {
-			this.endSCO();
-			this.removeEventListeners();
-		},
-
-		endSCO: function() {
 			scorm.finish();
-		},
 
-		removeEventListeners: function() {
 			$(window).off('unload', this._onWindowUnload);
 		}
 		
