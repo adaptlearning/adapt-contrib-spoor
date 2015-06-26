@@ -25,12 +25,12 @@ define([
             }
 
             var rtn = "";
-            try {
+            //try {
                 var data = this.captureData();
                 rtn = SCORMSuspendData.serialize(data);
-            } catch(e) {
+            /*} catch(e) {
                 console.error(e);
-            }
+            }*/
 
             return rtn;
         },

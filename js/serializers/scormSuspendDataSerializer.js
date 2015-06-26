@@ -194,7 +194,7 @@
 		var isDecimal = (number - Math.floor(number)) !== 0;
 		var numberDataTypes = DataType.getTypes("number");
 		for (var t = 0, type; type = numberDataTypes[t++];) {
-			if (number <= type.max && number >= type.min && isDecimal == type.decimal ) {
+			if (number <= type.max && number >= type.min && (!isDecimal || isDecimal == type.decimal) ) {
 				return type;
 			}
 		}
@@ -500,6 +500,8 @@
 						} else {
 							baseStr = highStr + lowStr;
 						}
+					} else {
+						baseStr = dblStr;
 					}
 
 				}
