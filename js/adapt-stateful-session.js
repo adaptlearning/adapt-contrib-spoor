@@ -16,7 +16,7 @@ define([
 
 		_sessionID: null,
 		_config: null,
-		_shouldStoreQuestions: false,
+		_shouldStoreResponses: false,
 
 	//Session Begin
 		initialize: function() {
@@ -28,7 +28,7 @@ define([
 
 		getConfig: function() {
 			this._config = Adapt.config.get('_spoor');
-			this._shouldStoreQuestions = (this._config && this._config._tracking && this._config._tracking._shouldStoreQuestions);
+			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
 		},
 
 		checkSaveState: function() {
@@ -47,7 +47,7 @@ define([
 		restoreSessionState: function() {
 			var sessionPairs = Adapt.offlineStorage.get();
 
-			if (sessionPairs.questions && this._shouldStoreQuestions ) questions.deserialize(sessionPairs.questions);
+			if (sessionPairs.questions && this._shouldStoreResponses ) questions.deserialize(sessionPairs.questions);
 
 			if (sessionPairs.completion) serializer.deserialize(sessionPairs.completion);
 
@@ -59,7 +59,7 @@ define([
 		getSessionState: function() {
 			var sessionPairs = {
 				"completion": serializer.serialize(),
-				"questions": (this._shouldStoreQuestions == true ? questions.serialize() : ""),
+				"questions": (this._shouldStoreResponses == true ? questions.serialize() : ""),
 				"_isCourseComplete": Adapt.course.get("_isComplete") || false,
 				"_isAssessmentPassed": Adapt.course.get('_isAssessmentPassed') || false
 			};
@@ -75,7 +75,7 @@ define([
 			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			$(window).on('unload', this._onWindowUnload);
 
-			if (this._shouldStoreQuestions) {
+			if (this._shouldStoreResponses) {
 				this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
 			}
 
