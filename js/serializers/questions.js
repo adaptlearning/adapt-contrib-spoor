@@ -27,7 +27,6 @@ define([
             var rtn = "";
             try {
                 var data = this.captureData();
-                console.log(data);
                 rtn = SCORMSuspendData.serialize(data);
             } catch(e) {
                 console.error(e);
@@ -123,7 +122,6 @@ define([
 
             try {
                 var data = SCORMSuspendData.deserialize(str);
-                console.log(data);
                 this.releaseData( data );
             } catch(e) {
                 console.error(e);
@@ -153,7 +151,7 @@ define([
                 component.set("_isComplete", true);
                 component.set("_isInteractionComplete", isInteractionComplete);
                 component.set("_isSubmitted", isSubmitted);
-                
+
                 if (hasUserAnswer) {
                     var userAnswer = dataItem[2];
                     if (!isUserAnswerArray) userAnswer = userAnswer[0];
