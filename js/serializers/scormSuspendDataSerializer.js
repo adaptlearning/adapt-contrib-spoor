@@ -1,62 +1,5 @@
-//https://raw.githubusercontent.com/oliverfoster/SCORMSuspendDataSerializer 2015-06-26
-(function() {
-
-	function indexOf(arr, func) {
-		for (var i = 0, l = arr.length; i < l; i++) {
-			var item = arr[i];
-			if (func( item, i )) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	function contains(arr, func) {
-		if (indexOf(arr, func) >= 0) return true;
-		return false;
-	}
-
-	function pluck(arr, func) {
-		var plucked = [];
-		for (var i = 0, l = arr.length; i < l; i++) {
-			var item = arr[i];
-			var val = func( item, i );
-			if (val) plucked.push(val);
-		}
-		return plucked;
-	}
-
-	function unique(arr) {
-		var names = {};
-		var uniques = [];
-		for (var i = 0, l = arr.length; i < l; i++) {
-			var item = arr[i];
-			if (typeof item == "object") {
-				uniques.push(item);
-			} else {
-				names[item] = 0;
-			}
-		}
-		for (var k in names) {
-			uniques.push(k);
-		}
-		return uniques;
-	}
-
-	function max(arr, func) {
-		var highestScore = 0;
-		var atIndex = -1;
-		for (var i = 0, l = arr.length; i < l; i++) {
-			var item = arr[i];
-			var score = func(item, i);
-			if ( score === true ) return arr[i];
-			if ( score >= highestScore ) {
-				highestScore = score;
-				atIndex = i;
-			}
-		}
-		return arr[atIndex];
-	}
+//https://raw.githubusercontent.com/oliverfoster/SCORMSuspendDataSerializer 2015-06-27
+(function(_) {
 
 	function toPrecision(number, precision) {
 		if (precision === undefined) precision = 2
@@ -231,9 +174,9 @@
 		for (var i = 0, l = arr.length; i < l; i++) {
 			var item = arr[i];
 			var itemDataType = DataType.getVariableType(item);
-	
-			if (contains(foundItemTypes, function(typ, index) { if (typ.name == itemDataType.name) return true; })) continue;
 
+			if (_.findWhere(foundItemTypes, { name: itemDataType.name })) continue;
+	
 			foundItemTypes.push(itemDataType);
 		}
 
@@ -245,10 +188,8 @@
 		 	return foundItemTypes[0];
 		default: 
 			//many value types
-			var nativeTypeNames = pluck(foundItemTypes, function(type) {
-				return type.type;
-			});
-			var uniqueNativeTypeNames = unique(nativeTypeNames);
+			var nativeTypeNames = _.pluck(foundItemTypes, 'type');
+			var uniqueNativeTypeNames = _.uniq(nativeTypeNames);
 			var hasManyNativeTypes = (uniqueNativeTypeNames.length > 1);
 
 			if (hasManyNativeTypes) return DataType("variable"); //multiple types in array
@@ -256,7 +197,7 @@
 			//single native type in array, multiple datatype lengths
 			switch (uniqueNativeTypeNames[0]) {
 			case "number":
-				return max(foundItemTypes, function(type) {
+				return _.max(foundItemTypes, function(type) {
 					if (type.decimal) return true;
 					return type.max;
 				});
@@ -747,6 +688,4 @@
 	};
 
 
-})();
-
-
+})(_);
