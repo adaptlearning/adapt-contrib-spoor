@@ -20,9 +20,7 @@ define([
 		get: function(name) {
 			if (name === undefined) {
 				//If not connected return just temporary store.
-				if (!scorm.lmsConnected) return temporaryStore;
-
-				if (!this.checkConfig()) return temporaryStore;
+				if (this.useTemporaryStore()) return temporaryStore;
 
 				//Get all values as a combined object
 				return _.extend(scorm.getCustomStates(), {
@@ -34,9 +32,7 @@ define([
 			}
 
 			//If not connected return just temporary store value.
-			if (!scorm.lmsConnected) return temporaryStore[name];
-
-			if (!this.checkConfig()) return temporaryStore[name];
+			if (this.useTemporaryStore())  return temporaryStore[name];
 
 			//Get by name
 			switch (name.toLowerCase()) {
@@ -69,9 +65,7 @@ define([
 			}
 
 			//Save all values in temporaryStore if not connected
-			if (!scorm.lmsConnected) return temporaryStore[name] = value;
-
-			if (!this.checkConfig()) return temporaryStore[name] = value;
+			if (this.useTemporaryStore()) return temporaryStore[name] = value;
 
 			//Set by name
 			switch (name.toLowerCase()) {
@@ -92,10 +86,11 @@ define([
 				return scorm.setCustomStates(temporaryStore);
 			}
 		},
-
-		checkConfig: function() {
-			this._config = Adapt.config.get('_spoor');
-			if (this._config && this._config._isEnabled !== false) return true;
+		
+		useTemporaryStore: function() {
+			var cfg = Adapt.config.get('_spoor');
+			
+			if (!scorm.lmsConnected || (cfg && cfg._isEnabled === false)) return true;
 			return false;
 		}
 		
