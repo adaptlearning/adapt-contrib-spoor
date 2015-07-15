@@ -78,20 +78,22 @@ define([
                 var isUserAnswerArray = (component['_userAnswer'] instanceof Array);
 
 
-                var trackingIdAndBlockLocation = [
+                var numericParameters = [
                         blockLocation,
-                        block['_trackingId']
+                        block['_trackingId'],
+                        component['_score'] || 0
                     ];
 
                 var booleanParameters = [
                         hasUserAnswer,
                         isUserAnswerArray,
                         component['_isInteractionComplete'],
-                        component['_isSubmitted']
+                        component['_isSubmitted'],
+                        component['_isCorrect'] || false
                     ];
 
                 var dataItem = [
-                    trackingIdAndBlockLocation,
+                    numericParameters,
                     booleanParameters
                 ];
 
@@ -134,16 +136,18 @@ define([
             for (var i = 0, l = arr.length; i < l; i++) {
                 var dataItem = arr[i];
 
-                var trackingIdAndBlockLocation = dataItem[0];
+                var numericParameters = dataItem[0];
                 var booleanParameters = dataItem[1];
 
-                var blockLocation = trackingIdAndBlockLocation[0];
-                var trackingId = trackingIdAndBlockLocation[1];
+                var blockLocation = numericParameters[0];
+                var trackingId = numericParameters[1];
+                var score = numericParameters[2];
 
                 var hasUserAnswer = booleanParameters[0];
                 var isUserAnswerArray = booleanParameters[1];
                 var isInteractionComplete = booleanParameters[2];
                 var isSubmitted = booleanParameters[3];
+                var isCorrect = booleanParameters[4];
 
                 var block = Adapt.blocks.findWhere({_trackingId: trackingId});
                 var component = block.getChildren().models[blockLocation];
@@ -151,6 +155,8 @@ define([
                 component.set("_isComplete", true);
                 component.set("_isInteractionComplete", isInteractionComplete);
                 component.set("_isSubmitted", isSubmitted);
+                component.set("_score", score);
+                component.set("_isCorrect", isCorrect);
 
                 if (hasUserAnswer) {
                     var userAnswer = dataItem[2];
