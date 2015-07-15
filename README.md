@@ -1,5 +1,4 @@
-adapt-contrib-spoor
-===================
+#adapt-contrib-spoor
 Tracking plugin for the Adapt Framework. Currently (officially) only supports SCORM 1.2
 
 ##Installation
@@ -13,8 +12,8 @@ This component can also be installed by adding the component to the adapt.json f
 "adapt-contrib-spoor": "*"
 ```
 
-##Usage instructions
-You will need to add the data that is in [example.json](example.json) to your config.json, amending the settings as required (see below).
+##Usage
+You will need to add the data that is in [mple.json](example.json)exa to your config.json, amending the settings as required (see below).
 
 Additionally, you must update your course to include tracking IDs in blocks.json - this should be done by running
 ```
@@ -103,3 +102,9 @@ When spoor is installed, main.html can be used instead of index.html to allow no
 
 ####Client Local Storage / Fake LMS / Adapt LMS Behaviour Testing
 When spoor is installed, scorm_test_harness.html can be used instead of index.html to allow the browser to store LMS states inside a browser cookie. This allows developer to test LMS specified behaviour outside of an LMS environment.
+
+##Limitations 
+To be completed.
+
+##Browser spec
+This component has been tested to the standard Adapt browser specification.
