@@ -5,7 +5,8 @@
 		"_tracking": {
 			"_requireCourseCompleted": true,
 			"_requireAssessmentPassed": false,
-			"_shouldSubmitScore": false
+			"_shouldSubmitScore": false,
+			"_shouldStoreResponses": false
 		},
 		"_reporting": {
 			"_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",

@@ -6,8 +6,9 @@
 
 define([
 	'coreJS/adapt',
-	'./serializers/default'
-], function(Adapt, serializer) {
+	'./serializers/default',
+	'./serializers/questions'
+], function(Adapt, serializer, questions) {
 
 	//Implements Adapt session statefulness
 	
@@ -15,6 +16,7 @@ define([
 
 		_sessionID: null,
 		_config: null,
+		_shouldStoreResponses: false,
 
 	//Session Begin
 		initialize: function() {
@@ -26,6 +28,7 @@ define([
 
 		getConfig: function() {
 			this._config = Adapt.config.get('_spoor');
+			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
 		},
 
 		checkSaveState: function() {
@@ -44,8 +47,10 @@ define([
 		restoreSessionState: function() {
 			var sessionPairs = Adapt.offlineStorage.get();
 
+			if (sessionPairs.questions && this._shouldStoreResponses ) questions.deserialize(sessionPairs.questions);
+
 			if (sessionPairs.completion) serializer.deserialize(sessionPairs.completion);
-			
+
 			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
 			
 			if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
@@ -54,6 +59,7 @@ define([
 		getSessionState: function() {
 			var sessionPairs = {
 				"completion": serializer.serialize(),
+				"questions": (this._shouldStoreResponses == true ? questions.serialize() : ""),
 				"_isCourseComplete": Adapt.course.get("_isComplete") || false,
 				"_isAssessmentPassed": Adapt.course.get('_isAssessmentPassed') || false
 			};
@@ -69,6 +75,10 @@ define([
 			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			$(window).on('unload', this._onWindowUnload);
 
+			if (this._shouldStoreResponses) {
+				this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
+			}
+
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
@@ -77,6 +87,11 @@ define([
 		},
 
 		onBlockComplete: function(block) {
+			this.saveSessionState();
+		},
+
+		onQuestionComponentComplete: function(component) {
+			if (!component.get("_isQuestionType")) return;
 			this.saveSessionState();
 		},
 
