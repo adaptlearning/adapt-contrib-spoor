@@ -197,11 +197,11 @@
 			//single native type in array, multiple datatype lengths
 			switch (uniqueNativeTypeNames[0]) {
 			case "number":
+				var foundDecimal = _.findWhere(foundItemTypes, { decimal: true});
+				if (foundDecimal) return foundDecimal;
 				return _.max(foundItemTypes, function(type) {
-					if (type.decimal) return true;
 					return type.max;
 				});
-				
 			}
 
 			throw "Unsupported data types";
