@@ -2,7 +2,7 @@
 Tracking plugin for the Adapt Framework. Currently (officially) only supports SCORM 1.2
 
 ##Installation
-If you haven't already done so, be sure to install the [Adapt Command Line Interface](https://github.com/adaptlearning/adapt-cli) then, from the command line run:-
+If you haven't already done so, be sure to install the [Adapt Command Line Interface](https://github.com/adaptlearning/adapt-cli) then, from the command line run:
 ```
 $ adapt install adapt-contrib-spoor
 ```
@@ -13,7 +13,7 @@ This component can also be installed by adding the component to the adapt.json f
 ```
 
 ##Usage
-You will need to add the data that is in [mple.json](example.json)exa to your config.json, amending the settings as required (see below).
+You will need to add the data that is in [example.json](example.json) to your config.json, amending the settings as required (see below).
 
 Additionally, you must update your course to include tracking IDs in blocks.json - this should be done by running
 ```
