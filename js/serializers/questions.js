@@ -27,6 +27,7 @@ define([
             var rtn = "";
             try {
                 var data = this.captureData();
+                if (data.length === 0) return "";
                 rtn = SCORMSuspendData.serialize(data);
             } catch(e) {
                 console.error(e);
