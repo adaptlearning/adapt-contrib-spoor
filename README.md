@@ -53,7 +53,7 @@ If later you add more blocks, run this again to assign tracking IDs to the new b
 <div float align=right><a href="#top">Back to Top</a></div>  
 
 ### Configure *config.json*  
-The attributes listed below are used in *config.json* to configure **Spoor**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-blank/blob/master/example.json). Visit the [**Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).  
+The attributes listed below are used in *config.json* to configure **Spoor**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json). Visit the [**Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).  
 
 #### Attributes
 
