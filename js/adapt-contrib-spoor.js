@@ -47,7 +47,7 @@ define([
 
 				if(settings._showDebugWindow) scorm.showDebugWindow();
 
-				this.scorm.setVersion(settings._scormVersion || "1.2");
+				scorm.setVersion(settings._scormVersion || "1.2");
 
 				if(settings.hasOwnProperty("_commitOnStatusChange")) {
 					scorm.commitOnStatusChange = settings._commitOnStatusChange;

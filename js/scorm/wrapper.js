@@ -90,7 +90,7 @@ define (function(require) {
 		 * (e.g. setting it to 'logout' apparently causes Plateau to log the user completely out of the LMS!)
 		 * It needs to be on for SCORM 2004 though, otherwise the LMS might not restore the suspend_data
 		 */
-		this.scorm.handleExitMode(this.scorm.version === "2004");
+		this.scorm.handleExitMode = (this.scorm.version === "2004");
 	};
 
 	ScormWrapper.prototype.registerView = function(_view) {
