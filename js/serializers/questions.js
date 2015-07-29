@@ -1,9 +1,3 @@
-/*
-* adapt-contrib-spoor
-* License - http://github.com/adaptlearning/adapt_framework/LICENSE
-* Maintainers -  Oliver Foster <oliver.foster@kineo.com>
-*/
-
 define([
     'coreJS/adapt',
     './scormSuspendDataSerializer'
