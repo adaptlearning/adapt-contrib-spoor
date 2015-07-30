@@ -3,10 +3,7 @@
   "version": "2.0.0",
   "framework": "^2.0.0",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-spoor",
-  "authors": [
-    "Kevin Corry <kevinc@learningpool.com>",
-    "Kev Adsett <kev.adsett@kineo.com>"
-  ],
+  "issues": "https://adaptlearning.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10100&issuetype=1&priority=6&components=10520",
   "displayName" : "Spoor",
   "extension" : "spoor",
   "description": "An extension which allows basic SCORM tracking",
