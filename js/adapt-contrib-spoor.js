@@ -20,19 +20,22 @@ define([
 	//Session Begin
 
 		initialize: function() {
+			this.listenToOnce(Adapt, "configModel:dataLoaded", this.onConfigLoaded);
 			this.listenToOnce(Adapt, "app:dataReady", this.onDataReady);
 		},
 
-		onDataReady: function() {
+		onConfigLoaded: function() {
 			if (!this.checkConfig()) return;
 
 			this.configureAdvancedSettings();
 
 			scorm.initialize();
 
-			adaptStatefulSession.initialize();
-
 			this.setupEventListeners();
+		},
+
+		onDataReady: function() {
+			adaptStatefulSession.initialize();
 		},
 
 		checkConfig: function() {
