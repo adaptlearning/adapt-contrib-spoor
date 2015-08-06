@@ -110,7 +110,7 @@
 		}
 		
 	}
-	DataType.VARIABLELENGTHDESCRIPTORSIZE = 7;
+	DataType.VARIABLELENGTHDESCRIPTORSIZE = 8;
 	DataType._types = {};
 	DataType._indexes = [];
 	DataType.getName = function DataTypeGetName(name) {
