@@ -5,6 +5,10 @@ define([
 
     //Captures the completion status and user selections of the question components
     //Returns and parses a base64 style string
+    var includes = {
+        "_isQuestionType": true,
+        "_isResetOnRevisit": false
+    };
 
     var serializer = {
         serialize: function () {
@@ -34,11 +38,6 @@ define([
             var data = [];
             
             var components = Adapt.components.toJSON();
-
-            var includes = {
-                "_isQuestionType": true,
-                "_isResetOnRevisit": false
-            };
 
             components = _.where(components, includes);
 
@@ -145,7 +144,9 @@ define([
                 var isCorrect = booleanParameters[4];
 
                 var block = Adapt.blocks.findWhere({_trackingId: trackingId});
-                var component = block.getChildren().models[blockLocation];
+                var components = block.getChildren();
+                components = components.where(includes);
+                var component = components[blockLocation];
 
                 component.set("_isComplete", true);
                 component.set("_isInteractionComplete", isInteractionComplete);
