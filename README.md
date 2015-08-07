@@ -97,7 +97,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 - Set `"_isEnabled": false` in *config.json*.
 
 ###Client Local Storage / Fake LMS / Adapt LMS Behaviour Testing
-When **Spoor** is installed, *scorm_test_harness.html* can be used instead of *index.html* to allow the browser to store LMS states inside a browser cookie. This allows developer to test LMS specified behaviour outside of an LMS environment.
+When **Spoor** is installed, *scorm_test_harness.html* can be used instead of *index.html* to allow the browser to store LMS states inside a browser cookie. This allows developer to test LMS specified behaviour outside of an LMS environment. If you run the command `grunt server-scorm`, this will start a local server and run the course using *scorm_test_harness.html* for you.
 
 ## Limitations
  
