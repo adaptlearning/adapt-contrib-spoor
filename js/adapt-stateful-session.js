@@ -111,13 +111,18 @@ define([
 		},
 
 		onQuestionRecordInteraction:function(questionView) {
-			var id = questionView.model.get('_id');
-			var latency = questionView.getLatency();
-			var response = questionView.getResponse();
-			var responseType = questionView.getResponseType();
-			var result = questionView.isCorrect();
-			
-			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
+			if (this._config._isEnabled === false || questionView.model.get('_recordInteraction') === false) return;
+
+            if (questionView.model.get('_recordInteraction') === true || this._config._tracking._recordInteractions === true) {
+
+				var id = questionView.model.get('_id');
+				var latency = questionView.getLatency();
+				var response = questionView.getResponse();
+				var responseType = questionView.getResponseType();
+				var result = questionView.isCorrect();
+				
+				Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
+			}
 		},
 
 		submitScore: function(score) {

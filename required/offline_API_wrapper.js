@@ -13,7 +13,7 @@ function createResetButton(API) {
 
 var API = {
 	LMSInitialize: function() {
-		if (window.ISCOOKIELMS !== false) createResetButton(this);
+		//if (window.ISCOOKIELMS !== false) createResetButton(this);
 		if (!API.LMSFetch()) {
 			this.data["cmi.core.lesson_status"] = "not attempted";
 			this.data["cmi.suspend_data"] = "";
@@ -87,7 +87,7 @@ var API = {
 
 var API_1484_11 = {
 	Initialize: function() {
-		if (window.ISCOOKIELMS !== false) createResetButton(this);
+		//if (window.ISCOOKIELMS !== false) createResetButton(this);
 		if (!API_1484_11.LMSFetch()) {
 			this.data["cmi.completion_status"] = "not attempted";
 			this.data["cmi.suspend_data"] = "";
