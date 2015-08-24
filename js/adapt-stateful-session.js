@@ -110,10 +110,10 @@ define([
 			}
 		},
 
-		onQuestionRecordInteraction:function(questionView) {
-			if (this._config._isEnabled === false || questionView.model.get('_recordInteraction') === false) return;
+		onQuestionRecordInteraction:function(questionView, forceRecord) {
+			if (this._config._isEnabled === false) return;
 
-            if (questionView.model.get('_recordInteraction') === true || this._config._tracking._recordInteractions === true) {
+            if (this._config._tracking._recordInteractions === true || forceRecord) {
 
 				var id = questionView.model.get('_id');
 				var latency = questionView.getLatency();
