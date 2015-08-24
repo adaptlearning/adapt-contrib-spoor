@@ -61,7 +61,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
  
 >**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS on course launch. If one is not available, a 'Could not connect to LMS' error message will be display. This error may be ignored, or it may be avoided entirely by setting this to `false`. Disabling tracking in this way can be very helpful during course development (when running the course from a local server rather than an LMS) or if you have a course that needs to be able to run on an LMS or a web server.
 
->**_tracking** (object): This object contains values for **_requireCourseCompleted**, **_requireAssessmentPassed**, **_shouldSubmitScore**.  
+>**_tracking** (object): This object contains values for **_requireCourseCompleted**, **_requireAssessmentPassed**, **_shouldSubmitScore**, **_recordInteractions**.  
 
 >>**_requireCourseCompleted** (boolean): Determines whether the learner must complete all the components in the course before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `true`.    
 
@@ -69,7 +69,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_shouldSubmitScore** (boolean): Determines whether the numeric scores attained in assessments will be reported to the LMS. Acceptable values are `true` or `false`.  
 
->>**_recordInteractions** (boolean): Determines whether question attempt data are written to SCORM cmi.interactions. This setting can be overidden at component level by specifying **_recordInteraction** as appropriate. Acceptable values are `true` or `false`.
+>>**_recordInteractions** (boolean): Determines whether question attempt data are written to SCORM cmi.interactions. This setting can be overridden at component level by specifying **_recordInteraction** as appropriate. Acceptable values are `true` or `false`.
 		
 >**_reporting** (object): This object defines what status to report back to the LMS. Contains values for **_onTrackingCriteriaMet**, **_onAssessmentFailure**.  
 
