@@ -68,6 +68,8 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 >>**_requireAssessmentPassed** (boolean): Determines whether the user must pass the course assessment, not simply complete it, before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `false`.  If this attribute and `_requireCourseCompleted` are both set to `true`, the learner must pass the course assessment as well as complete all components in order for the course can be marked as finished in the LMS.
 
 >>**_shouldSubmitScore** (boolean): Determines whether the numeric scores attained in assessments will be reported to the LMS. Acceptable values are `true` or `false`.  
+
+>>**_shouldStoreResponses** (boolean): Determines whether the user's question responses should be saved and restored, to and from the LMS. Acceptable values are `true` or `false`.  
 		
 >**_reporting** (object): This object defines what status to report back to the LMS. Contains values for **_onTrackingCriteriaMet**, **_onAssessmentFailure**.  
 
