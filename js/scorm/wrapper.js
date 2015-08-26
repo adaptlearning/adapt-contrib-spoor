@@ -1007,6 +1007,32 @@ define (function(require) {
 		return this.scorm.version === "2004";
 	};
 
+	var MatchingResponse = function(source, target){
+		if (source.constructor == String){
+			source = ScormWrapper.getInstance().createResponseIdentifier(source, source);
+		}
+
+		if (target.constructor == String){
+			target = ScormWrapper.getInstance().createResponseIdentifier(target, target);
+		}
+		
+		this.Source = source;
+		this.Target = target;
+	};
+
+	MatchingResponse.prototype.toString = function(){
+		return "[Matching Response " + this.Source + ", " + this.Target + "]";
+	};
+
+	var ResponseIdentifier = function(strShort, strLong) {
+		this.Short = new String(strShort);
+		this.Long = new String(strLong);
+	};
+
+	ResponseIdentifier.prototype.toString = function() {
+		return "[Response Identifier " + this.Short + ", " + this.Long + "]";
+	};
+
 	function delegate(obj, func) {
 		return function() { return func.apply(obj, arguments); };
 	};

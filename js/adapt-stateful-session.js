@@ -78,6 +78,7 @@ define([
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
 			this.listenTo(Adapt, 'questionView:complete', this.onQuestionComplete);
 			this.listenTo(Adapt, 'questionView:reset', this.onQuestionReset);
+			this.listenTo(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
 		},
 
 		onBlockComplete: function(block) {
@@ -106,6 +107,21 @@ define([
 				this.onCompletion();
 			} else if(this._config._tracking._requireAssessmentPassed) {
 				this.submitAssessmentFailed();
+			}
+		},
+
+		onQuestionRecordInteraction:function(questionView, forceRecord) {
+			if (this._config._isEnabled === false) return;
+
+            if (this._config._tracking._recordInteractions === true || forceRecord) {
+
+				var id = questionView.model.get('_id');
+				var latency = questionView.getLatency();
+				var response = questionView.getResponse();
+				var responseType = questionView.getResponseType();
+				var result = questionView.isCorrect();
+				
+				Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
 			}
 		},
 

@@ -63,6 +63,8 @@ define([
 
 			//Set by name
 			switch (name.toLowerCase()) {
+			case "interaction":
+				return scorm.recordInteraction.apply(scorm, args );
 			case "location":
 				return scorm.setLessonLocation.apply(scorm, args );
 			case "score":
