@@ -21,7 +21,9 @@ define([
 		},
 
 		getConfig: function() {
-			this._config = Adapt.config.get('_spoor');
+			this._config = Adapt.config.has('_spoor')
+				? Adapt.config.get('_spoor')
+				: false;
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
 		},
 
@@ -104,19 +106,19 @@ define([
 
 			if (stateModel.isPass) {
 				this.onCompletion();
-			} else if(this._config._tracking._requireAssessmentPassed) {
+			} else if (this._config && this._config._tracking._requireAssessmentPassed) {
 				this.submitAssessmentFailed();
 			}
 		},
 
 		submitScore: function(score) {
-			if (!this._config._tracking._shouldSubmitScore) return;
+			if (this._config && !this._config._tracking._shouldSubmitScore) return;
 			
 			Adapt.offlineStorage.set("score", score, 0, 100);
 		},
 
 		submitAssessmentFailed: function() {
-			if(this._config._reporting.hasOwnProperty("_onAssessmentFailure")) {
+			if (this._config && this._config._reporting.hasOwnProperty("_onAssessmentFailure")) {
 				var onAssessmentFailure = this._config._reporting._onAssessmentFailure;
 				if (onAssessmentFailure === "") return;
 					
@@ -136,6 +138,10 @@ define([
 		
 		checkTrackingCriteriaMet: function() {
 			var criteriaMet = false;
+
+			if (!this._config) {
+				return false;
+			}
 
 			if (this._config._tracking._requireCourseCompleted && this._config._tracking._requireAssessmentPassed) { // user must complete all blocks AND pass the assessment
 				criteriaMet = (Adapt.course.get('_isComplete') && Adapt.course.get('_isAssessmentPassed'));
