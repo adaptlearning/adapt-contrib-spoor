@@ -33,7 +33,7 @@
                     "_requireCourseCompleted": {
                       "type":"boolean",
                       "required":false,
-                      "default": "false",
+                      "default": "true",
                       "title":"Course completion required",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
@@ -111,10 +111,10 @@
                       "required":false,
                       "default": "1.2",
                       "title":"SCORM Version",
-                      "enum": ["1.2", "2004"],
+                      "enum": ["1.2"],
                       "inputType": {
                         "type": "Select",
-                        "options": ["1.2", "2004"]
+                        "options": ["1.2"]
                       },
                       "validators": [],
                       "help": "What version of SCORM you are targeting. Note that currently only 1.2 is officially supported."
@@ -131,7 +131,7 @@
                     "_commitOnStatusChange": {
                       "type":"boolean",
                       "required":false,
-                      "default": "false",
+                      "default": "true",
                       "title":"Commit data on status change",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
