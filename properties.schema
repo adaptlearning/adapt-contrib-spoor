@@ -106,19 +106,6 @@
                   "required":false,
                   "title": "Advanced Settings",
                   "properties":{
-                    "_scormVersion": {
-                      "type":"string",
-                      "required":false,
-                      "default": "1.2",
-                      "title":"SCORM Version",
-                      "enum": ["1.2"],
-                      "inputType": {
-                        "type": "Select",
-                        "options": ["1.2"]
-                      },
-                      "validators": [],
-                      "help": "What version of SCORM you are targeting. Note that currently only 1.2 is officially supported."
-                    },
                     "_showDebugWindow": {
                       "type":"boolean",
                       "required":false,
