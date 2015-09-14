@@ -370,6 +370,9 @@ define (function(require) {
 				
 				this.recordMatchingInteraction(strID, matchingResponses, strCorrect, null, null, null, strLatency, null);
 			}
+			else if (scormInteractionType === "numeric") {
+				this.recordNumericInteraction(strID, strResponse, strCorrect, null, null, null, strLatency, null);
+			}
 		}
 		else {
 			this.logger.info("ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...");
@@ -806,6 +809,15 @@ define (function(require) {
 			return this.recordInteraction2004(strID, strResponseLong, blnCorrect, strCorrectResponseLong, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "matching");
 		
 		return this.recordInteraction12(strID, strResponseLong, blnCorrect, strCorrectResponseLong, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "matching", strResponse, strCorrectResponse);
+	};
+
+	ScormWrapper.prototype.recordNumericInteraction = function(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID) {
+		var dtmTime = new Date();
+
+		if (this.isSCORM2004())
+			return this.recordInteraction2004(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "numeric");
+		
+		return this.recordInteraction12(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "numeric", response, correctResponse);
 	};
 
 	ScormWrapper.prototype.showDebugWindow = function() {
