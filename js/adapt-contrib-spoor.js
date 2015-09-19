@@ -61,10 +61,6 @@ define([
 				if(settings.hasOwnProperty("_commitRetryDelay")) {
 					scorm.commitRetryDelay = settings._commitRetryDelay;
 				}
-				
-				if(settings.hasOwnProperty("_disableInteractionTracking")) {
-					scorm.disableInteractionTracking = settings._disableInteractionTracking;
-				}
 			}
 		},
 

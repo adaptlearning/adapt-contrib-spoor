@@ -11,6 +11,7 @@ define([
 		_sessionID: null,
 		_config: null,
 		_shouldStoreResponses: false,
+		_shouldRecordInteractions: true,
 
 	//Session Begin
 		initialize: function() {
@@ -22,7 +23,13 @@ define([
 
 		getConfig: function() {
 			this._config = Adapt.config.get('_spoor');
+			
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
+			
+			// default should be to record interactions, so only avoid doing that if _shouldRecordInteractions is set to false
+			if(this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
+				this._shouldRecordInteractions = false;
+			}
 		},
 
 		checkSaveState: function() {
@@ -73,12 +80,15 @@ define([
 				this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
 			}
 
+			if(this._shouldRecordInteractions) {
+				this.listenTo(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
+			}
+
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
 			this.listenTo(Adapt, 'questionView:complete', this.onQuestionComplete);
 			this.listenTo(Adapt, 'questionView:reset', this.onQuestionReset);
-			this.listenTo(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
 		},
 
 		onBlockComplete: function(block) {
@@ -111,8 +121,6 @@ define([
 		},
 
 		onQuestionRecordInteraction:function(questionView) {
-			if (this._config._isEnabled === false || this._config._tracking._disableInteractionTracking === true) return;
-
 			var id = questionView.model.get('_id');
 			var latency = questionView.getLatency();
 			var response = questionView.getResponse();
