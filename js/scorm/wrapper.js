@@ -12,11 +12,6 @@ define (function(require) {
 		 */
 		this.commitOnStatusChange = true;
 		/**
-		 * allows you to deactivate tracking to cmi.interactions - useful in instances where the code to detect when cmi.interactions are 
-		 * are supported isn't working due to inconsistent LMS behaviour
-		 */
-		this.disableInteractionTracking = false;
-		/**
 		 * how frequently (in minutes) to commit automatically. set to 0 to disable.
 		 */
 		this.timedCommitFrequency = 10;
@@ -54,8 +49,6 @@ define (function(require) {
 		this.logger = Logger.getInstance();
 		this.scorm = pipwerks.SCORM;
 
-		this.registeredViews = [];
-		
 		if (window.__debug)
 			this.showDebugWindow();
 	};
@@ -85,16 +78,6 @@ define (function(require) {
 		 * It needs to be on for SCORM 2004 though, otherwise the LMS might not restore the suspend_data
 		 */
 		this.scorm.handleExitMode = (this.scorm.version === "2004");
-	};
-
-	ScormWrapper.prototype.registerView = function(_view) {
-		this.registeredViews[this.registeredViews.length] = _view;
-	};
-
-	ScormWrapper.prototype.updateViews = function() {
-		for (var i = 0; i < this.registeredViews.length; i++) {
-			this.registeredViews[i].update(this);
-		}
 	};
 
 	ScormWrapper.prototype.initialize = function() {
@@ -275,7 +258,7 @@ define (function(require) {
 					this.lastCommitSuccessTime = new Date();
 				}
 				else {
-					if (this.commitRetries <= this.maxCommitRetries && !this.finishCalled) {
+					if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
 						this.commitRetries++;
 						this.initRetryCommit();
 					}
@@ -338,40 +321,42 @@ define (function(require) {
 	};
 
 	ScormWrapper.prototype.recordInteraction = function(strID, strResponse, strCorrect, strLatency, scormInteractionType) {
-		/*
-		* because some LMSes (e.g. Learning Core, Syntrio) - report cmi.interactions._count as being supported even though
-		* no other cmi.interactions data fields are... so this flag gives us an option to switch off tracking to
-		* cmi.interactions altogether in these rare instances.
-		*/
-		if(this.disableInteractionTracking === true) {
-			return;
-		}
-
 		if(this.isSupported("cmi.interactions._count")) {
-			if (scormInteractionType === "choice") {
-				var responseIdentifiers = new Array();
-				var answers = strResponse.split("#");
-				
-				for (var i = 0; i < answers.length; i++) {
-					responseIdentifiers.push(new ResponseIdentifier(answers[i], answers[i]));
-				}
-				
-				this.recordMultipleChoiceInteraction(strID, responseIdentifiers, strCorrect, null, null, null, strLatency, null);
-			}
-			else if (scormInteractionType === "matching") {
-				var matchingResponses = new Array();
-				var sourceTargetPairs = strResponse.split("#");
-				var sourceTarget = null;
-				
-				for (var i = 0; i < sourceTargetPairs.length; i++) {
-					sourceTarget = sourceTargetPairs[i].split(".");
-					matchingResponses.push(new MatchingResponse(sourceTarget[0], sourceTarget[1]));
-				}
-				
-				this.recordMatchingInteraction(strID, matchingResponses, strCorrect, null, null, null, strLatency, null);
-			}
-			else if (scormInteractionType === "numeric") {
-				this.recordNumericInteraction(strID, strResponse, strCorrect, null, null, null, strLatency, null);
+			switch(scormInteractionType) {
+				case "choice":
+					var responseIdentifiers = [];
+					var answers = strResponse.split("#");
+					
+					for (var i = 0, count = answers.length; i < count; i++) {
+						responseIdentifiers.push(new ResponseIdentifier(answers[i], answers[i]));
+					}
+					
+					this.recordMultipleChoiceInteraction(strID, responseIdentifiers, strCorrect, null, null, null, strLatency, null);
+				break;
+
+				case "matching":
+					var matchingResponses = [];
+					var sourceTargetPairs = strResponse.split("#");
+					var sourceTarget = null;
+					
+					for (var i = 0, count = sourceTargetPairs.length; i < count; i++) {
+						sourceTarget = sourceTargetPairs[i].split(".");
+						matchingResponses.push(new MatchingResponse(sourceTarget[0], sourceTarget[1]));
+					}
+					
+					this.recordMatchingInteraction(strID, matchingResponses, strCorrect, null, null, null, strLatency, null);
+				break;
+
+				case "numeric":
+					this.recordNumericInteraction(strID, strResponse, strCorrect, null, null, null, strLatency, null);
+				break;
+
+				case "fill-in":
+					this.recordFillInInteraction(strID, strResponse, strCorrect, null, null, null, strLatency, null);
+				break;
+
+				default:
+					console.error("ScormWrapper.recordInteraction: unknown interaction type of '" + scormInteractionType + "' encountered...");
 			}
 		}
 		else {
@@ -480,16 +465,16 @@ define (function(require) {
 		
 		if(this.timedCommitFrequency > 0) {
 			var delay = this.timedCommitFrequency * (60 * 1000);
-			this.timedCommitIntervalID = window.setInterval(delegate(this, this.commit), delay);
+			this.timedCommitIntervalID = window.setInterval(_.bind(this.commit, this), delay);
 		}
 	};
 
 	ScormWrapper.prototype.initRetryCommit = function() {
-		this.logger.debug("ScormWrapper::initRetryCommit");
+		this.logger.debug("ScormWrapper::initRetryCommit " + this.commitRetries + " out of " + this.maxCommitRetries);
 		
 		this.commitRetryPending = true;// stop anything else from calling commit until this is done
 		
-		this.retryCommitTimeoutID = window.setTimeout(delegate(this, this.doRetryCommit), this.commitRetryDelay);
+		this.retryCommitTimeoutID = window.setTimeout(_.bind(this.doRetryCommit, this), this.commitRetryDelay);
 	};
 
 	ScormWrapper.prototype.doRetryCommit = function() {
@@ -561,46 +546,48 @@ define (function(require) {
 		else if (bCorrect === "neutral") {
 			strResult = "neutral";
 		}
+
+		var prefix = "cmi.interactions." + interactionIndex;
 		
-		bResult = this.setValue("cmi.interactions." + interactionIndex + ".id", strID);
-		bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".type", scormInteractionType);
+		bResult = this.setValue(prefix + ".id", strID);
+		bResult = bResult && this.setValue(prefix + ".type", scormInteractionType);
 		
-		bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".student_response", strResponse);
+		bTempResult = this.setValue(prefix + ".student_response", strResponse);
 		
 		if (bTempResult === false) {
-			bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".student_response", strAlternateResponse);
+			bTempResult = this.setValue(prefix + ".student_response", strAlternateResponse);
 		}
 		
 		bResult = bResult && bTempResult;
 		
-		if (strCorrectResponse !== undefined && strCorrectResponse !== null && strCorrectResponse !== "") {
-			bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".correct_responses.0.pattern", strCorrectResponse);
+		if (!_.isEmpty(strCorrectResponse)) {
+			bTempResult = this.setValue(prefix + ".correct_responses.0.pattern", strCorrectResponse);
 			if (bTempResult === false) {
-				bTempResult = this.setValue("cmi.interactions." + interactionIndex + ".correct_responses.0.pattern", strAlternateCorrectResponse);
+				bTempResult = this.setValue(prefix + ".correct_responses.0.pattern", strAlternateCorrectResponse);
 			}
 			
 			bResult = bResult && bTempResult;
 		}
 
-		if (strResult !== undefined && strResult !== null && strResult !== "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".result", strResult);
+		if (!_.isEmpty(strResult)) {
+			bResult = bResult && this.setValue(prefix + ".result", strResult);
 		}
 		
 		// ignore the description parameter in SCORM 1.2, there is nothing we can do with it
 		
-		if (intWeighting !== undefined && intWeighting !== null && intWeighting !== "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".weighting", intWeighting);
+		if (!_.isEmpty(intWeighting)) {
+			bResult = bResult && this.setValue(prefix + ".weighting", intWeighting);
 		}
 
-		if (intLatency !== undefined && intLatency !== null && intLatency !== "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".latency", this.convertMilliSecondsToSCORMTime(intLatency));
+		if (!_.isEmpty(intLatency)) {
+			bResult = bResult && this.setValue(prefix + ".latency", this.convertMilliSecondsToSCORMTime(intLatency));
 		}
 		
-		if (strLearningObjectiveID !== undefined && strLearningObjectiveID !== null && strLearningObjectiveID !== "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".objectives.0.id", strLearningObjectiveID);
+		if (!_.isEmpty(strLearningObjectiveID)) {
+			bResult = bResult && this.setValue(prefix + ".objectives.0.id", strLearningObjectiveID);
 		}
 		
-		bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".time", this.convertDateToCMITime(dtmTime));
+		bResult = bResult && this.setValue(prefix + ".time", this.convertDateToCMITime(dtmTime));
 		
 		return bResult;
 	};
@@ -635,38 +622,40 @@ define (function(require) {
 		}
 		
 		strID = this.createValidIdentifier(strID);
+
+		var prefix = "cmi.interactions." + interactionIndex;
 		
-		bResult = this.setValue("cmi.interactions." + interactionIndex + ".id", strID);
-		bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".type", scormInteractionType);
-		bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".learner_response", strResponse);
+		bResult = this.setValue(prefix + ".id", strID);
+		bResult = bResult && this.setValue(prefix + ".type", scormInteractionType);
+		bResult = bResult && this.setValue(prefix + ".learner_response", strResponse);
 		
-		if (strResult != undefined && strResult != null && strResult != "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".result", strResult);
+		if (!_.isEmpty(strResult)) {
+			bResult = bResult && this.setValue(prefix + ".result", strResult);
 		}
 		
-		if (strCorrectResponse != undefined && strCorrectResponse != null && strCorrectResponse != "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".correct_responses.0.pattern", strCorrectResponse);
+		if (!_.isEmpty(strCorrectResponse)) {
+			bResult = bResult && this.setValue(prefix + ".correct_responses.0.pattern", strCorrectResponse);
 		}
 		
-		if (strDescription != undefined && strDescription != null && strDescription != "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".description", strDescription);
+		if (!_.isEmpty(strDescription)) {
+			bResult = bResult && this.setValue(prefix + ".description", strDescription);
 		}
 		
 		// ignore the description parameter in SCORM 1.2, there is nothing we can do with it
 		
-		if (intWeighting != undefined && intWeighting != null && intWeighting != "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".weighting", intWeighting);
+		if (!_.isEmpty(intWeighting)) {
+			bResult = bResult && this.setValue(prefix + ".weighting", intWeighting);
 		}
 
-		if (intLatency != undefined && intLatency != null && intLatency != "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".latency", this.convertMilliSecondsToSCORM2004Time(intLatency));
+		if (!_.isEmpty(intLatency)) {
+			bResult = bResult && this.setValue(prefix + ".latency", this.convertMilliSecondsToSCORM2004Time(intLatency));
 		}
 		
-		if (strLearningObjectiveID != undefined && strLearningObjectiveID != null && strLearningObjectiveID != "") {
-			bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".objectives.0.id", strLearningObjectiveID);
+		if (!_.isEmpty(strLearningObjectiveID)) {
+			bResult = bResult && this.setValue(prefix + ".objectives.0.id", strLearningObjectiveID);
 		}
 		
-		bResult = bResult && this.setValue("cmi.interactions." + interactionIndex + ".timestamp", this.convertDateToISO8601Timestamp(dtmTime));
+		bResult = bResult && this.setValue(prefix + ".timestamp", this.convertDateToISO8601Timestamp(dtmTime));
 		
 		return bResult;
 	};
@@ -676,10 +665,10 @@ define (function(require) {
 		var _correctResponseArray = null;
 		
 		if (response.constructor == String) {
-			_responseArray = new Array(this.createResponseIdentifier(response, response));
+			_responseArray = [this.createResponseIdentifier(response, response)];
 		}
 		else if (response.constructor == ResponseIdentifier) {
-			_responseArray = new Array(response);
+			_responseArray = [response];
 		}
 		else if (response.constructor == Array || response.constructor.toString().search("Array") > 0) {
 			_responseArray = response;
@@ -692,12 +681,12 @@ define (function(require) {
 			return false;
 		}
 		
-		if (correctResponse != null && correctResponse != undefined && correctResponse != "") {
+		if (!_.isEmpty(correctResponse)) {
 			if (correctResponse.constructor == String) {
-				_correctResponseArray = new Array(this.createResponseIdentifier(correctResponse, correctResponse));
+				_correctResponseArray = [this.createResponseIdentifier(correctResponse, correctResponse)];
 			}
 			else if (correctResponse.constructor == ResponseIdentifier) {
-				_correctResponseArray = new Array(correctResponse);
+				_correctResponseArray = [correctResponse];
 			}
 			else if (correctResponse.constructor == Array || correctResponse.constructor.toString().search("Array") > 0) {
 				_correctResponseArray = correctResponse;
@@ -711,7 +700,7 @@ define (function(require) {
 			}
 		}
 		else {
-			_correctResponseArray = new Array();
+			_correctResponseArray = [];
 		}
 		
 		var dtmTime = new Date();
@@ -749,7 +738,7 @@ define (function(require) {
 		var _correctResponseArray = null;
 		
 		if (response.constructor == MatchingResponse) {
-			_responseArray = new Array(response);
+			_responseArray = [response];
 		}
 		else if (response.constructor == Array || response.constructor.toString().search("Array") > 0) {
 			_responseArray = response;
@@ -762,9 +751,9 @@ define (function(require) {
 			return false;
 		}
 		
-		if (correctResponse != null && correctResponse != undefined) {
+		if (!_.isEmpty(correctResponse)) {
 			if (correctResponse.constructor == MatchingResponse) {
-				_correctResponseArray = new Array(correctResponse);
+				_correctResponseArray = [correctResponse];
 			}
 			else if (correctResponse.constructor == Array || correctResponse.constructor.toString().search("Array") > 0) {
 				_correctResponseArray = correctResponse;
@@ -778,7 +767,7 @@ define (function(require) {
 			}
 		}
 		else {
-			_correctResponseArray = new Array();
+			_correctResponseArray = [];
 		}
 		
 		var dtmTime = new Date();
@@ -818,6 +807,15 @@ define (function(require) {
 			return this.recordInteraction2004(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "numeric");
 		
 		return this.recordInteraction12(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "numeric", response, correctResponse);
+	};
+
+	ScormWrapper.prototype.recordFillInInteraction = function(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID) {
+		var dtmTime = new Date();
+
+		if (this.isSCORM2004())
+			return this.recordInteraction2004(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "fill-in");
+		
+		return this.recordInteraction12(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "fill-in", response, correctResponse);
 	};
 
 	ScormWrapper.prototype.showDebugWindow = function() {
@@ -873,7 +871,7 @@ define (function(require) {
 		CMITimeSpan = this.zeroPad(h, 4) + ":" + this.zeroPad(m, 2) + ":" +	this.zeroPad(s, 2);
 		CMITimeSpan += "." + cs;
 		
-	if (h > 9999) {
+		if (h > 9999) {
 			CMITimeSpan = "9999:99:99";
 			
 			CMITimeSpan += ".99";
@@ -1043,10 +1041,6 @@ define (function(require) {
 
 	ResponseIdentifier.prototype.toString = function() {
 		return "[Response Identifier " + this.Short + ", " + this.Long + "]";
-	};
-
-	function delegate(obj, func) {
-		return function() { return func.apply(obj, arguments); };
 	};
 
 	return ScormWrapper;
