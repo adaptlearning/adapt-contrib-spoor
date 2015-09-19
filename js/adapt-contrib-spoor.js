@@ -33,8 +33,12 @@ define([
 		},
 
 		checkConfig: function() {
-			this._config = Adapt.config.get('_spoor');
+			this._config = Adapt.config.has('_spoor') 
+				? Adapt.config.get('_spoor')
+				: false;
+
 			if (this._config && this._config._isEnabled !== false) return true;
+			
 			return false;
 		},
 
