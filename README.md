@@ -62,14 +62,16 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 >**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS on course launch. If one is not available, a 'Could not connect to LMS' error message will be display. This error may be ignored, or it may be avoided entirely by setting this to `false`. Disabling tracking in this way can be very helpful during course development (when running the course from a local server rather than an LMS) or if you have a course that needs to be able to run on an LMS or a web server.
 
 
->>**_requireCourseCompleted** (boolean): Determines whether the learner must complete all the components in the course before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `true`.    
+>>**_requireCourseCompleted** (boolean): Determines whether the learner must complete all the components in the course before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `false`.    
 
 >>**_requireAssessmentPassed** (boolean): Determines whether the user must pass the course assessment, not simply complete it, before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `false`.  If this attribute and `_requireCourseCompleted` are both set to `true`, the learner must pass the course assessment as well as complete all components in order for the course can be marked as finished in the LMS.
 
->>**_shouldSubmitScore** (boolean): Determines whether the numeric scores attained in assessments will be reported to the LMS. Acceptable values are `true` or `false`.  
+>>**_shouldSubmitScore** (boolean): Determines whether the numeric scores attained in assessments will be reported to the LMS. Acceptable values are `true` or `false`. The default is `false`.  
 
->>**_shouldStoreResponses** (boolean): Determines whether the user's question responses should be saved and restored, to and from the LMS. Acceptable values are `true` or `false`.  
-		
+>>**_shouldStoreResponses** (boolean): Determines whether the user's responses to questions should be persisted across sessions (by storing them in `cmi.suspend_data`) or not. Acceptable values are `true` or `false`. The default is `false`. Note that if you set this to `true`, the user will not be able to attempt questions within the course again unless some mechanism for resetting them is made available (for example, see `_isResetOnRevisit` in [adapt-contrib-assessment](https://github.com/adaptlearning/adapt-contrib-assessment)).
+
+>>**_shouldRecordInteractions** (boolean): Determines whether the user's responses to questions should be tracked to  the `cmi.interactions` fields of the SCORM data model or not. Acceptable values are `true` or `false`. The default is `true`. Note that not all SCORM 1.2 conformant Learning Management Systems support `cmi.interactions`. The code will attempt to detect whether support is implemented or not and, if not, will fail gracefully. Occasionally the code is unable to detect when `cmi.interactions` are not supported, in those (rare) instances you can switch off interaction tracking using this property so as to avoid 'not supported' errors. You can also switch off interaction tracking for any individual question using the `_recordInteraction` property of question components. All core question components support recording of interactions, community components will not necessarily do so.
+
 >**_reporting** (object): This object defines what status to report back to the LMS. Contains values for **_onTrackingCriteriaMet**, **_onAssessmentFailure**.  
 
 >>**_onTrackingCriteriaMet** (string): Specifies the status that is reported to the LMS when the tracking criteria are met. Acceptable values are: `"completed"`, `"passed"`, `"failed"`, and `"incomplete"`. If you are tracking a course by assessment, you would typically set this to `"passed"`. Otherwise, `"completed"` is the usual value.
