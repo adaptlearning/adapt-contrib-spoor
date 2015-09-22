@@ -19,6 +19,7 @@
                 "_isEnabled": {
                   "type":"boolean",
                   "required":true,
+                  "default": "true",
                   "title":"Is Enabled",
                   "inputType": {"type": "Boolean", "options": [true, false]},
                   "validators": [],
@@ -32,6 +33,7 @@
                     "_requireCourseCompleted": {
                       "type":"boolean",
                       "required":false,
+                      "default": "true",
                       "title":"Course completion required",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
@@ -40,6 +42,7 @@
                     "_requireAssessmentPassed": {
                       "type":"boolean",
                       "required":false,
+                      "default": "false",
                       "title":"Assessment pass required",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
@@ -48,10 +51,20 @@
                     "_shouldSubmitScore": {
                       "type":"boolean",
                       "required":false,
+                      "default": "false",
                       "title":"Submit score",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
                       "help": "If set to true, the score attained in any assessment will be reported back to the LMS (regardless of whether the user passes or fails the assessment)."
+                    },
+                    "_shouldStoreResponses": {
+                      "type":"boolean",
+                      "required":false,
+                      "default": "false",
+                      "title":"Store responses",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": "If set to true, the user's question responses will be saved to the LMS."
                     }
                   }
                 },
@@ -63,6 +76,7 @@
                     "_onTrackingCriteriaMet": {
                       "type":"string",
                       "required":true,
+                      "default": "completed",
                       "title":"Tracking success status",
                       "enum": ["completed", "passed", "failed", "incomplete"],
                       "inputType": {
@@ -75,6 +89,7 @@
                     "_onAssessmentFailure": {
                       "type":"string",
                       "required":false,
+                      "default": "incomplete",
                       "title":"Assessment failure status",
                       "enum": ["completed", "failed", "incomplete"],
                       "inputType": {
@@ -91,21 +106,10 @@
                   "required":false,
                   "title": "Advanced Settings",
                   "properties":{
-                    "_scormVersion": {
-                      "type":"string",
-                      "required":false,
-                      "title":"SCORM Version",
-                      "enum": ["1.2", "2004"],
-                      "inputType": {
-                        "type": "Select",
-                        "options": ["1.2", "2004"]
-                      },
-                      "validators": [],
-                      "help": "What version of SCORM you are targeting. Note that currently only 1.2 is officially supported."
-                    },
                     "_showDebugWindow": {
                       "type":"boolean",
                       "required":false,
+                      "default": "false",
                       "title":"SCORM debug window",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
@@ -114,6 +118,7 @@
                     "_commitOnStatusChange": {
                       "type":"boolean",
                       "required":false,
+                      "default": "true",
                       "title":"Commit data on status change",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
@@ -122,6 +127,7 @@
                     "_timedCommitFrequency": {
                       "type":"number",
                       "required":false,
+                      "default": "10",
                       "title":"Frequency (mins) of automatic commits",
                       "inputType": "Number",
                       "validators": ["number"],
@@ -130,6 +136,7 @@
                     "_maxCommitRetries": {
                       "type":"number",
                       "required":false,
+                      "default": "5",
                       "title":"Maximum number of commit retries",
                       "inputType": "Number",
                       "validators": ["number"],
@@ -138,6 +145,7 @@
                     "_commitRetryDelay": {
                       "type":"number",
                       "required":false,
+                      "default": "2000",
                       "title":"Commit retry delay",
                       "inputType": "Number",
                       "validators": ["number"],
