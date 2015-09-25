@@ -298,7 +298,7 @@
 		fromType = Converter.translateTypeAlias(fromType);
 		toType = Converter.translateTypeAlias(toType);
 
-		var args = [].splice.call(arguments, 2);
+		var args = [].slice.call(arguments, 2);
 
 		if (fromType != "binary" && toType != "binary") {
 			if (!Converter._converters[fromType]) throw "Type not found '" + fromType + "'";
