@@ -812,6 +812,14 @@ define (function(require) {
 	ScormWrapper.prototype.recordFillInInteraction = function(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID) {
 		var dtmTime = new Date();
 
+		var max_len = this.isSCORM2004() ? 250 : 255;
+
+		if(response.length > max_len) {
+			response = response.substr(0,max_len);
+
+			this.logger.warn("ScormWrapper::recordFillInInteraction: response data for " + strID + " is longer than the maximum allowed length of " + max_len + " characters; data will be truncated to avoid an error.");
+		}
+
 		if (this.isSCORM2004())
 			return this.recordInteraction2004(strID, response, blnCorrect, correctResponse, strDescription, intWeighting, intLatency, strLearningObjectiveID, dtmTime, "fill-in");
 		
