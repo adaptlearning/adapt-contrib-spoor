@@ -78,7 +78,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_onAssessmentFailure** (string): Specifies the status that is reported to the LMS when the assessment is failed. Acceptable values are `"failed"` and `"incomplete"`. Some Learning Management Systems will prevent the user from making further attempts at the course after status has been set to `"failed"`. Therefore, it is common to set this to `"incomplete"` to allow the user more attempts to pass an assessment.  
 
->**_advancedSettings** (object): The advance settings attribute group contains values for **_scormVersion**, **_showDebugWindow**, **_commitOnStatusChange**, **_timedCommitFrequency**, **_maxCommitRetries**, and **_commitRetryDelay**.
+>**_advancedSettings** (object): The advanced settings attribute group contains values for **_scormVersion**, **_showDebugWindow**, **_commitOnStatusChange**, **_timedCommitFrequency**, **_maxCommitRetries**, and **_commitRetryDelay**.
 
 >>**_scormVersion** (string): This text defines what version of SCORM is targeted. Only SCORM 1.2 is officially supported by Adapt. SCORM 2004 should work, but Adapt doesn't include this version in testing. To enable SCORM 2004 support, change this value to `"2004"` and include the relevant SCORM 2004 packaging files (*imsmanifest.xml* and others). The default is `"1.2"`.  
 
