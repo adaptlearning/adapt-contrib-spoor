@@ -11,6 +11,7 @@ define([
 		_sessionID: null,
 		_config: null,
 		_shouldStoreResponses: false,
+		_shouldRecordInteractions: true,
 
 	//Session Begin
 		initialize: function() {
@@ -24,7 +25,13 @@ define([
 			this._config = Adapt.config.has('_spoor')
 				? Adapt.config.get('_spoor')
 				: false;
+			
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
+			
+			// default should be to record interactions, so only avoid doing that if _shouldRecordInteractions is set to false
+			if(this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
+				this._shouldRecordInteractions = false;
+			}
 		},
 
 		checkSaveState: function() {
@@ -75,6 +82,10 @@ define([
 				this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
 			}
 
+			if(this._shouldRecordInteractions) {
+				this.listenTo(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
+			}
+
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
@@ -109,6 +120,16 @@ define([
 			} else if (this._config && this._config._tracking._requireAssessmentPassed) {
 				this.submitAssessmentFailed();
 			}
+		},
+
+		onQuestionRecordInteraction:function(questionView) {
+			var id = questionView.model.get('_id');
+			var latency = questionView.getLatency();
+			var response = questionView.getResponse();
+			var responseType = questionView.getResponseType();
+			var result = questionView.isCorrect();
+			
+			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
 		},
 
 		submitScore: function(score) {

@@ -65,11 +65,6 @@ define([
 				if(settings.hasOwnProperty("_commitRetryDelay")) {
 					scorm.commitRetryDelay = settings._commitRetryDelay;
 				}
-				/**
-				* Adapt doesn't yet support cmi.interactions, uncomment this when support is added
-				if(settings.hasOwnProperty("_disableInteractionTracking")) {
-					scorm.disableInteractionTracking = settings._disableInteractionTracking;
-				}*/
 			}
 		},
 
