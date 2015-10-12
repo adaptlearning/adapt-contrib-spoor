@@ -65,6 +65,12 @@ define([
 				if(settings.hasOwnProperty("_commitRetryDelay")) {
 					scorm.commitRetryDelay = settings._commitRetryDelay;
 				}
+			} else {
+				/**
+        * force use of SCORM 1.2 by default - some LMSes (SABA/Kallidus for instance) present both APIs to the SCO and, if given the choice,
+        * the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
+        */
+				scorm.setVersion("1.2");
 			}
 		},
 
