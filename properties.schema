@@ -150,6 +150,15 @@
                       "inputType": "Number",
                       "validators": ["number"],
                       "help": "How much of a delay (in milliseconds) to leave between commit retries."
+                    },
+                    "_suppressErrors": {
+                      "type":"boolean",
+                      "required":false,
+                      "default": "false",
+                      "title":"Supress LMS errors",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": "Whether spoor plugin should show any errors to the user."
                     }
                   }
                 }
