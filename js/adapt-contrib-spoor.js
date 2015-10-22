@@ -21,6 +21,10 @@ define([
 		onConfigLoaded: function() {
 			if (!this.checkConfig()) return;
 
+			if(this._config.hasOwnProperty("_silent")) {
+				scorm.silent = this._config._silent;
+			}
+
 			this.configureAdvancedSettings();
 
 			scorm.initialize();
