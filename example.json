@@ -2,6 +2,7 @@
 {
 	"_spoor": {
 		"_isEnabled": true,
+        	"_silent": true,
 		"_tracking": {
 			"_requireCourseCompleted": true,
 			"_requireAssessmentPassed": false,
