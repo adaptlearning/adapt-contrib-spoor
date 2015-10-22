@@ -56,7 +56,9 @@ define (function(require) {
 
 		this.registeredViews = [];
 		
-		if (window.__debug)
+		this.silent = false;
+		
+		if (window.__debug && !this.silent)
 			this.showDebugWindow();
 	};
 
@@ -502,7 +504,7 @@ define (function(require) {
 	ScormWrapper.prototype.handleError = function(_msg) {
 		this.logger.error(_msg);
 		
-		if ((!this.logOutputWin || this.logOutputWin.closed) && confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support."))
+		if (!this.silent && (!this.logOutputWin || this.logOutputWin.closed) && confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support."))
 			this.showDebugWindow();
 	};
 
