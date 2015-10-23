@@ -97,6 +97,8 @@ define([
 
 		onCompletion: function() {
 			if (!this.checkTrackingCriteriaMet()) return;
+
+			this.saveSessionState();
 			
 			Adapt.offlineStorage.set("status", this._config._reporting._onTrackingCriteriaMet);
 		},
