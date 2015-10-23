@@ -158,7 +158,7 @@
                       "title":"Supress LMS errors",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
-                      "help": "Whether spoor plugin should show any errors to the user."
+                      "help": "Set this to 'true' to stop this plugin from displaying error messages when tracking problems occur."
                     }
                   }
                 }
