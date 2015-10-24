@@ -50,6 +50,10 @@ define([
 
 				scorm.setVersion(settings._scormVersion || "1.2");
 
+				if(settings.hasOwnProperty("_suppressErrors")) {
+					scorm.suppressErrors = settings._suppressErrors;
+				}
+
 				if(settings.hasOwnProperty("_commitOnStatusChange")) {
 					scorm.commitOnStatusChange = settings._commitOnStatusChange;
 				}

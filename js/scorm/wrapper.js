@@ -49,6 +49,8 @@ define (function(require) {
 		this.logger = Logger.getInstance();
 		this.scorm = pipwerks.SCORM;
 
+        	this.suppressErrors = false;
+        
 		if (window.__debug)
 			this.showDebugWindow();
 	};
@@ -491,7 +493,7 @@ define (function(require) {
 	ScormWrapper.prototype.handleError = function(_msg) {
 		this.logger.error(_msg);
 		
-		if ((!this.logOutputWin || this.logOutputWin.closed) && confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support."))
+		if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm("An error has occured:\n\n" + _msg + "\n\nPress 'OK' to view debug information to send to technical support."))
 			this.showDebugWindow();
 	};
 

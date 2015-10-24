@@ -21,7 +21,8 @@
 			"_commitOnStatusChange": false,
 			"_timedCommitFrequency": 10,
 			"_maxCommitRetries": 5,
-			"_commitRetryDelay": 2000
+			"_commitRetryDelay": 2000,
+        		"_suppressErrors": false
 		}
 	}
 }
