@@ -246,9 +246,10 @@ define (function(require) {
 	ScormWrapper.prototype.getStudentName = function() {
 		return this.getValue(this.isSCORM2004() ? "cmi.learner_name" : "cmi.core.student_name");
 	};
+
 	ScormWrapper.prototype.getStudentId = function(){
 		return this.getValue(this.isSCORM2004() ? "cmi.learner_id":"cmi.core.student_id");
-	}
+	};
 
 	ScormWrapper.prototype.commit = function() {
 		this.logger.debug("ScormWrapper::commit");
