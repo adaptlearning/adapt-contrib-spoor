@@ -50,6 +50,10 @@ define([
 
 				scorm.setVersion(settings._scormVersion || "1.2");
 
+				if(settings.hasOwnProperty("_suppressErrors")) {
+					scorm.suppressErrors = settings._suppressErrors;
+				}
+
 				if(settings.hasOwnProperty("_commitOnStatusChange")) {
 					scorm.commitOnStatusChange = settings._commitOnStatusChange;
 				}
@@ -65,11 +69,12 @@ define([
 				if(settings.hasOwnProperty("_commitRetryDelay")) {
 					scorm.commitRetryDelay = settings._commitRetryDelay;
 				}
+			} else {
 				/**
-				* Adapt doesn't yet support cmi.interactions, uncomment this when support is added
-				if(settings.hasOwnProperty("_disableInteractionTracking")) {
-					scorm.disableInteractionTracking = settings._disableInteractionTracking;
-				}*/
+        * force use of SCORM 1.2 by default - some LMSes (SABA/Kallidus for instance) present both APIs to the SCO and, if given the choice,
+        * the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
+        */
+				scorm.setVersion("1.2");
 			}
 		},
 
