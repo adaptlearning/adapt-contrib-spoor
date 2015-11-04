@@ -150,6 +150,15 @@
                       "inputType": "Number",
                       "validators": ["number"],
                       "help": "How much of a delay (in milliseconds) to leave between commit retries."
+                    },
+                    "_suppressErrors": {
+                      "type":"boolean",
+                      "required":false,
+                      "default": "false",
+                      "title":"Supress LMS errors",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": "Set this to 'true' to stop this plugin from displaying error messages when tracking problems occur."
                     }
                   }
                 }

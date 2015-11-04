@@ -84,6 +84,8 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_showDebugWindow** (boolean): If set to `true`, a pop-up window will be shown on course launch that gives detailed information about what SCORM calls are being made. This can be very useful for debugging SCORM issues. Note that this pop-up window will appear automatically if the SCORM code encounters an error, even if this is set to `false`. The default is `false`.  
 
+>>**_suppressErrors** (boolean): If set to `true`, an alert dialog will NOT be shown when a SCORM error occurs. Errors will still be logged but the user will not be informed that a problem has occurred. Note that setting **_showDebugWindow** to `true` will still cause the debug popup window to be shown on course launch, this setting merely suppresses the alert dialog that would normally be shown when a SCORM error occurs. *This setting should be used with extreme caution as, if enabled, users will not be told about any LMS connectivity issues or other SCORM tracking problems.*
+
 >>**_commitOnStatusChange** (boolean): Determines whether a "commit" call should be made automatically every time the SCORM *lesson_status* is changed. The default is `true`.  
 
 >>**_timedCommitFrequency** (number): Specifies the frequency - in minutes - at which a "commit" call will be made. Set this value to `0` to disable automatic commits. The default is `10`.  
