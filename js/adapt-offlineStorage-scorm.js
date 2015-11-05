@@ -52,6 +52,8 @@ define([
 		},
 
 		set: function(name, value) {
+			//Convert arguments to array and drop the 'name' parameter
+			var args = [].slice.call(arguments, 1);
 			var isObject = typeof name == "object";
 
 			if (isObject) {
@@ -70,12 +72,14 @@ define([
 			}
 
 			switch (name.toLowerCase()) {
+				case "interaction":
+					return scorm.recordInteraction.apply(scorm, args);
 				case "location":
-					return scorm.setLessonLocation(value);
+					return scorm.setLessonLocation.apply(scorm, args);
 				case "score":
-					return scorm.setScore(value);
+					return scorm.setScore.apply(scorm, args);
 				case "status":
-					return scorm.setStatus(value);
+					return scorm.setStatus.apply(scorm, args);
 				case "student":
 					return false;
 				case "suspenddata":
