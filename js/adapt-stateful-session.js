@@ -16,7 +16,7 @@ define([
 	//Session Begin
 		initialize: function() {
 			this.getConfig();
-			this.checkSaveState();
+			this.restoreSessionState();
 			this.assignSessionId();
 			this.setupEventListeners();
 		},
@@ -29,17 +29,9 @@ define([
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
 			
 			// default should be to record interactions, so only avoid doing that if _shouldRecordInteractions is set to false
-			if(this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
+			if (this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
 				this._shouldRecordInteractions = false;
 			}
-		},
-
-		checkSaveState: function() {
-			var sessionPairs = Adapt.offlineStorage.get();
-			var hasNoPairs = _.keys(sessionPairs).length === 0;
-
-			if (hasNoPairs) this.saveSessionState();
-			else this.restoreSessionState();
 		},
 
 		saveSessionState: function() {
@@ -49,13 +41,13 @@ define([
 
 		restoreSessionState: function() {
 			var sessionPairs = Adapt.offlineStorage.get();
+			var hasNoPairs = _.keys(sessionPairs).length === 0;
 
-			if (sessionPairs.questions && this._shouldStoreResponses ) questions.deserialize(sessionPairs.questions);
+			if (hasNoPairs) return;
 
 			if (sessionPairs.completion) serializer.deserialize(sessionPairs.completion);
-
-			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
-			
+			if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
+			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);			
 			if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
 		},
 
@@ -99,11 +91,14 @@ define([
 
 		onQuestionComponentComplete: function(component) {
 			if (!component.get("_isQuestionType")) return;
+
 			this.saveSessionState();
 		},
 
 		onCompletion: function() {
 			if (!this.checkTrackingCriteriaMet()) return;
+
+			this.saveSessionState();
 			
 			Adapt.offlineStorage.set("status", this._config._reporting._onTrackingCriteriaMet);
 		},
@@ -152,7 +147,7 @@ define([
 		},
 
 		onQuestionReset: function(questionView) {
-			if(this._sessionID !== questionView.model.get('_sessionID')) {
+			if (this._sessionID !== questionView.model.get('_sessionID')) {
 				questionView.model.set('_isEnabledOnRevisit', true);
 			}
 		},

@@ -215,34 +215,6 @@ define (function(require) {
 		this.setValue("cmi.suspend_data", _data);
 	};
 
-	ScormWrapper.prototype.getCustomStates = function(name) {
-		var dataAsString = this.getSuspendData();
-		if (dataAsString === "" || dataAsString === " " || dataAsString === undefined) return {};
-
-		var dataAsJSON = JSON.parse(dataAsString);
-		return dataAsJSON;
-	};
-
-	ScormWrapper.prototype.getCustomState = function(name) {
-		var dataAsJSON = this.getCustomStates();
-		return dataAsJSON[name];
-	};
-
-	ScormWrapper.prototype.setCustomStates = function(obj) {
-		var dataAsJSON = this.getCustomStates();
-		var combinedDataAsJSON = _.extend(dataAsJSON, obj);
-		var dataAsString = JSON.stringify(combinedDataAsJSON);
-		return this.setSuspendData(dataAsString);
-	};
-
-	ScormWrapper.prototype.setCustomState = function(name, value) {
-		var dataAsJSON = this.getCustomStates();
-		dataAsJSON[name] = value;
-		var dataAsString = JSON.stringify(dataAsJSON);
-		
-		return this.setSuspendData(dataAsString);
-	};
-
 	ScormWrapper.prototype.getStudentName = function() {
 		return this.getValue(this.isSCORM2004() ? "cmi.learner_name" : "cmi.core.student_name");
 	};
