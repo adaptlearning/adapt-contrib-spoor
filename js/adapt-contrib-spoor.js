@@ -76,6 +76,11 @@ define([
         */
         scorm.setVersion("1.2");
       }
+
+      /**
+      * suppress SCORM errors when the course is being previewed from the authoring tool
+      */
+      if(window.location.search.indexOf('nolmserrors') != -1) scorm.suppressErrors = true;
     },
 
     setupEventListeners: function() {
