@@ -53,7 +53,7 @@ define([
                     var blockId = component._parentId;
 
                     if (!blocks[blockId]) {
-                            blocks[blockId] = blockModel.toJSON();
+                        blocks[blockId] = blockModel.toJSON();
                     }
 
                     var block = blocks[blockId];
@@ -64,11 +64,6 @@ define([
 
                     if (component['_isInteractionComplete'] === false || component['_isComplete'] === false) {
                         //if component is not currently complete skip it
-                        continue;
-                    }
-
-                    if (block['_trackingId'] === undefined) {
-                        //if block has no tracking id, skip it
                         continue;
                     }
 
