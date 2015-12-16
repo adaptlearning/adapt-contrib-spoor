@@ -74,7 +74,8 @@ define([
                     var numericParameters = [
                             blockLocation,
                             block['_trackingId'],
-                            component['_score'] || 0
+                            component['_score'] || 0,
+                            component['_attemptsLeft'] || 0
                         ];
 
                     var booleanParameters = [
@@ -137,6 +138,7 @@ define([
                 var blockLocation = numericParameters[0];
                 var trackingId = numericParameters[1];
                 var score = numericParameters[2];
+                var attemptsLeft = numericParameters[3] || 0;
 
                 var hasUserAnswer = booleanParameters[0];
                 var isUserAnswerArray = booleanParameters[1];
@@ -154,6 +156,7 @@ define([
                 component.set("_isSubmitted", isSubmitted);
                 component.set("_score", score);
                 component.set("_isCorrect", isCorrect);
+                component.set("_attemptsLeft", attemptsLeft);
 
                 if (hasUserAnswer) {
                     var userAnswer = dataItem[2];
