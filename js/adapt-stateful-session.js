@@ -47,7 +47,7 @@ define([
 
 			if (sessionPairs.completion) serializer.deserialize(sessionPairs.completion);
 			if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
-			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);			
+			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
 			if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
 		},
 
@@ -118,11 +118,15 @@ define([
 		},
 
 		onQuestionRecordInteraction:function(questionView) {
-			var id = questionView.model.get('_id');
-			var latency = questionView.getLatency();
-			var response = questionView.getResponse();
 			var responseType = questionView.getResponseType();
+
+			// if responseType doesn't contain any data, assume that the question component hasn't been set up for cmi.interaction tracking
+			if(_.isEmpty(responseType)) return;
+
+			var id = questionView.model.get('_id');
+			var response = questionView.getResponse();
 			var result = questionView.isCorrect();
+			var latency = questionView.getLatency();
 			
 			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
 		},
