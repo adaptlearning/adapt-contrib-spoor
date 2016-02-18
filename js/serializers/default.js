@@ -71,7 +71,7 @@ define([
         },
 
         markBlockAsComplete: function(block) {
-            if (!block || block.get('_isComplete')) {
+            if (!block) {
                 return;
             }
         
