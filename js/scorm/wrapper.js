@@ -595,22 +595,22 @@ define (function(require) {
 
 		var days = Math.floor(csConvert/ csPerDay);
 		csConvert -= days * csPerDay
-		days = days ? days+"D": "";
+		days = days ? days+"D" : "";
 
 		var hours = Math.floor(csConvert/ csPerHour);
 		csConvert -= hours * csPerHour
-		hours = hours ? hours+"H": "";
+		hours = hours ? hours+"H" : "";
 
 		var mins = Math.floor(csConvert/ csPerMin);
 		csConvert -= mins * csPerMin
-		mins = mins ? mins+"M": "";
+		mins = mins ? mins+"M" : "";
 
 		var secs = Math.floor(csConvert/ csPerSec);
 		csConvert -= secs * csPerSec
-		secs = secs ? secs: "";
+		secs = secs ? secs+"S" : "";
 
 		var cs = csConvert;
-		cs = cs ? "."+cs+"S": "";
+		cs = cs ? "."+cs+"S" : "";
 
 		var hms = [hours,mins,secs,cs].join("");
 
