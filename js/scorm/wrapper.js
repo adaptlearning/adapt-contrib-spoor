@@ -473,7 +473,7 @@ define (function(require) {
 		this.setValue(cmiPrefix + ".type", type);
 		this.setValue(cmiPrefix + ".student_response", response);
 		this.setValue(cmiPrefix + ".result", correct ? "correct" : "wrong");
-		if (!_.isEmpty(latency)) this.setValue(cmiPrefix + ".latency", this.convertToSCORM12Time(latency));
+		if (latency !== null && latency !== undefined) this.setValue(cmiPrefix + ".latency", this.convertToSCORM12Time(latency));
 		this.setValue(cmiPrefix + ".time", this.getCMITime());
 	};
 
@@ -488,7 +488,7 @@ define (function(require) {
 		this.setValue(cmiPrefix + ".type", type);
 		this.setValue(cmiPrefix + ".learner_response", response);
 		this.setValue(cmiPrefix + ".result", correct ? "correct" : "incorrect");
-		if (!_.isEmpty(latency)) this.setValue(cmiPrefix + ".latency", this.convertToSCORM2004Time(latency));
+		if (latency !== null && latency !== undefined) this.setValue(cmiPrefix + ".latency", this.convertToSCORM2004Time(latency));
 		this.setValue(cmiPrefix + ".timestamp", this.getISO8601Timestamp());
 	};
 
