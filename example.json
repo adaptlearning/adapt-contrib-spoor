@@ -15,11 +15,11 @@
 			"_onAssessmentFailure": "incomplete"
 		},
 		"_advancedSettings": {
-			"_comment": "You only need to include this section if you want to change any of the default values. You only need include settings you want to change.",
+			"_comment": "Only include this section if you want to change any of the default values. You only need include settings you want to change.",
 			"_scormVersion": "1.2",
 			"_showDebugWindow": false,
 			"_suppressErrors": false,
-			"_commitOnStatusChange": false,
+			"_commitOnStatusChange": true,
 			"_timedCommitFrequency": 10,
 			"_maxCommitRetries": 5,
 			"_commitRetryDelay": 2000
