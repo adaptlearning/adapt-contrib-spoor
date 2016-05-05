@@ -26,7 +26,7 @@ define([
 					score: scorm.getScore(),
 					status: scorm.getStatus(),
 					student: scorm.getStudentName(),
-					studentid: scorm.getStudentId()
+					learner: this.getLearnerObject()
 				});
 
 				suspendDataRestored = true;
@@ -47,8 +47,8 @@ define([
 					return scorm.getStatus();
 				case "student":
 					return scorm.getStudentName();
-				case "studentid":
-					return scorm.getStudentId();
+				case "learner":
+					return this.getLearnerObject();
 				default:
 					return this.getCustomState(name);
 			}
@@ -85,7 +85,7 @@ define([
 					return scorm.setStatus.apply(scorm, args);
 				case "student":
 					return false;
-				case "studentid":
+				case "learner":
 					return false;
 				case "suspenddata":
 				default:
@@ -122,6 +122,26 @@ define([
 			
 			if (!scorm.lmsConnected || (cfg && cfg._isEnabled === false)) return true;
 			return false;
+		},
+
+		getLearnerObject: function() {
+			var name = scorm.getStudentName();
+			var firstname = "", lastname = "";
+			if (name && name !== 'undefined' && name.indexOf(",") > -1) {
+				//last name first, comma separated
+				var nameSplit = name.split(",");
+				lastname = $.trim(nameSplit[0]);
+				firstname = $.trim(nameSplit[1]);
+				name = firstname + " " + lastname;
+			} else {
+				console.log("SPOOR: LMS learner_name not in 'lastname, firstname' format");
+			}
+			return {
+				name: name,
+				lastname: lastname,
+				firstname: firstname,
+				id: scorm.getStudentId()
+			};
 		}
 		
 	});
