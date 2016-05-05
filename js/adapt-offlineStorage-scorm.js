@@ -25,7 +25,8 @@ define([
 					location: scorm.getLessonLocation(),
 					score: scorm.getScore(),
 					status: scorm.getStatus(),
-					student: scorm.getStudentName()
+					student: scorm.getStudentName(),
+					studentid: scorm.getStudentId()
 				});
 
 				suspendDataRestored = true;
@@ -46,6 +47,8 @@ define([
 					return scorm.getStatus();
 				case "student":
 					return scorm.getStudentName();
+				case "studentid":
+					return scorm.getStudentId();
 				default:
 					return this.getCustomState(name);
 			}
@@ -81,6 +84,8 @@ define([
 				case "status":
 					return scorm.setStatus.apply(scorm, args);
 				case "student":
+					return false;
+				case "studentid":
 					return false;
 				case "suspenddata":
 				default:
