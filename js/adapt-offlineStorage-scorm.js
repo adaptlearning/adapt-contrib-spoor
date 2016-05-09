@@ -26,7 +26,7 @@ define([
 					score: scorm.getScore(),
 					status: scorm.getStatus(),
 					student: scorm.getStudentName(),
-					learner: this.getLearnerObject()
+					learnerInfo: this.getLearnerInfo()
 				});
 
 				suspendDataRestored = true;
@@ -45,10 +45,10 @@ define([
 					return scorm.getScore();
 				case "status":
 					return scorm.getStatus();
-				case "student":
+				case "student":// for backwards-compatibility. learnerInfo is preferred now and will give you more information
 					return scorm.getStudentName();
-				case "learner":
-					return this.getLearnerObject();
+				case "learnerInfo":
+					return this.getLearnerInfo();
 				default:
 					return this.getCustomState(name);
 			}
@@ -84,9 +84,8 @@ define([
 				case "status":
 					return scorm.setStatus.apply(scorm, args);
 				case "student":
-					return false;
-				case "learner":
-					return false;
+				case "learnerInfo":
+					return false;// these properties are read-only
 				case "suspenddata":
 				default:
 					if (isObject) {
@@ -124,7 +123,14 @@ define([
 			return false;
 		},
 
-		getLearnerObject: function() {
+		/**
+		 * Returns an object with the properties:
+		 * - id (cmi.core.student_id)
+		 * - name (cmi.core.student_name - which is usually in the format "Lastname, Firstname" - but sometimes doesn't have the space after the comma)
+		 * - firstname
+		 * - lastname
+		 */
+		getLearnerInfo: function() {
 			var name = scorm.getStudentName();
 			var firstname = "", lastname = "";
 			if (name && name !== 'undefined' && name.indexOf(",") > -1) {
