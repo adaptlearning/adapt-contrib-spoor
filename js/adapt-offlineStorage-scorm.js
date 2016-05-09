@@ -26,7 +26,7 @@ define([
 					score: scorm.getScore(),
 					status: scorm.getStatus(),
 					student: scorm.getStudentName(),
-					learner: this.getLearnerObject()
+					learner: this.getLearnerInfo()
 				});
 
 				suspendDataRestored = true;
@@ -48,7 +48,7 @@ define([
 				case "student":
 					return scorm.getStudentName();
 				case "learner":
-					return this.getLearnerObject();
+					return this.getLearnerInfo();
 				default:
 					return this.getCustomState(name);
 			}
@@ -124,7 +124,7 @@ define([
 			return false;
 		},
 
-		getLearnerObject: function() {
+		getLearnerInfo: function() {
 			var name = scorm.getStudentName();
 			var firstname = "", lastname = "";
 			if (name && name !== 'undefined' && name.indexOf(",") > -1) {
