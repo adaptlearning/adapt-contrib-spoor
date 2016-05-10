@@ -25,7 +25,8 @@ define([
 					location: scorm.getLessonLocation(),
 					score: scorm.getScore(),
 					status: scorm.getStatus(),
-					student: scorm.getStudentName()
+					student: scorm.getStudentName(),
+					learnerInfo: this.getLearnerInfo()
 				});
 
 				suspendDataRestored = true;
@@ -44,8 +45,10 @@ define([
 					return scorm.getScore();
 				case "status":
 					return scorm.getStatus();
-				case "student":
+				case "student":// for backwards-compatibility. learnerInfo is preferred now and will give you more information
 					return scorm.getStudentName();
+				case "learnerInfo":
+					return this.getLearnerInfo();
 				default:
 					return this.getCustomState(name);
 			}
@@ -81,7 +84,8 @@ define([
 				case "status":
 					return scorm.setStatus.apply(scorm, args);
 				case "student":
-					return false;
+				case "learnerInfo":
+					return false;// these properties are read-only
 				case "suspenddata":
 				default:
 					if (isObject) {
@@ -117,6 +121,33 @@ define([
 			
 			if (!scorm.lmsConnected || (cfg && cfg._isEnabled === false)) return true;
 			return false;
+		},
+
+		/**
+		 * Returns an object with the properties:
+		 * - id (cmi.core.student_id)
+		 * - name (cmi.core.student_name - which is usually in the format "Lastname, Firstname" - but sometimes doesn't have the space after the comma)
+		 * - firstname
+		 * - lastname
+		 */
+		getLearnerInfo: function() {
+			var name = scorm.getStudentName();
+			var firstname = "", lastname = "";
+			if (name && name !== 'undefined' && name.indexOf(",") > -1) {
+				//last name first, comma separated
+				var nameSplit = name.split(",");
+				lastname = $.trim(nameSplit[0]);
+				firstname = $.trim(nameSplit[1]);
+				name = firstname + " " + lastname;
+			} else {
+				console.log("SPOOR: LMS learner_name not in 'lastname, firstname' format");
+			}
+			return {
+				name: name,
+				lastname: lastname,
+				firstname: firstname,
+				id: scorm.getStudentId()
+			};
 		}
 		
 	});
