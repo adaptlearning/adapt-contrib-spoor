@@ -47,12 +47,20 @@ define([
         },
 
         deserialize: function (completion) {
+            var idStateHash = this.deserializeSaveState(completion);
+            var blockIdHash = {};
 
-            _.each(this.deserializeSaveState(completion), function(state, blockTrackingId) {
+            for (var i = 0, l = Adapt.blocks.models.length; i < l; i++) {
+                var blockModel = Adapt.blocks.models[i];
+                blockIdHash[blockModel.attributes._trackingId] = blockModel;
+            }
+
+            for (var blockTrackingId = 0, l = idStateHash.length; blockTrackingId < l; blockTrackingId++) {
+                var state = idStateHash[blockTrackingId];
                 if (state === 1) {
-                    this.markBlockAsComplete(Adapt.blocks.findWhere({_trackingId: blockTrackingId}));
+                    this.markBlockAsComplete(blockIdHash[blockTrackingId]);
                 }
-            }, this);
+            }
 
         },    
 
@@ -74,10 +82,11 @@ define([
             if (!block) {
                 return;
             }
-        
-            block.getChildren().each(function(child) {
-                child.set('_isComplete', true);
-            }, this);
+
+            _.defer(function() {
+                block.setOnChildren("_isComplete", true);
+            });
+
         }
 
     };
