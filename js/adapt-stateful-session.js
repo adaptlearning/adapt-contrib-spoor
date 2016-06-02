@@ -15,6 +15,7 @@ define([
 
 	//Session Begin
 		initialize: function() {
+			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			this.getConfig();
 			this.restoreSessionState();
 			this.assignSessionId();
@@ -67,7 +68,6 @@ define([
 
 	//Session In Progress
 		setupEventListeners: function() {
-			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			$(window).on('unload', this._onWindowUnload);
 
 			if (this._shouldStoreResponses) {
@@ -83,10 +83,41 @@ define([
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
 			this.listenTo(Adapt, 'questionView:complete', this.onQuestionComplete);
 			this.listenTo(Adapt, 'questionView:reset', this.onQuestionReset);
+			this.listenTo(Adapt, 'app:resetSession', this.onResetSession);
 		},
+
+		removeEventListeners: function () {
+			$(window).off('unload', this._onWindowUnload);
+
+			if (this._shouldStoreResponses) {
+				this.stopListening(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
+			}
+
+			if(this._shouldRecordInteractions) {
+				this.stopListening(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
+			}
+
+			this.stopListening(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
+			this.stopListening(Adapt.course, 'change:_isComplete', this.onCompletion);
+			this.stopListening(Adapt, 'assessment:complete', this.onAssessmentComplete);
+			this.stopListening(Adapt, 'questionView:complete', this.onQuestionComplete);
+			this.stopListening(Adapt, 'questionView:reset', this.onQuestionReset);
+			this.stopListening(Adapt, 'app:resetSession', this.onResetSession);
+		}
 
 		onBlockComplete: function(block) {
 			this.saveSessionState();
+		},
+
+		onResetSession: function () {
+			this.removeEventListeners();
+			this.setupEventListeners();
+			var sessionPairs = this.getSessionState();
+			
+			// hard reste of score and status
+			Adapt.offlineStorage.set("score", "undefined");
+			Adapt.offlineStorage.set("status", "incomplete");
+			Adapt.offlineStorage.set(sessionPairs);
 		},
 
 		onQuestionComponentComplete: function(component) {
