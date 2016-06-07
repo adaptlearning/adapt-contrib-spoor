@@ -103,7 +103,7 @@ define([
 			this.stopListening(Adapt, 'questionView:complete', this.onQuestionComplete);
 			this.stopListening(Adapt, 'questionView:reset', this.onQuestionReset);
 			this.stopListening(Adapt, 'app:resetSession', this.onResetSession);
-		}
+		},
 
 		onBlockComplete: function(block) {
 			this.saveSessionState();
