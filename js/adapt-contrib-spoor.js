@@ -86,6 +86,14 @@ define([
     setupEventListeners: function() {
       this._onWindowUnload = _.bind(this.onWindowUnload, this);
       $(window).on('unload', this._onWindowUnload);
+
+      if (document.addEventListener) {
+        document.addEventListener("visibilitychange", this.onVisibilityChange);
+      }
+    },
+
+    onVisibilityChange: function() {
+      if (document.visibilityState === "hidden") scorm.commit();
     },
 
   //Session End
