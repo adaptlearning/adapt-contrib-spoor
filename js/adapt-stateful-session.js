@@ -18,7 +18,11 @@ define([
 			this.getConfig();
 			this.restoreSessionState();
 			this.assignSessionId();
-			this.setupEventListeners();
+			/*
+			deferring this prevents restoring the completion state of the blocks from triggering a setSuspendData call for each block that gets its completion state restored
+			we should be able to remove this if/when we implement the feature that allows plugins like spoor to pause course initialisation
+			*/
+			_.defer(_.bind(this.setupEventListeners, this));
 		},
 
 		getConfig: function() {
