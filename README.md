@@ -94,6 +94,8 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_commitRetryDelay** (number): Specifies the interval in milliseconds between commit retries. The default is `2000`.
 
+>>**_commitOnVisibilityChangeHidden** (boolean): Determines whether a "commit" call should be made whenever the course becomes hidden. The default is `true`.
+
 <div float align=right><a href="#top">Back to Top</a></div>  
 
 ###Running a course without tracking while Spoor is installed  
