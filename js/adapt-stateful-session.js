@@ -8,7 +8,6 @@ define([
 	
 	var AdaptStatefulSession = _.extend({
 
-		_sessionID: null,
 		_config: null,
 		_shouldStoreResponses: false,
 		_shouldRecordInteractions: true,
@@ -18,7 +17,6 @@ define([
 			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			this.getConfig();
 			this.restoreSessionState();
-			this.assignSessionId();
 			/*
 			deferring this prevents restoring the completion state of the blocks from triggering a setSuspendData call for each block that gets its completion state restored
 			we should be able to remove this if/when we implement the feature that allows plugins like spoor to pause course initialisation
@@ -66,10 +64,6 @@ define([
 			return sessionPairs;
 		},
 
-		assignSessionId: function () {
-			this._sessionID = Math.random().toString(36).slice(-8);
-		},
-
 	//Session In Progress
 		setupEventListeners: function() {
 			$(window).on('unload', this._onWindowUnload);
@@ -85,8 +79,6 @@ define([
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
-			this.listenTo(Adapt, 'questionView:complete', this.onQuestionComplete);
-			this.listenTo(Adapt, 'questionView:reset', this.onQuestionReset);
 			this.listenTo(Adapt, 'app:resetSession', this.onResetSession);
 		},
 
@@ -104,8 +96,6 @@ define([
 			this.stopListening(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.stopListening(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.stopListening(Adapt, 'assessment:complete', this.onAssessmentComplete);
-			this.stopListening(Adapt, 'questionView:complete', this.onQuestionComplete);
-			this.stopListening(Adapt, 'questionView:reset', this.onQuestionReset);
 			this.stopListening(Adapt, 'app:resetSession', this.onResetSession);
 		},
 
@@ -177,16 +167,6 @@ define([
 				if (onAssessmentFailure === "") return;
 					
 				Adapt.offlineStorage.set("status", onAssessmentFailure);
-			}
-		},
-
-		onQuestionComplete: function(questionView) {
-			questionView.model.set('_sessionID', this._sessionID);
-		},
-
-		onQuestionReset: function(questionView) {
-			if (this._sessionID !== questionView.model.get('_sessionID')) {
-				questionView.model.set('_isEnabledOnRevisit', true);
 			}
 		},
 		

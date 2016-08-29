@@ -84,8 +84,21 @@ define([
     },
 
     setupEventListeners: function() {
+      var advancedSettings = this._config._advancedSettings;
+      var shouldCommitOnVisibilityChange = (!advancedSettings ||
+        advancedSettings._commitOnVisibilityChangeHidden !== false) &&
+        document.addEventListener;
+
       this._onWindowUnload = _.bind(this.onWindowUnload, this);
       $(window).on('unload', this._onWindowUnload);
+
+      if (shouldCommitOnVisibilityChange) {
+        document.addEventListener("visibilitychange", this.onVisibilityChange);
+      }
+    },
+
+    onVisibilityChange: function() {
+      if (document.visibilityState === "hidden") scorm.commit();
     },
 
   //Session End

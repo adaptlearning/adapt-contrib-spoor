@@ -159,6 +159,14 @@
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
                       "help": "Set this to 'true' to stop this plugin from displaying error messages when tracking problems occur."
+                    },
+                    "_commitOnVisibilityChangeHidden": {
+                      "type": "boolean",
+                      "default": true,
+                      "title": "Commit on visibility change hidden",
+                      "inputType": { "type": "Boolean", "options": [ true, false ] },
+                      "validators": [],
+                      "help": "Whether a 'commit' call should be made whenever the course becomes hidden."
                     }
                   }
                 }

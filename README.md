@@ -94,6 +94,8 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_commitRetryDelay** (number): Specifies the interval in milliseconds between commit retries. The default is `2000`.
 
+>>**_commitOnVisibilityChangeHidden** (boolean): Determines whether or not a "commit" call should be made when the [visibilityState](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState) of the course page changes to `"hidden"`. This functionality helps to ensure that tracking data is saved whenever the user switches to another tab or minimises the browser window - and is only available in [browsers that support the Page Visibility API](http://caniuse.com/#search=page%20visibility). The default is `true`.
+
 <div float align=right><a href="#top">Back to Top</a></div>  
 
 ###Running a course without tracking while Spoor is installed  
@@ -109,7 +111,7 @@ When **Spoor** is installed, *scorm_test_harness.html* can be used instead of *i
 Currently (officially) only supports SCORM 1.2  
 
 ----------------------------
-**Version number:**  2.0.10   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
+**Version number:**  2.0.11   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
 **Framework versions:**  2.0     
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors) 
 **Accessibility support:** n/a   
