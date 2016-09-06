@@ -581,13 +581,12 @@ define (function(require) {
 
 	/**
 	* Converts milliseconds into the SCORM 2004 data type 'timeinterval (second, 10,2)'
-	* this will output something like 'PT2H5M10S' a value which indicates a period of time of 2 hours, 5 minutes & 10 seconds
+	* this will output something like 'PD1T3H5M0S' which indicates a period of time of 1 day, 3 hours and 5 minutes
+	* or 'PT2M10.1S' which indicates a period of time of 2 minutes and 10.1 seconds
 	*/
 	ScormWrapper.prototype.convertToSCORM2004Time = function(msConvert) {
-
-		var timeinterval = "";
 		var csConvert = Math.floor(msConvert / 10)
-
+  
 		var csPerSec = 100;
 		var csPerMin = csPerSec * 60;
 		var csPerHour = csPerMin * 60;
@@ -595,31 +594,28 @@ define (function(require) {
 
 		var days = Math.floor(csConvert/ csPerDay);
 		csConvert -= days * csPerDay
-		days = days ? days+"D" : "";
+		days = days ? days + "D" : "";
 
 		var hours = Math.floor(csConvert/ csPerHour);
 		csConvert -= hours * csPerHour
-		hours = hours ? hours+"H" : "";
+		hours = hours ? hours + "H" : "";
 
 		var mins = Math.floor(csConvert/ csPerMin);
 		csConvert -= mins * csPerMin
-		mins = mins ? mins+"M" : "";
+		mins = mins ? mins + "M" : "";
 
 		var secs = Math.floor(csConvert/ csPerSec);
 		csConvert -= secs * csPerSec
-		secs = secs ? secs+"S" : "";
+		secs = secs ? secs : "0";
 
 		var cs = csConvert;
-		cs = cs ? "."+cs+"S" : "";
-
-		var hms = [hours,mins,secs,cs].join("");
-
-		hms = hms.length ? "T" + hms: hms;
-
-		timeinterval = days + hms;
-		timeinterval = timeinterval.length ? timeinterval : "0S";
-
-		return "P" + timeinterval;
+		cs = cs ? "." + cs : "";
+		
+		var seconds = secs + cs + "S";
+		
+		var hms = [hours,mins,seconds].join("");
+		
+		return "P" + days + "T" + hms;
 	};
 
 	ScormWrapper.prototype.getCMITime = function() {
