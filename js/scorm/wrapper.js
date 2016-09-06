@@ -585,8 +585,7 @@ define (function(require) {
 	* or 'PT2M10.1S' which indicates a period of time of 2 minutes and 10.1 seconds
 	*/
 	ScormWrapper.prototype.convertToSCORM2004Time = function(msConvert) {
-		var csConvert = Math.floor(msConvert / 10)
-  
+		var csConvert = Math.floor(msConvert / 10);
 		var csPerSec = 100;
 		var csPerMin = csPerSec * 60;
 		var csPerHour = csPerMin * 60;
