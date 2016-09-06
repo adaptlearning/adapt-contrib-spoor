@@ -581,7 +581,7 @@ define (function(require) {
 
 	/**
 	* Converts milliseconds into the SCORM 2004 data type 'timeinterval (second, 10,2)'
-	* this will output something like 'PD1T3H5M0S' which indicates a period of time of 1 day, 3 hours and 5 minutes
+	* this will output something like 'P1DT3H5M0S' which indicates a period of time of 1 day, 3 hours and 5 minutes
 	* or 'PT2M10.1S' which indicates a period of time of 2 minutes and 10.1 seconds
 	*/
 	ScormWrapper.prototype.convertToSCORM2004Time = function(msConvert) {
