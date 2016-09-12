@@ -84,19 +84,7 @@ define([
 
 		removeEventListeners: function () {
 			$(window).off('unload', this._onWindowUnload);
-
-			if (this._shouldStoreResponses) {
-				this.stopListening(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
-			}
-
-			if(this._shouldRecordInteractions) {
-				this.stopListening(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
-			}
-
-			this.stopListening(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
-			this.stopListening(Adapt.course, 'change:_isComplete', this.onCompletion);
-			this.stopListening(Adapt, 'assessment:complete', this.onAssessmentComplete);
-			this.stopListening(Adapt, 'app:resetSession', this.onResetSession);
+			this.stopListening();
 		},
 
 		onBlockComplete: function(block) {
