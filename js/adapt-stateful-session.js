@@ -79,7 +79,7 @@ define([
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
-			this.listenTo(Adapt, 'spoor:resetSession', this.onResetSession);
+			this.listenTo(Adapt, 'languagePicker:languageChange', this.onLanguageChange);
 		},
 
 		removeEventListeners: function () {
@@ -139,12 +139,15 @@ define([
 			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
 		},
 
-		onResetSession: function () {
+		onLanguageChange: function () {
 			this.reattachEventListeners();
 			var sessionPairs = this.getSessionState();
 			
 			// hard status reset
-			Adapt.offlineStorage.set("status", "incomplete");
+			if (this._config._reporting && this._config._reporting._resetStatusOnLanguageChange === true) {
+				Adapt.offlineStorage.set("status", "incomplete");
+			}
+			
 			Adapt.offlineStorage.set(sessionPairs);
 		},
 
