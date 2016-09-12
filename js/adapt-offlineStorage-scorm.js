@@ -95,6 +95,7 @@ define([
 					}
 
 					var dataAsString = JSON.stringify(suspendDataStore);
+					// make sure the lang attribute used to store the selected language is always written into localstorage
 					return (suspendDataRestored || name.toLowerCase() === "lang") ? scorm.setSuspendData(dataAsString) : false;
 			}
 		},
