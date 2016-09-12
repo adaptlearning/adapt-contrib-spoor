@@ -87,6 +87,12 @@ define([
 			this.stopListening();
 		},
 
+		reattachEventListeners: function() {
+			// reattach event listeners to the new collections created when the json was reloaded
+			this.removeEventListeners();
+			this.setupEventListeners();
+		},
+
 		onBlockComplete: function(block) {
 			this.saveSessionState();
 		},
@@ -134,8 +140,7 @@ define([
 		},
 
 		onResetSession: function () {
-			this.removeEventListeners();
-			this.setupEventListeners();
+			this.reattachEventListeners();
 			var sessionPairs = this.getSessionState();
 			
 			// hard status reset
