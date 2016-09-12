@@ -79,7 +79,7 @@ define([
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
-			this.listenTo(Adapt, 'app:resetSession', this.onResetSession);
+			this.listenTo(Adapt, 'spoor:resetSession', this.onResetSession);
 		},
 
 		removeEventListeners: function () {
