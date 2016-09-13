@@ -12,7 +12,8 @@
 		"_reporting": {
 			"_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
 			"_onTrackingCriteriaMet": "completed",
-			"_onAssessmentFailure": "incomplete"
+			"_onAssessmentFailure": "incomplete",
+			"_resetStatusOnLanguageChange": false
 		},
 		"_advancedSettings": {
 			"_comment": "Only include this section if you want to change any of the default values. You only need include settings you want to change.",
