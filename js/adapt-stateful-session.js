@@ -25,9 +25,7 @@ define([
 		},
 
 		getConfig: function() {
-			this._config = Adapt.config.has('_spoor')
-				? Adapt.config.get('_spoor')
-				: false;
+			this._config = Adapt.config.has('_spoor') ? Adapt.config.get('_spoor') : false;
 			
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
 			
@@ -57,7 +55,7 @@ define([
 		getSessionState: function() {
 			var sessionPairs = {
 				"completion": serializer.serialize(),
-				"questions": (this._shouldStoreResponses == true ? questions.serialize() : ""),
+				"questions": (this._shouldStoreResponses === true ? questions.serialize() : ""),
 				"_isCourseComplete": Adapt.course.get("_isComplete") || false,
 				"_isAssessmentPassed": Adapt.course.get('_isAssessmentPassed') || false
 			};
@@ -111,7 +109,7 @@ define([
 		},
 
 		onAssessmentComplete: function(stateModel) {
-			Adapt.course.set('_isAssessmentPassed', stateModel.isPass)
+			Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
 			
 			this.saveSessionState();
 
