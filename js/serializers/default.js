@@ -1,5 +1,5 @@
 define([
-    'coreJS/adapt'
+    'core/js/adapt'
 ], function (Adapt) {
 
     //Captures the completion status of the blocks

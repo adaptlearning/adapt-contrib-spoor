@@ -1,5 +1,5 @@
 define([
-	'coreJS/adapt',
+	'core/js/adapt',
 	'./serializers/default',
 	'./serializers/questions'
 ], function(Adapt, serializer, questions) {
