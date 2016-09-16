@@ -80,7 +80,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >**_advancedSettings** (object): The advanced settings attribute group contains values for **_scormVersion**, **_showDebugWindow**, **_commitOnStatusChange**, **_timedCommitFrequency**, **_maxCommitRetries**, and **_commitRetryDelay**.
 
->>**_scormVersion** (string): This property defines what version of SCORM is targeted. Only SCORM 1.2 is officially supported by Adapt. SCORM 2004 should work, but the Adapt team don't include this version in testing. To enable SCORM 2004 support, change this value to `"2004"` and include the relevant SCORM 2004 packaging files (*imsmanifest.xml* and others). The default is `"1.2"`.  
+>>**_scormVersion** (string): This property defines what version of SCORM is targeted. Only SCORM 1.2 is officially supported by Adapt. SCORM 2004 should work, but the Adapt team don't include this version in testing. To enable SCORM 2004 support, change this value to `"2004"` and include the relevant SCORM 2004 packaging files (*imsmanifest.xml* and others - you can find examples over at [scorm.com](http://scorm.com/scorm-explained/technical-scorm/content-packaging/xml-schema-definition-files/)). The default is `"1.2"`.  
 
 >>**_showDebugWindow** (boolean): If set to `true`, a pop-up window will be shown on course launch that gives detailed information about what SCORM calls are being made. This can be very useful for debugging SCORM issues. Note that this pop-up window will appear automatically if the SCORM code encounters an error, even if this is set to `false`. The default is `false`.  
 
