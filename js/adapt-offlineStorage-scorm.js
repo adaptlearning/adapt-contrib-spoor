@@ -95,7 +95,8 @@ define([
 					}
 
 					var dataAsString = JSON.stringify(suspendDataStore);
-					// make sure the lang attribute used to store the selected language is always written into localstorage
+					// make sure the user's selected language is written into suspend_data even if the suspend_data hasn't been retrieved yet
+					// if the language picker is being used on first launch this needs to be done before the suspend_data is restored
 					return (suspendDataRestored || name.toLowerCase() === "lang") ? scorm.setSuspendData(dataAsString) : false;
 			}
 		},

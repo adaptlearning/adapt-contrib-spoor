@@ -88,7 +88,6 @@ define([
 		},
 
 		reattachEventListeners: function() {
-			// reattach event listeners to the new collections created when the json was reloaded
 			this.removeEventListeners();
 			this.setupEventListeners();
 		},
@@ -139,16 +138,20 @@ define([
 			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
 		},
 
+		/**
+		 * when the user switches language, we need to:
+		 * - reattach the event listeners as the language change triggers a reload of the json, which will create brand new collections
+		 * - get and save a fresh copy of the session state. as the json has been reloaded, the blocks completion data will be reset (the user is warned that this will happen by the language picker extension)
+		 * - check to see if the config requires that the lesson_status be reset to 'incomplete'
+		 */
 		onLanguageChange: function () {
 			this.reattachEventListeners();
-			var sessionPairs = this.getSessionState();
+
+			this.saveSessionState();
 			
-			// hard status reset
 			if (this._config._reporting && this._config._reporting._resetStatusOnLanguageChange === true) {
 				Adapt.offlineStorage.set("status", "incomplete");
 			}
-			
-			Adapt.offlineStorage.set(sessionPairs);
 		},
 
 		submitScore: function(score) {
@@ -186,9 +189,7 @@ define([
 
 	//Session End
 		onWindowUnload: function() {
-			$(window).off('unload', this._onWindowUnload);
-
-			this.stopListening();
+			this.removeEventListeners();
 		}
 		
 	}, Backbone.Events);
