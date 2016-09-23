@@ -47,7 +47,7 @@ define([
 					return scorm.getStatus();
 				case "student":// for backwards-compatibility. learnerInfo is preferred now and will give you more information
 					return scorm.getStudentName();
-				case "learnerInfo":
+				case "learnerinfo":
 					return this.getLearnerInfo();
 				default:
 					return this.getCustomState(name);
@@ -84,7 +84,7 @@ define([
 				case "status":
 					return scorm.setStatus.apply(scorm, args);
 				case "student":
-				case "learnerInfo":
+				case "learnerinfo":
 					return false;// these properties are read-only
 				case "suspenddata":
 				default:
