@@ -1,5 +1,5 @@
 define([
-  'coreJS/adapt',
+  'core/js/adapt',
   './scorm',
   './adapt-stateful-session',
   './adapt-offlineStorage-scorm'
@@ -24,6 +24,8 @@ define([
       this.configureAdvancedSettings();
 
       scorm.initialize();
+
+      Adapt.offlineStorage.setReadyStatus();
 
       this.setupEventListeners();
     },
