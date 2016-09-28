@@ -77,7 +77,7 @@ define([
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
-			this.listenTo(Adapt, 'languagePicker:languageChange', this.onLanguageChange);
+			this.listenTo(Adapt, 'app:languageChanged', this.onLanguageChanged);
 		},
 
 		removeEventListeners: function () {
@@ -142,7 +142,7 @@ define([
 		 * - get and save a fresh copy of the session state. as the json has been reloaded, the blocks completion data will be reset (the user is warned that this will happen by the language picker extension)
 		 * - check to see if the config requires that the lesson_status be reset to 'incomplete'
 		 */
-		onLanguageChange: function () {
+		onLanguageChanged: function () {
 			this.reattachEventListeners();
 
 			this.saveSessionState();
