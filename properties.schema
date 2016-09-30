@@ -20,7 +20,7 @@
                   "type":"boolean",
                   "required":true,
                   "default": "true",
-                  "title":"Is enabled",
+                  "title":"Enable Spoor",
                   "inputType": {"type": "Boolean", "options": [true, false]},
                   "validators": [],
                   "help": "If set to true, the plugin will try to find and track to a SCORM conformant LMS. Set to false to switch off SCORM tracking."
