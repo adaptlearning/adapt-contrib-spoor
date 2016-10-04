@@ -19,7 +19,10 @@ define([
     },
 
     onConfigLoaded: function() {
-      if (!this.checkConfig()) return;
+      if (!this.checkConfig()) {
+        Adapt.offlineStorage.setReadyStatus();
+        return;
+      }
 
       this.configureAdvancedSettings();
 
