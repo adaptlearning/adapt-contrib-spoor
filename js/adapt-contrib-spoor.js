@@ -28,6 +28,12 @@ define([
 
       scorm.initialize();
 
+      /*
+      force offlineStorage-scorm to initialise suspendDataStore - this allows us to do things like store the user's 
+      chosen language before the rest of the course data loads 
+      */ 
+      Adapt.offlineStorage.get();
+
       Adapt.offlineStorage.setReadyStatus();
 
       this.setupEventListeners();
