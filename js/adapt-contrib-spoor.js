@@ -20,7 +20,9 @@ define([
 
     onConfigLoaded: function() {
       if (!this.checkConfig()) {
-        Adapt.offlineStorage.setReadyStatus();
+        if (Adapt.offlineStorage.setReadyStatus) {// backwards-compatibility check - setReadyStatus was only introduced in framework v2.0.14
+          Adapt.offlineStorage.setReadyStatus();
+        }
         return;
       }
 
@@ -34,7 +36,9 @@ define([
       */ 
       Adapt.offlineStorage.get();
 
-      Adapt.offlineStorage.setReadyStatus();
+      if (Adapt.offlineStorage.setReadyStatus) {
+        Adapt.offlineStorage.setReadyStatus();
+      }
 
       this.setupEventListeners();
     },
