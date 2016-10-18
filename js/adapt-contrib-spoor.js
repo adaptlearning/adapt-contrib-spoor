@@ -1,5 +1,5 @@
 define([
-  'coreJS/adapt',
+  'core/js/adapt',
   './scorm',
   './adapt-stateful-session',
   './adapt-offlineStorage-scorm'
@@ -19,11 +19,22 @@ define([
     },
 
     onConfigLoaded: function() {
-      if (!this.checkConfig()) return;
+      if (!this.checkConfig()) {
+        Adapt.offlineStorage.setReadyStatus();
+        return;
+      }
 
       this.configureAdvancedSettings();
 
       scorm.initialize();
+
+      /*
+      force offlineStorage-scorm to initialise suspendDataStore - this allows us to do things like store the user's 
+      chosen language before the rest of the course data loads 
+      */ 
+      Adapt.offlineStorage.get();
+
+      Adapt.offlineStorage.setReadyStatus();
 
       this.setupEventListeners();
     },

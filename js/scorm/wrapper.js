@@ -133,14 +133,15 @@ define (function(require) {
 		if (this.isSCORM2004()) {
 			this.setValue("cmi.success_status", "failed");
 			
-			if(this.setCompletedWhenFailed)
+			if(this.setCompletedWhenFailed) {
 				this.setValue("cmi.completion_status", "completed");
+			}
 		}
 		else {
 			this.setValue("cmi.core.lesson_status", "failed");
 		}
 
-			if(this.commitOnStatusChange) this.commit();
+		if(this.commitOnStatusChange) this.commit();
 	};
 
 	ScormWrapper.prototype.getStatus = function() {
@@ -156,7 +157,6 @@ define (function(require) {
 			case "not_attempted":// mentioned in SCORM 2004 docs but not sure it ever gets used
 			case "unknown": //the SCORM 2004 version of not attempted
 				return status;
-			break;
 			default:
 				this.handleError("ScormWrapper::getStatus: invalid lesson status '" + status + "' received from LMS");
 				return null;
@@ -165,23 +165,22 @@ define (function(require) {
 
 	ScormWrapper.prototype.setStatus = function(status) {
 		switch (status.toLowerCase()){
-        case "incomplete":
-          this.setIncomplete();
-          break;
-        case "completed":
-          this.setCompleted();
-          break;
-        case "passed":
-          this.setPassed();
-          break;
-        case "failed":
-          this.setFailed();
-          break;
-        default:
-          this.handleError("ScormWrapper::setStatus: the status '" + status + "' is not supported.");
-          break;
-      }
-	}
+			case "incomplete":
+				this.setIncomplete();
+			break;
+			case "completed":
+				this.setCompleted();
+			break;
+			case "passed":
+				this.setPassed();
+			break;
+			case "failed":
+				this.setFailed();
+			break;
+			default:
+				this.handleError("ScormWrapper::setStatus: the status '" + status + "' is not supported.");
+		}
+	};
 
 	ScormWrapper.prototype.getScore = function() {
 		return this.getValue(this.isSCORM2004() ? "cmi.score.raw" : "cmi.core.score.raw");
@@ -189,7 +188,10 @@ define (function(require) {
 
 	ScormWrapper.prototype.setScore = function(_score, _minScore, _maxScore) {
 		if (this.isSCORM2004()) {
-			this.setValue("cmi.score.raw", _score) && this.setValue("cmi.score.min", _minScore) && this.setValue("cmi.score.max", _maxScore) && this.setValue("cmi.score.scaled", _score / 100);
+			this.setValue("cmi.score.raw", _score);
+			this.setValue("cmi.score.min", _minScore);
+			this.setValue("cmi.score.max", _maxScore);
+			this.setValue("cmi.score.scaled", _score / 100);
 		}
 		else {
 			this.setValue("cmi.core.score.raw", _score);
@@ -264,7 +266,7 @@ define (function(require) {
 		if (this.lmsConnected && !this.finishCalled) {
 			this.finishCalled = true;
 			
-			if(this.timedCommitIntervalID != null) {
+			if(this.timedCommitIntervalID !== null) {
 				window.clearInterval(this.timedCommitIntervalID);
 			}
 			
@@ -375,10 +377,10 @@ define (function(require) {
 			var _errorMsg = "";
 			
 			if (!_success) {
-			/*
-			* Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
-			* So, we should throw an error _only_ if there was a valid error code...
-			*/
+				/*
+				* Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
+				* So, we should throw an error _only_ if there was a valid error code...
+				*/
 				if(_errorCode !== 0) {
 					_errorMsg += "Course could not set " + _property + " to " + _value;
 					_errorMsg += "\nError Info: " + this.scorm.debug.getInfo(_errorCode);
@@ -455,11 +457,8 @@ define (function(require) {
 			this.showDebugWindow();
 	};
 
-
 	ScormWrapper.prototype.getInteractionCount = function(){
-
 		var count = this.getValue("cmi.interactions._count");
-
 		return count === "" ? 0 : count;
 	};
 	
@@ -527,7 +526,7 @@ define (function(require) {
 		var maxLength = this.isSCORM2004() ? 250 : 255;
 
 		if(response.length > maxLength) {
-			response = response.substr(0,maxLength);
+			response = response.substr(0, maxLength);
 
 			this.logger.warn("ScormWrapper::recordInteractionFillIn: response data for " + id + " is longer than the maximum allowed length of " + maxLength + " characters; data will be truncated to avoid an error.");
 		}
@@ -592,19 +591,19 @@ define (function(require) {
 		var csPerDay = csPerHour * 24;
 
 		var days = Math.floor(csConvert/ csPerDay);
-		csConvert -= days * csPerDay
+		csConvert -= days * csPerDay;
 		days = days ? days + "D" : "";
 
 		var hours = Math.floor(csConvert/ csPerHour);
-		csConvert -= hours * csPerHour
+		csConvert -= hours * csPerHour;
 		hours = hours ? hours + "H" : "";
 
 		var mins = Math.floor(csConvert/ csPerMin);
-		csConvert -= mins * csPerMin
+		csConvert -= mins * csPerMin;
 		mins = mins ? mins + "M" : "";
 
 		var secs = Math.floor(csConvert/ csPerSec);
-		csConvert -= secs * csPerSec
+		csConvert -= secs * csPerSec;
 		secs = secs ? secs : "0";
 
 		var cs = csConvert;
@@ -644,15 +643,14 @@ define (function(require) {
 			this.padWithZeroes(date.getSeconds(),2)
 		].join(":");
 
-
-		return ymd+"T"+hms;
+		return ymd + "T" + hms;
 	};
 
 	ScormWrapper.prototype.padWithZeroes = function(numToPad, padBy) {
 
 		var len = padBy;
 
-		while(--len){ numToPad = "0" + numToPad }
+		while(--len){ numToPad = "0" + numToPad; }
 
 		return numToPad.slice(-padBy);
 	};

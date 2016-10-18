@@ -98,6 +98,15 @@
                       },
                       "validators": [],
                       "help": "What status to report back to the LMS when the assessment is failed."
+                    },
+                    "_resetStatusOnLanguageChange": {
+                      "type":"boolean",
+                      "required":false,
+                      "default": "false",
+                      "title":"Reset status when Languge changes",
+                      "inputType": {"type": "Boolean", "options": [true, false]},
+                      "validators": [],
+                      "help": "If set to true, the status of the course will be set to 'incomplete'."
                     }
                   }
                 },

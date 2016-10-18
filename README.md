@@ -72,11 +72,13 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_shouldRecordInteractions** (boolean): Determines whether the user's responses to questions should be tracked to  the `cmi.interactions` fields of the SCORM data model or not. Acceptable values are `true` or `false`. The default is `true`. Note that not all SCORM 1.2 conformant Learning Management Systems support `cmi.interactions`. The code will attempt to detect whether support is implemented or not and, if not, will fail gracefully. Occasionally the code is unable to detect when `cmi.interactions` are not supported, in those (rare) instances you can switch off interaction tracking using this property so as to avoid 'not supported' errors. You can also switch off interaction tracking for any individual question using the `_recordInteraction` property of question components. All core question components support recording of interactions, community components will not necessarily do so.
 
->**_reporting** (object): This object defines what status to report back to the LMS. Contains values for **_onTrackingCriteriaMet**, **_onAssessmentFailure**.  
+>**_reporting** (object): This object defines what status to report back to the LMS. Contains values for **_onTrackingCriteriaMet**, **_onAssessmentFailure** and **_resetStatusOnLanguageChange**.  
 
 >>**_onTrackingCriteriaMet** (string): Specifies the status that is reported to the LMS when the tracking criteria are met. Acceptable values are: `"completed"`, `"passed"`, `"failed"`, and `"incomplete"`. If you are tracking a course by assessment, you would typically set this to `"passed"`. Otherwise, `"completed"` is the usual value.
 
 >>**_onAssessmentFailure** (string): Specifies the status that is reported to the LMS when the assessment is failed. Acceptable values are `"failed"` and `"incomplete"`. Some Learning Management Systems will prevent the user from making further attempts at the course after status has been set to `"failed"`. Therefore, it is common to set this to `"incomplete"` to allow the user more attempts to pass an assessment.  
+
+>>**_resetStatusOnLanguageChange** (boolean): If set to `true` the status of the course is set to "incomplete" when the languge is changed using the [adapt-contrib-langugePicker](https://github.com/adaptlearning/adapt-contrib-languagepicker) Plugin. Acceptable values are `true` or `false`. The default is `false`.       
 
 >**_advancedSettings** (object): The advanced settings attribute group contains values for **_scormVersion**, **_showDebugWindow**, **_commitOnStatusChange**, **_timedCommitFrequency**, **_maxCommitRetries**, and **_commitRetryDelay**.
 
@@ -111,7 +113,7 @@ When **Spoor** is installed, *scorm_test_harness.html* can be used instead of *i
 Currently (officially) only supports SCORM 1.2  
 
 ----------------------------
-**Version number:**  2.0.12   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
+**Version number:**  2.0.13   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
 **Framework versions:**  2.0     
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors) 
 **Accessibility support:** n/a   

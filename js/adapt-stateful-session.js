@@ -1,5 +1,5 @@
 define([
-	'coreJS/adapt',
+	'core/js/adapt',
 	'./serializers/default',
 	'./serializers/questions'
 ], function(Adapt, serializer, questions) {
@@ -14,6 +14,7 @@ define([
 
 	//Session Begin
 		initialize: function() {
+			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			this.getConfig();
 			this.restoreSessionState();
 			/*
@@ -24,9 +25,7 @@ define([
 		},
 
 		getConfig: function() {
-			this._config = Adapt.config.has('_spoor')
-				? Adapt.config.get('_spoor')
-				: false;
+			this._config = Adapt.config.has('_spoor') ? Adapt.config.get('_spoor') : false;
 			
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
 			
@@ -56,7 +55,7 @@ define([
 		getSessionState: function() {
 			var sessionPairs = {
 				"completion": serializer.serialize(),
-				"questions": (this._shouldStoreResponses == true ? questions.serialize() : ""),
+				"questions": (this._shouldStoreResponses === true ? questions.serialize() : ""),
 				"_isCourseComplete": Adapt.course.get("_isComplete") || false,
 				"_isAssessmentPassed": Adapt.course.get('_isAssessmentPassed') || false
 			};
@@ -65,7 +64,6 @@ define([
 
 	//Session In Progress
 		setupEventListeners: function() {
-			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			$(window).on('unload', this._onWindowUnload);
 
 			if (this._shouldStoreResponses) {
@@ -79,6 +77,17 @@ define([
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
 			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
 			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
+			this.listenTo(Adapt, 'app:languageChanged', this.onLanguageChanged);
+		},
+
+		removeEventListeners: function () {
+			$(window).off('unload', this._onWindowUnload);
+			this.stopListening();
+		},
+
+		reattachEventListeners: function() {
+			this.removeEventListeners();
+			this.setupEventListeners();
 		},
 
 		onBlockComplete: function(block) {
@@ -100,7 +109,7 @@ define([
 		},
 
 		onAssessmentComplete: function(stateModel) {
-			Adapt.course.set('_isAssessmentPassed', stateModel.isPass)
+			Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
 			
 			this.saveSessionState();
 
@@ -125,6 +134,22 @@ define([
 			var latency = questionView.getLatency();
 			
 			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
+		},
+
+		/**
+		 * when the user switches language, we need to:
+		 * - reattach the event listeners as the language change triggers a reload of the json, which will create brand new collections
+		 * - get and save a fresh copy of the session state. as the json has been reloaded, the blocks completion data will be reset (the user is warned that this will happen by the language picker extension)
+		 * - check to see if the config requires that the lesson_status be reset to 'incomplete'
+		 */
+		onLanguageChanged: function () {
+			this.reattachEventListeners();
+
+			this.saveSessionState();
+			
+			if (this._config._reporting && this._config._reporting._resetStatusOnLanguageChange === true) {
+				Adapt.offlineStorage.set("status", "incomplete");
+			}
 		},
 
 		submitScore: function(score) {
@@ -162,9 +187,7 @@ define([
 
 	//Session End
 		onWindowUnload: function() {
-			$(window).off('unload', this._onWindowUnload);
-
-			this.stopListening();
+			this.removeEventListeners();
 		}
 		
 	}, Backbone.Events);

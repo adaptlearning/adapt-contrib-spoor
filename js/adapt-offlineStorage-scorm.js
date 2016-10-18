@@ -1,7 +1,7 @@
 define([
-	'coreJS/adapt',
+	'core/js/adapt',
 	'./scorm',
-	'coreJS/offlineStorage'
+	'core/js/offlineStorage'
 ], function(Adapt, scorm) {
 
 	//SCORM handler for Adapt.offlineStorage interface.
