@@ -12,6 +12,9 @@ function createResetButton(API) {
 
 
 var API = {
+	
+	__offlineAPIWrapper:true,
+
 	LMSInitialize: function() {
 		//if (window.ISCOOKIELMS !== false) createResetButton(this);
 		if (!API.LMSFetch()) {
@@ -86,6 +89,9 @@ var API = {
 };
 
 var API_1484_11 = {
+
+	__offlineAPIWrapper:true,
+
 	Initialize: function() {
 		//if (window.ISCOOKIELMS !== false) createResetButton(this);
 		if (!API_1484_11.LMSFetch()) {

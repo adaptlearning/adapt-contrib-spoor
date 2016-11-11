@@ -53,6 +53,9 @@ define (function(require) {
         
 		if (window.__debug)
 			this.showDebugWindow();
+
+		if ((window.API && window.API.__offlineAPIWrapper) || (window.API_1484_11 && window.API_1484_11.__offlineAPIWrapper))
+			this.logger.error("Offline SCORM API is being used. No data will be reported to the LMS!");
 	};
 
 	// static
