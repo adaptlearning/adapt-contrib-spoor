@@ -33,12 +33,8 @@
                     
                     // check for match
                     if (pressed.length == trigger.length && _.difference(pressed, trigger).length == 0) {
-                        _.each(pressed, function(p) {
-                            delete down[p];
-                        });
                         //console.log('$.keyboard: firing handler for keys '+trigger.toString());
                         handler(event);
-                        break;
                     }
                 }
             }
