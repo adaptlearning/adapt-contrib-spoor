@@ -16,15 +16,25 @@
 			var log = o.Logger.getInstance().getEntries();
 			var colours = ["#ffffff", "#00ffff", "#ffffe0", "#ffffff"];
 
-			str = "</table>";
+			var str = "</table>", ts;
 			
 			for (var i = log.length - 1; i >= 0; i--) {
-				str = "<tr><td style=\"background-color:" + colours[log[i].type] + ";\">" + log[i].str + "</td></tr>" + str;
+				ts = new Date(log[i].time);
+				ts = pad(ts.getHours()) + ':' + pad(ts.getMinutes()) + ':' + pad(ts.getSeconds()) + '.' + pad(ts.getMilliseconds());
+				str = "<tr><td style=\"background-color:" + colours[log[i].type] + ";\">" + ts + ' ' + log[i].str + "</td></tr>" + str;
 			}
 			
 			str = "<table>" + str;
 
 			document.getElementById("logDiv").innerHTML = str;
+		}
+
+		function pad(numToPad) {
+			var len = 2;
+
+			while(--len){ numToPad = "0" + numToPad; }
+
+			return numToPad.slice(-2);
 		}
 		
 		function onLoad() {
