@@ -24,6 +24,8 @@
             var count = pressed.length;
             // the group of handlers listening for [count] keys
             var collection = handlers[count];
+            // the handlers to call
+            var execute = [];
 
             if (collection) {
                 // look at handlers listening for [count] keys
@@ -33,15 +35,19 @@
                     
                     // check for match
                     if (pressed.length == trigger.length && _.difference(pressed, trigger).length == 0) {
-                        //console.log('$.keyboard: firing handler for keys '+trigger.toString());
-                        handler(event);
+                        execute.push(handler);
                     }
                 }
             }
 
             _.each(pressed, function(p) {
                 delete down[p];
-            })
+            });
+
+            _.each(execute, function(handler) {
+                console.log('$.onKeyCombo: firing handler for keys '+trigger.toString());
+                handler();
+            });
         });
     };
 
