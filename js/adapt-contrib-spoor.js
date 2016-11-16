@@ -2,8 +2,7 @@ define([
     'core/js/adapt',
     './scorm',
     './adapt-stateful-session',
-    './adapt-offlineStorage-scorm',
-    './jquery.keycombo'
+    './adapt-offlineStorage-scorm'
 ], function(Adapt, scorm, adaptStatefulSession) {
 
     //SCORM session manager
@@ -110,9 +109,11 @@ define([
                 document.addEventListener("visibilitychange", this.onVisibilityChange);
             }
 
-            // listen for user holding 'd', 'e', 'v' keys together
-            $.onKeyCombo([68, 69, 86], function() {
-                scorm.showDebugWindow();
+            require(['libraries/jquery.keycombo'], function() {
+                // listen for user holding 'd', 'e', 'v' keys together
+                $.onKeyCombo([68, 69, 86], function() {
+                    scorm.showDebugWindow();
+                });
             });
         },
 
