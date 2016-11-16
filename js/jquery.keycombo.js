@@ -46,7 +46,7 @@
 
             _.each(execute, function(handler) {
                 console.log('$.onKeyCombo: firing handler for keys '+trigger.toString());
-                handler();
+                handler(event);
             });
         });
     };
