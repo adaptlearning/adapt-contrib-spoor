@@ -3,6 +3,10 @@ Logger = function() {
 	this.registeredViews = new Array();
 };
 
+if (!Date.now) {
+    Date.now = function() { return new Date().getTime(); }
+}
+
 // static
 Logger.instance = null;
 Logger.LOG_TYPE_INFO = 0;
@@ -25,22 +29,22 @@ Logger.prototype.getLastEntry = function() {
 };
 
 Logger.prototype.info = function(str) {
-	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_INFO};
+	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_INFO, time:Date.now()};
 	this.updateViews();
 };
 
 Logger.prototype.warn = function(str) {
-	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_WARN};
+	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_WARN, time:Date.now()};
 	this.updateViews();
 };
 
 Logger.prototype.error = function(str) {
-	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_ERROR};
+	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_ERROR, time:Date.now()};
 	this.updateViews();
 };
 
 Logger.prototype.debug = function(str) {
-	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_DEBUG};
+	this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_DEBUG, time:Date.now()};
 	this.updateViews();
 };
 

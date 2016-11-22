@@ -545,7 +545,7 @@ define (function(require) {
 			this.logOutputWin.close();
 		}
 		
-		this.logOutputWin = window.open("log_output.html", "Log", "width=600,height=300,status=no,scrollbars=yes,resize=yes,menubar=yes,toolbar=yes,location=yes,top=0,left=0");
+		this.logOutputWin = window.open("log_output.html", "Log", "width=600,height=300,status=no,scrollbars=yes,resizable=yes,menubar=yes,toolbar=yes,location=yes,top=0,left=0");
 		
 		if (this.logOutputWin)
 			this.logOutputWin.focus();

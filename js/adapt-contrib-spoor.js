@@ -108,6 +108,13 @@ define([
             if (shouldCommitOnVisibilityChange) {
                 document.addEventListener("visibilitychange", this.onVisibilityChange);
             }
+
+            require(['libraries/jquery.keycombo'], function() {
+                // listen for user holding 'd', 'e', 'v' keys together
+                $.onKeyCombo([68, 69, 86], function() {
+                    scorm.showDebugWindow();
+                });
+            });
         },
 
         onVisibilityChange: function() {
