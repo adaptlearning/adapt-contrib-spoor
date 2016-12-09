@@ -43,7 +43,7 @@ var API = {
 
 			_.each(_.keys(this.data), function(key) {
 				var index = key.indexOf(str);
-				if (index != -1) map[key.substr(strLen, 1)] = true;
+				if (index != -1) map[key.substring(strLen, key.indexOf(".", strLen))] = true;
 			});
 			
 			this.data["cmi.interactions._count"] = _.compact(map).length;
@@ -120,7 +120,7 @@ var API_1484_11 = {
 
 			_.each(_.keys(this.data), function(key) {
 				var index = key.indexOf(str);
-				if (index != -1) map[key.substr(strLen, 1)] = true;
+				if (index != -1) map[key.substring(strLen, key.indexOf(".", strLen))] = true;
 			});
 			
 			this.data["cmi.interactions._count"] = _.compact(map).length;
