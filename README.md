@@ -114,7 +114,7 @@ Currently (officially) only supports SCORM 1.2
 
 ----------------------------
 **Version number:**  2.0.15   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
-**Framework versions:** 2.0.13
+**Framework versions:** 2.0.15
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors) 
 **Accessibility support:** n/a   
 **RTL support:** n/a  
