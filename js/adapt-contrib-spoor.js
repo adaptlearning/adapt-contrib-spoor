@@ -103,7 +103,7 @@ define([
                 document.addEventListener;
 
             this._onWindowUnload = _.bind(this.onWindowUnload, this);
-            $(window).on('unload', this._onWindowUnload);
+            $(window).on('beforeunload unload', this._onWindowUnload);
 
             if (shouldCommitOnVisibilityChange) {
                 document.addEventListener("visibilitychange", this.onVisibilityChange);
@@ -124,9 +124,9 @@ define([
     //Session End
 
         onWindowUnload: function() {
-            scorm.finish();
+            $(window).off('beforeunload unload', this._onWindowUnload);
 
-            $(window).off('unload', this._onWindowUnload);
+            scorm.finish();
         }
         
     }, Backbone.Events);
