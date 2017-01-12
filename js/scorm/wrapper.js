@@ -76,6 +76,7 @@ define (function(require) {
 	};
 
 	ScormWrapper.prototype.setVersion = function(value) {
+		this.logger.debug("ScormWrapper::setVersion: " + value);
 		this.scorm.version = value;
 		/**
 		 * stop the pipwerks code from setting cmi.core.exit to suspend/logout when targeting SCORM 1.2.
@@ -87,6 +88,7 @@ define (function(require) {
 	};
 
 	ScormWrapper.prototype.initialize = function() {
+		this.logger.debug("ScormWrapper::initialize");
 		this.lmsConnected = this.scorm.init();
 
 		if (this.lmsConnected) {
