@@ -48,7 +48,7 @@ define([
         },
 
         checkConfig: function() {
-            this._config = Adapt.config.has('_spoor') ? Adapt.config.get('_spoor') : false;
+            this._config = Adapt.config.get('_spoor') || false;
 
             if (this._config && this._config._isEnabled !== false) return true;
             
@@ -103,7 +103,7 @@ define([
                 document.addEventListener;
 
             this._onWindowUnload = _.bind(this.onWindowUnload, this);
-            $(window).on('unload', this._onWindowUnload);
+            $(window).on('beforeunload unload', this._onWindowUnload);
 
             if (shouldCommitOnVisibilityChange) {
                 document.addEventListener("visibilitychange", this.onVisibilityChange);
@@ -124,9 +124,9 @@ define([
     //Session End
 
         onWindowUnload: function() {
-            scorm.finish();
+            $(window).off('beforeunload unload', this._onWindowUnload);
 
-            $(window).off('unload', this._onWindowUnload);
+            scorm.finish();
         }
         
     }, Backbone.Events);
