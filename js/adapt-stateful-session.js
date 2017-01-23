@@ -113,7 +113,7 @@ define([
 			
 			this.saveSessionState();
 
-			this.submitScore(stateModel.scoreAsPercent);
+			this.submitScore(stateModel);
 
 			if (stateModel.isPass) {
 				this.onCompletion();
@@ -152,10 +152,14 @@ define([
 			}
 		},
 
-		submitScore: function(score) {
+		submitScore: function(stateModel) {
 			if (this._config && !this._config._tracking._shouldSubmitScore) return;
-			
-			Adapt.offlineStorage.set("score", score, 0, 100);
+
+			if (stateModel.isPercentageBased) {
+				Adapt.offlineStorage.set("score", stateModel.scoreAsPercent, 0, 100);
+			} else {
+				Adapt.offlineStorage.set("score", stateModel.score, 0, stateModel.maxScore);
+			}
 		},
 
 		submitAssessmentFailed: function() {
