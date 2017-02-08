@@ -13,15 +13,15 @@ define([
 		_shouldRecordInteractions: true,
 
 	//Session Begin
-		initialize: function() {
+		initialize: function(callback) {
 			this._onWindowUnload = _.bind(this.onWindowUnload, this);
 			this.getConfig();
-			this.restoreSessionState();
-			/*
-			deferring this prevents restoring the completion state of the blocks from triggering a setSuspendData call for each block that gets its completion state restored
-			we should be able to remove this if/when we implement the feature that allows plugins like spoor to pause course initialisation
-			*/
-			_.defer(_.bind(this.setupEventListeners, this));
+			// restore state asynchronously to prevent IE8 freezes
+			this.restoreSessionState(_.bind(function() {
+				// still need to defer call because AdaptModel.check*Status functions are asynchronous
+				_.defer(_.bind(this.setupEventListeners, this));
+				callback();
+			}, this));
 		},
 
 		getConfig: function() {
@@ -40,16 +40,25 @@ define([
 			Adapt.offlineStorage.set(sessionPairs);
 		},
 
-		restoreSessionState: function() {
+		restoreSessionState: function(callback) {
 			var sessionPairs = Adapt.offlineStorage.get();
 			var hasNoPairs = _.keys(sessionPairs).length === 0;
 
-			if (hasNoPairs) return;
+			var doSynchronousPart = _.bind(function() {
+				if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
+				if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
+				if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
+				callback();
+			}, this);
 
-			if (sessionPairs.completion) serializer.deserialize(sessionPairs.completion);
-			if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
-			if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
-			if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
+			if (hasNoPairs) return callback();
+
+			// asynchronously restore block completion data because this has been known to be a choke-point resulting in IE8 freezes
+			if (sessionPairs.completion) {
+				serializer.deserialize(sessionPairs.completion, doSynchronousPart);
+			} else {
+				doSynchronousPart();
+			}
 		},
 
 		getSessionState: function() {

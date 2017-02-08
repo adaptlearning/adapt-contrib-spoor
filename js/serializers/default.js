@@ -46,15 +46,33 @@ define([
             return data.join("");
         },
 
-        deserialize: function (completion) {
+        deserialize: function (completion, callback) {
+            var syncIterations = 1; // number of synchronous iterations to perform
+            var i = 0, arr = this.deserializeSaveState(completion), len = arr.length;
 
-            _.each(this.deserializeSaveState(completion), function(state, blockTrackingId) {
-                if (state === 1) {
-                    this.markBlockAsComplete(Adapt.blocks.findWhere({_trackingId: blockTrackingId}));
+            function step() {
+                var state;
+                for (var j=0, count=Math.min(syncIterations, len-i); j < count; i++, j++) {
+                    state = arr[i];
+                    if (state === 1) {
+                        markBlockAsComplete(Adapt.blocks.findWhere({_trackingId: i}));
+                    }
                 }
-            }, this);
+                i == len ? callback() : setTimeout(step);
+            }
 
-        },    
+            function markBlockAsComplete(block) {
+                if (!block) {
+                    return;
+                }
+            
+                block.getChildren().each(function(child) {
+                    child.set('_isComplete', true);
+                });
+            }
+
+            step();
+        },  
 
         deserializeSaveState: function (string) {
             var completionArray = string.split("");
@@ -68,16 +86,6 @@ define([
             }
 
             return completionArray;
-        },
-
-        markBlockAsComplete: function(block) {
-            if (!block) {
-                return;
-            }
-        
-            block.getChildren().each(function(child) {
-                child.set('_isComplete', true);
-            }, this);
         }
 
     };
