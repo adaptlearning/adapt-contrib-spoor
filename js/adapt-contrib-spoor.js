@@ -129,7 +129,9 @@ define([
         onWindowUnload: function() {
             $(window).off('beforeunload unload', this._onWindowUnload);
 
-            scorm.finish();
+            if (!scorm.finishCalled){
+                scorm.finish();
+            }
         }
         
     }, Backbone.Events);
