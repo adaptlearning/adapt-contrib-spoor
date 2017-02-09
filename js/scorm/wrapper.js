@@ -632,23 +632,12 @@ define (function(require) {
 		return [hours, min, sec].join(":");
 	};
 
-	ScormWrapper.prototype.getISO8601Timestamp = function() {
-	
-		var date = new Date();
-		
-		var ymd = [
-			date.getFullYear(),
-			this.padWithZeroes(date.getMonth()+1,2),
-			this.padWithZeroes(date.getDate(),2)
-		].join("-");
-
-		var hms = [
-			this.padWithZeroes(date.getHours(),2),
-			this.padWithZeroes(date.getMinutes(),2),
-			this.padWithZeroes(date.getSeconds(),2)
-		].join(":");
-
-		return ymd + "T" + hms;
+	/**
+	* returns the current date & time in the format YYYY-MM-DDTHH:mm:ss 
+	*/
+	ScormWrapper.prototype.getISO8601Timestamp = function() {		
+		var date = new Date().toISOString();
+		return date.replace(/.\d\d\dZ/, "");//Date.toISOString returns the date in the format YYYY-MM-DDTHH:mm:ss.sssZ so we need to drop the last bit to make it SCORM 2004 conformant
 	};
 
 	ScormWrapper.prototype.padWithZeroes = function(numToPad, padBy) {
