@@ -196,7 +196,10 @@ define (function(require) {
 			this.setValue("cmi.score.raw", _score);
 			this.setValue("cmi.score.min", _minScore);
 			this.setValue("cmi.score.max", _maxScore);
-			this.setValue("cmi.score.scaled", _score / 100);
+
+			var range = _maxScore - _minScore;
+			var scaledScore = ((_score - _minScore) / range).toFixed(7);
+			this.setValue("cmi.score.scaled", scaledScore);
 		}
 		else {
 			this.setValue("cmi.core.score.raw", _score);
