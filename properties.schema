@@ -61,10 +61,19 @@
                       "type":"boolean",
                       "required":false,
                       "default": "false",
-                      "title":"Store responses",
+                      "title":"Restore responses",
                       "inputType": {"type": "Boolean", "options": [true, false]},
                       "validators": [],
-                      "help": "If set to true, the user's question responses will be saved to the LMS."
+                      "help": "If set to true, the user's responses to questions will be restored in each session."
+                    },
+                    "_shouldRecordInteractions": {
+                      "type":"boolean",
+                      "required": false,
+                      "default": false,
+                      "title":"Record responses",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "Set to true to have the course record the user's responses to questions to the cmi.interactions SCORM data fields."
                     }
                   }
                 },
