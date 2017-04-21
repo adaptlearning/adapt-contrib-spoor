@@ -217,17 +217,6 @@ var API_1484_11 = {
 
 		var pluses = /\+/g;
 
-		function encode(s) {
-			return config.raw ? s : encodeURIComponent(s);
-		}
-
-		function decode(s) {
-			return config.raw ? s : decodeURIComponent(s);
-		}
-
-		function stringifyCookieValue(value) {
-			return encode(config.json ? JSON.stringify(value) : String(value));
-		}
 
 		function parseCookieValue(s) {
 			if (s.indexOf('"') === 0) {
@@ -262,7 +251,7 @@ var API_1484_11 = {
 				}
 
 				return (document.cookie = [
-					encode(key), '=', stringifyCookieValue(value),
+					key, '=', value,
 					options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
 					options.path    ? '; path=' + options.path : '',
 					options.domain  ? '; domain=' + options.domain : '',
@@ -281,7 +270,7 @@ var API_1484_11 = {
 
 			for (var i = 0, l = cookies.length; i < l; i++) {
 				var parts = cookies[i].split('=');
-				var name = decode(parts.shift());
+				var name = parts.shift();
 				var cookie = parts.join('=');
 
 				if (key && key === name) {
