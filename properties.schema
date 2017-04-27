@@ -23,7 +23,7 @@
                   "title": "Is Enabled",
                   "inputType": "Checkbox",
                   "validators": [],
-                  "help": "If checked, the plugin will try to find and track to a SCORM conformant LMS. Uncheck to switch off SCORM tracking."
+                  "help": "If enabled, the plugin will try to find and track to a SCORM conformant LMS. Uncheck to switch off SCORM tracking."
                 },
                 "_tracking": {
                   "type": "object",
@@ -37,7 +37,7 @@
                       "title": "Course completion required",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, the plugin will require that the user must complete all the components in the course before the course can be marked as finished in the LMS."
+                      "help": "If enabled, the plugin will require that the user must complete all the components in the course before the course can be marked as finished in the LMS."
                     },
                     "_requireAssessmentPassed": {
                       "type": "boolean",
@@ -46,7 +46,7 @@
                       "title": "Assessment pass required",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, the plugin will require that the user must pass the course assessment before the course can be marked as finished in the LMS."
+                      "help": "If enabled, the plugin will require that the user must pass the course assessment before the course can be marked as finished in the LMS."
                     },
                     "_shouldSubmitScore": {
                       "type": "boolean",
@@ -55,7 +55,7 @@
                       "title": "Submit score",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, the score attained in any assessment will be reported back to the LMS (regardless of whether the user passes or fails the assessment)."
+                      "help": "If enabled, the score attained in any assessment will be reported back to the LMS (regardless of whether the user passes or fails the assessment)."
                     },
                     "_shouldStoreResponses": {
                       "type": "boolean",
@@ -64,7 +64,7 @@
                       "title": "Remember responses",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, the user's responses to questions will be saved and restored in each session."
+                      "help": "If enabled, the user's responses to questions will be saved and restored in each session."
                     },
                     "_shouldRecordInteractions": {
                       "type": "boolean",
@@ -73,7 +73,7 @@
                       "title": "Record responses",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, the course will record the user's responses to questions to the cmi.interactions SCORM data fields."
+                      "help": "If enabled, the course will record the user's responses to questions to the cmi.interactions SCORM data fields."
                     }
                   }
                 },
@@ -115,7 +115,7 @@
                       "title": "Reset status when Languge changes",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, the the course status will be reset to 'incomplete' when the user changes the course language."
+                      "help": "If enabled, the the course status will be reset to 'incomplete' when the user changes the course language."
                     }
                   }
                 },
@@ -131,7 +131,7 @@
                       "title": "SCORM debug window",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, a popup window will be shown on course launch that gives detailed information about what SCORM calls are being made. This can be very useful for debugging SCORM issues. Note that this popup window will appear automatically if the SCORM code encounters an error, even if this is set to false."
+                      "help": "If enabled, a popup window will be shown on course launch that gives detailed information about what SCORM calls are being made. This can be very useful for debugging SCORM issues. Note that this popup window will appear automatically if the SCORM code encounters an error, even if this is set to false."
                     },
                     "_commitOnStatusChange": {
                       "type": "boolean",
@@ -140,7 +140,7 @@
                       "title": "Commit data on status change",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, a 'commit' call will be made any time the lesson_status is changed."
+                      "help": "If enabled, a 'commit' call will be made any time the lesson_status is changed."
                     },
                     "_timedCommitFrequency": {
                       "type": "number",
@@ -176,7 +176,7 @@
                       "title": "Supress LMS errors",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, error messages will not be displayed when SCORM tracking problems occur."
+                      "help": "If enabled, error messages will not be displayed when SCORM tracking problems occur."
                     },
                     "_commitOnVisibilityChangeHidden": {
                       "type": "boolean",
@@ -184,7 +184,7 @@
                       "title": "Commit on visibility change hidden",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If checked, a 'commit' call will be made whenever the course window is hidden/minimised. Requires a browser that supports the 'visibilitychange' event."
+                      "help": "If enabled, a 'commit' call will be made whenever the course window is hidden/minimised. Requires a browser that supports the 'visibilitychange' event."
                     }
                   }
                 }
