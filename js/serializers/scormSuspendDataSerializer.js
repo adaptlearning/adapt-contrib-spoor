@@ -79,7 +79,7 @@
 	Base64._chars = {};
 	Base64._indexes = {};
 	(function() {
-		var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+		var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-/";
 		for (var i = 0, l = alphabet.length; i<l; i++) {
 			Base64(alphabet[i], i);
 		}
