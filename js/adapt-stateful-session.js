@@ -15,7 +15,12 @@ define([
 	//Session Begin
 		initialize: function(callback) {
 			this._onWindowUnload = _.bind(this.onWindowUnload, this);
+			
 			this.getConfig();
+
+			// replace the hard-coded _learnerInfo data with the actual data from the LMS
+			_.extend(Adapt.course.get('_globals')._learnerInfo, Adapt.offlineStorage.get("learnerinfo"));
+			
 			// restore state asynchronously to prevent IE8 freezes
 			this.restoreSessionState(_.bind(function() {
 				// still need to defer call because AdaptModel.check*Status functions are asynchronous

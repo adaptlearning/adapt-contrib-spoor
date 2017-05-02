@@ -20,7 +20,8 @@ var API = {
 		if (!API.LMSFetch()) {
 			this.data["cmi.core.lesson_status"] = "not attempted";
 			this.data["cmi.suspend_data"] = "";
-			this.data["cmi.core.student_name"] = "Test Student";
+			this.data["cmi.core.student_name"] = "Student, Sam";
+			this.data["cmi.core.student_id"] = "sam.student@example.org";
 			this.data["cmi.interactions._count"] = 0;
 			API.LMSStore(true);
 		}
@@ -97,7 +98,8 @@ var API_1484_11 = {
 		if (!API_1484_11.LMSFetch()) {
 			this.data["cmi.completion_status"] = "not attempted";
 			this.data["cmi.suspend_data"] = "";
-			this.data["cmi.learner_name"] = "Test Student";
+			this.data["cmi.learner_name"] = "Student, Sam";
+			this.data["cmi.learner_id"] = "sam.student@example.org";
 			this.data["cmi.interactions._count"] = 0;
 			API_1484_11.LMSStore(true);
 		}
