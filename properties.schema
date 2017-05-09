@@ -112,7 +112,7 @@
                       "type": "boolean",
                       "required": false,
                       "default": false,
-                      "title": "Reset status when Languge changes",
+                      "title": "Reset status when language changed?",
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, the the course status will be reset to 'incomplete' when the user changes the course language."
