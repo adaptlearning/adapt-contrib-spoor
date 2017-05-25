@@ -18,8 +18,7 @@ define([
 			
 			this.getConfig();
 
-			// replace the hard-coded _learnerInfo data with the actual data from the LMS
-			_.extend(Adapt.course.get('_globals')._learnerInfo, Adapt.offlineStorage.get("learnerinfo"));
+			this.getLearnerInfo();
 			
 			// restore state asynchronously to prevent IE8 freezes
 			this.restoreSessionState(_.bind(function() {
@@ -38,6 +37,18 @@ define([
 			if (this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
 				this._shouldRecordInteractions = false;
 			}
+		},
+
+		/**
+		 * replace the hard-coded _learnerInfo data in _globals with the actual data from the LMS
+		 * if the course has been published from the AT, the _learnerInfo object won't exist so we'll need to create it
+		 */
+		getLearnerInfo: function() {
+			var globals = Adapt.course.get('_globals');
+			if (!globals._learnerInfo) {
+				globals._learnerInfo = {};
+			}
+			_.extend(globals._learnerInfo, Adapt.offlineStorage.get("learnerinfo"));
 		},
 
 		saveSessionState: function() {
