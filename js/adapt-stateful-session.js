@@ -15,7 +15,11 @@ define([
 	//Session Begin
 		initialize: function(callback) {
 			this._onWindowUnload = _.bind(this.onWindowUnload, this);
+			
 			this.getConfig();
+
+			this.getLearnerInfo();
+			
 			// restore state asynchronously to prevent IE8 freezes
 			this.restoreSessionState(_.bind(function() {
 				// still need to defer call because AdaptModel.check*Status functions are asynchronous
@@ -33,6 +37,18 @@ define([
 			if (this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
 				this._shouldRecordInteractions = false;
 			}
+		},
+
+		/**
+		 * replace the hard-coded _learnerInfo data in _globals with the actual data from the LMS
+		 * if the course has been published from the AT, the _learnerInfo object won't exist so we'll need to create it
+		 */
+		getLearnerInfo: function() {
+			var globals = Adapt.course.get('_globals');
+			if (!globals._learnerInfo) {
+				globals._learnerInfo = {};
+			}
+			_.extend(globals._learnerInfo, Adapt.offlineStorage.get("learnerinfo"));
 		},
 
 		saveSessionState: function() {
