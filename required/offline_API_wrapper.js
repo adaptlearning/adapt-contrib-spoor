@@ -63,7 +63,7 @@ var API = {
 		return "Fake error string.";
 	},
 	LMSGetDiagnostic: function() {
-		return "Fake diagnostic information."
+		return "Fake diagnostic information.";
 	},
 	LMSStore: function(force) {
 		if (window.ISCOOKIELMS === false) return;
@@ -77,7 +77,7 @@ var API = {
 		}
 		this.data = API.cookie("_spoor");
 		if (this.data === undefined) {
-			this.data = {}
+			this.data = {};
 			return false;
 		} else {
 			this.data = JSON.parse(this.data);
@@ -141,7 +141,7 @@ var API_1484_11 = {
 		return "Fake error string.";
 	},
 	GetDiagnostic: function() {
-		return "Fake diagnostic information."
+		return "Fake diagnostic information.";
 	},
 	LMSStore: function(force) {
 		if (window.ISCOOKIELMS === false) return;
@@ -155,7 +155,7 @@ var API_1484_11 = {
 		}
 		this.data = API_1484_11.cookie("_spoor");
 		if (this.data === undefined) {
-			this.data = {}
+			this.data = {};
 			return false;
 		} else {
 			this.data = JSON.parse(this.data);
