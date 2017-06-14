@@ -219,6 +219,18 @@ var API_1484_11 = {
 
 		var pluses = /\+/g;
 
+		/**
+		 * Safari-for-iOS 10 doesn't like values in JSON strings to contain commas, and will simply
+		 * truncate the data at the point it finds one - see https://github.com/adaptlearning/adapt_framework/issues/1589
+		 * We can't just URL-encode the entire thing as that pretty much doubles the size of the data, see:
+		 * https://github.com/adaptlearning/adapt_framework/issues/1535
+		 * According to https://developer.mozilla.org/en-US/docs/Web/API/document/cookie, semi-colons and whitespace
+		 * are also disallowed, but so far we don't seem to be having problems because of them
+		 */
+		function urlEncodeDisallowedChars(value) {
+			var s = (config.json ? JSON.stringify(value) : String(value));
+			return s.replace(/,/g, '%2C');
+		}
 
 		function parseCookieValue(s) {
 			if (s.indexOf('"') === 0) {
@@ -253,7 +265,7 @@ var API_1484_11 = {
 				}
 
 				return (document.cookie = [
-					key, '=', value,
+					key, '=', urlEncodeDisallowedChars(value),
 					options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
 					options.path    ? '; path=' + options.path : '',
 					options.domain  ? '; domain=' + options.domain : '',
