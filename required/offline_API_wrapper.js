@@ -10,6 +10,19 @@ function createResetButton(API) {
 	});
 }
 
+function storageWarning() {
+	var Adapt;
+	var notificationMethod = alert;
+	this.__storageWarningTimeoutId = null;
+	if (require) Adapt = require('coreJS/adapt');
+	if (Adapt && Adapt.config && Adapt.config.has('_spoor')) {
+		if (Adapt.config.get('_spoor')._advancedSettings &&
+			Adapt.config.get('_spoor')._advancedSettings._suppressErrors === true) {
+			notificationMethod = console.error;
+		}
+	}
+	notificationMethod('Warning: possible cookie storage limit exceeded - tracking may malfunction');
+}
 
 var API = {
 	
@@ -68,7 +81,18 @@ var API = {
 	LMSStore: function(force) {
 		if (window.ISCOOKIELMS === false) return;
 		if (!force && API.cookie("_spoor") === undefined) return;
-		API.cookie("_spoor", JSON.stringify(this.data));
+
+		var stringified = JSON.stringify(this.data);
+
+		API.cookie("_spoor", stringified);
+
+		// a length mismatch will most likely indicate cookie storage limit exceeded
+		if (API.cookie("_spoor").length != stringified.length) {
+			// defer call to avoid excessive alerts
+			if (this.__storageWarningTimeoutId == null) {
+				this.__storageWarningTimeoutId = setTimeout(function() {storageWarning.apply(API);}, 1000);
+			}
+		}
 	},
 	LMSFetch: function() {
 		if (window.ISCOOKIELMS === false) {
@@ -146,7 +170,18 @@ var API_1484_11 = {
 	LMSStore: function(force) {
 		if (window.ISCOOKIELMS === false) return;
 		if (!force && API_1484_11.cookie("_spoor") === undefined) return;
-		API_1484_11.cookie("_spoor", JSON.stringify(this.data));
+
+		var stringified = JSON.stringify(this.data);
+
+		API_1484_11.cookie("_spoor", stringified);
+
+		// a length mismatch will most likely indicate cookie storage limit exceeded
+		if (API_1484_11.cookie("_spoor").length != stringified.length) {
+			// defer call to avoid excessive alerts
+			if (this.__storageWarningTimeoutId == null) {
+				this.__storageWarningTimeoutId = setTimeout(function() {storageWarning.apply(API_1484_11);}, 1000);
+			}
+		}
 	},
 	LMSFetch: function() {
 		if (window.ISCOOKIELMS === false) {
