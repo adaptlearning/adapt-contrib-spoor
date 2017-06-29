@@ -120,6 +120,12 @@ define([
             });
         },
 
+        removeEventListeners: function() {
+            $(window).off('beforeunload unload', this._onWindowUnload);
+
+            document.removeEventListener("visibilitychange", this.onVisibilityChange);
+        },
+
         onVisibilityChange: function() {
             if (document.visibilityState === "hidden") scorm.commit();
         },
@@ -127,7 +133,7 @@ define([
     //Session End
 
         onWindowUnload: function() {
-            $(window).off('beforeunload unload', this._onWindowUnload);
+            this.removeEventListeners();
 
             if (!scorm.finishCalled){
                 scorm.finish();
