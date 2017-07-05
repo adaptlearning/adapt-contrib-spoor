@@ -101,7 +101,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 <div float align=right><a href="#top">Back to Top</a></div>  
 
 ### Running a course without tracking while Spoor is installed  
-- Use *main.html* instead of *index.html*.  
+- Use *main.html* or *index.html* instead of *index_lms.html*.  
 *OR*  
 - Set `"_isEnabled": false` in *config.json*.
 
