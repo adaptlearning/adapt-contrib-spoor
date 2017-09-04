@@ -123,7 +123,9 @@ define([
         removeEventListeners: function() {
             $(window).off('beforeunload unload', this._onWindowUnload);
 
-            document.removeEventListener("visibilitychange", this.onVisibilityChange);
+            if (document.removeEventListener) {
+                document.removeEventListener("visibilitychange", this.onVisibilityChange);
+            }
         },
 
         onVisibilityChange: function() {
