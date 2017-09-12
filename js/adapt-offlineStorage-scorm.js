@@ -86,6 +86,12 @@ define([
 				case "student":
 				case "learnerinfo":
 					return false;// these properties are read-only
+				case "lang":
+					scorm.setLanguage(value);
+					// fall-through so that lang gets stored in suspend_data as well:
+					// because in SCORM 1.2 cmi.student_preference.language is an optional data element
+					// so we can't rely on the LMS having support for it. 
+					// If it does support it we may as well save the user's choice there purely for reporting purposes
 				case "suspenddata":
 				default:
 					if (isObject) {
