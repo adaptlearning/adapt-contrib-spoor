@@ -233,6 +233,16 @@ define (function(require) {
 	ScormWrapper.prototype.getStudentId = function(){
 		return this.getValue(this.isSCORM2004() ? "cmi.learner_id":"cmi.core.student_id");
 	};
+	
+	ScormWrapper.prototype.setLanguage = function(_lang){
+		if(this.isSCORM2004()) {
+			this.setValue("cmi.learner_preference.language", _lang);
+		} else {
+			if(this.isSupported("cmi.student_preference.language")) {
+				this.setValue("cmi.student_preference.language", _lang);
+			}
+		}
+	};
 
 	ScormWrapper.prototype.commit = function() {
 		this.logger.debug("ScormWrapper::commit");
