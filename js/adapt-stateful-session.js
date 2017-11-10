@@ -9,7 +9,7 @@ define([
 	var AdaptStatefulSession = _.extend({
 
 		_config: null,
-		_shouldStoreResponses: false,
+		_shouldStoreResponses: true,
 		_shouldRecordInteractions: true,
 
 	//Session Begin

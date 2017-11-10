@@ -60,17 +60,17 @@
                     "_shouldStoreResponses": {
                       "type": "boolean",
                       "required": false,
-                      "default": false,
-                      "title": "Remember responses",
+                      "default": true,
+                      "title": "Store question state",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If enabled, the user's responses to questions will be saved and restored in each session."
+                      "help": "If enabled, the user's responses to questions will be saved and restored in each session. Note: this setting should be enabled in the majority of cases."
                     },
                     "_shouldRecordInteractions": {
                       "type": "boolean",
                       "required": false,
                       "default": true,
-                      "title": "Record responses",
+                      "title": "Record interactions",
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, the course will record the user's responses to questions to the cmi.interactions SCORM data fields."
