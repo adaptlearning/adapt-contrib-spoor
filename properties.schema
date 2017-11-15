@@ -42,7 +42,7 @@
                     "_requireAssessmentPassed": {
                       "type": "boolean",
                       "required": false,
-                      "default": false,
+                      "default": true,
                       "title": "Assessment pass required",
                       "inputType": "Checkbox",
                       "validators": [],
