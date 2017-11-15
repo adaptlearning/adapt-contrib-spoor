@@ -32,6 +32,8 @@ define([
 			this._config = Adapt.config.has('_spoor') ? Adapt.config.get('_spoor') : false;
 			
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
+
+			!this._shouldStoreResponses && Adapt.log.warn("Storing of responses is disabled. Please ensure this is correct before publishing the course");
 			
 			// default should be to record interactions, so only avoid doing that if _shouldRecordInteractions is set to false
 			if (this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
