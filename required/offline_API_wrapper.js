@@ -35,7 +35,6 @@ var API = {
 			this.data["cmi.suspend_data"] = "";
 			this.data["cmi.core.student_name"] = "Surname, Sam";
 			this.data["cmi.core.student_id"] = "sam.surname@example.org";
-			this.data["cmi.interactions._count"] = 0;
 			API.LMSStore(true);
 		}
 		return "true";
@@ -48,20 +47,9 @@ var API = {
 	},
 	LMSSetValue: function(key, value) {
 		var str = 'cmi.interactions.';
+		if (key.indexOf(str) != -1) return "true";
 
 		this.data[key] = value;
-
-		if (key.indexOf(str) != -1) {
-			var map = [];
-			var strLen = str.length;
-
-			_.each(_.keys(this.data), function(key) {
-				var index = key.indexOf(str);
-				if (index != -1) map[key.substring(strLen, key.indexOf(".", strLen))] = true;
-			});
-			
-			this.data["cmi.interactions._count"] = _.compact(map).length;
-		}
 		
 		API.LMSStore();
 		return "true";
@@ -124,7 +112,6 @@ var API_1484_11 = {
 			this.data["cmi.suspend_data"] = "";
 			this.data["cmi.learner_name"] = "Surname, Sam";
 			this.data["cmi.learner_id"] = "sam.surname@example.org";
-			this.data["cmi.interactions._count"] = 0;
 			API_1484_11.LMSStore(true);
 		}
 		return "true";
@@ -137,20 +124,9 @@ var API_1484_11 = {
 	},
 	SetValue: function(key, value) {
 		var str = 'cmi.interactions.';
+		if (key.indexOf(str) != -1) return "true";
 
 		this.data[key] = value;
-
-		if (key.indexOf(str) != -1) {
-			var map = [];
-			var strLen = str.length;
-
-			_.each(_.keys(this.data), function(key) {
-				var index = key.indexOf(str);
-				if (index != -1) map[key.substring(strLen, key.indexOf(".", strLen))] = true;
-			});
-			
-			this.data["cmi.interactions._count"] = _.compact(map).length;
-		}
 
 		API_1484_11.LMSStore();
 		return "true";
