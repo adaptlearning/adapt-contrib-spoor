@@ -3,8 +3,6 @@
 	"_spoor": {
 		"_isEnabled": true,
 		"_tracking": {
-			"_requireCourseCompleted": true,
-			"_requireAssessmentPassed": false,
 			"_shouldSubmitScore": false,
 			"_shouldStoreResponses": false,
 			"_shouldRecordInteractions": true

@@ -59,11 +59,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 **_spoor**: (object): The Spoor object that contains values for **_isEnabled**, **_tracking**, **_reporting**, and **_advancedSettings**.
  
->**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS when the course is launched via *index_lms.html*. If one is not available, a 'Could not connect to LMS' error message will be displayed. This error can be avoided during course development either by setting this to `false` or - more easily - by launching the course via *index.html* or *main.html*. This latter technique is also useful if you are developing a course that could be run either from an LMS or a regular web server.
-
->>**_requireCourseCompleted** (boolean): Determines whether the learner must complete all the components in the course before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `false`.    
-
->>**_requireAssessmentPassed** (boolean): Determines whether the user must pass the course assessment, not simply complete it, before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `false`.  If this attribute and `_requireCourseCompleted` are both set to `true`, the learner must pass the course assessment as well as complete all components in order for the course can be marked as finished in the LMS.
+>>**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS when the course is launched via *index_lms.html*. If one is not available, a 'Could not connect to LMS' error message will be displayed. This error can be avoided during course development either by setting this to `false` or - more easily - by launching the course via *index.html* or *main.html*. This latter technique is also useful if you are developing a course that could be run either from an LMS or a regular web server.ß
 
 >>**_shouldSubmitScore** (boolean): Determines whether the numeric scores attained in assessments will be reported to the LMS. Acceptable values are `true` or `false`. The default is `false`.  
 
@@ -114,8 +110,8 @@ Note that due to the data storage limitations of browser cookies, there is less 
 Currently (officially) only supports SCORM 1.2  
 
 ----------------------------
-**Version number:**  2.1.3   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
-**Framework versions:** 2.0.16+
+**Version number:**  3.0.0   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
+**Framework versions:** 3.0.0+
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors) 
 **Accessibility support:** n/a   
 **RTL support:** n/a  

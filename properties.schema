@@ -30,24 +30,6 @@
                   "required": false,
                   "title": "Tracking",
                   "properties": {
-                    "_requireCourseCompleted": {
-                      "type": "boolean",
-                      "required": false,
-                      "default": true,
-                      "title": "Course completion required",
-                      "inputType": "Checkbox",
-                      "validators": [],
-                      "help": "If enabled, the plugin will require that the user must complete all the components in the course before the course can be marked as finished in the LMS."
-                    },
-                    "_requireAssessmentPassed": {
-                      "type": "boolean",
-                      "required": false,
-                      "default": false,
-                      "title": "Assessment pass required",
-                      "inputType": "Checkbox",
-                      "validators": [],
-                      "help": "If enabled, the plugin will require that the user must pass the course assessment before the course can be marked as finished in the LMS."
-                    },
                     "_shouldSubmitScore": {
                       "type": "boolean",
                       "required": false,
