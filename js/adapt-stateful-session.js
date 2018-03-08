@@ -155,7 +155,7 @@ define([
 				}
 			}
 
-			Adapt.offlineStorage.set("status", completionData.status.asLowerCase);
+			Adapt.offlineStorage.set("status", completionStatus);
 		},
 
 		onAssessmentComplete: function(stateModel) {
