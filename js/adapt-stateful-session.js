@@ -164,10 +164,6 @@ define([
 			this.saveSessionState();
 
 			this.submitScore(stateModel);
-
-			if (!stateModel.isPass && Adapt.config.get('_completionCriteria')._requireAssessmentPassed) {
-				this.submitAssessmentFailed();
-			}
 		},
 
 		onQuestionRecordInteraction:function(questionView) {
@@ -214,12 +210,6 @@ define([
 				Adapt.offlineStorage.set("score", stateModel.scoreAsPercent, 0, 100);
 			} else {
 				Adapt.offlineStorage.set("score", stateModel.score, 0, stateModel.maxScore);
-			}
-		},
-
-		submitAssessmentFailed: function() {
-			if (this._config && this._config._reporting._onAssessmentFailure) {
-				Adapt.offlineStorage.set("status", this._config._reporting._onAssessmentFailure);
 			}
 		},
 
