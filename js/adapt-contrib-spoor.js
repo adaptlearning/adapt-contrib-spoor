@@ -14,15 +14,15 @@ define([
     //Session Begin
 
         initialize: function() {
-            this.listenToOnce(Adapt, "configModel:dataLoaded", this.onConfigLoaded);
-            this.listenToOnce(Adapt, "app:dataReady", this.onDataReady);
+            this.listenToOnce(Adapt, {
+                'offlineStorage:prepare': this.onPrepareOfflineStorage,
+                'app:dataReady': this.onDataReady
+            });
         },
 
-        onConfigLoaded: function() {
+        onPrepareOfflineStorage: function() {
             if (!this.checkConfig()) {
-                if (Adapt.offlineStorage.setReadyStatus) {// backwards-compatibility check - setReadyStatus was only introduced in framework v2.0.14
-                    Adapt.offlineStorage.setReadyStatus();
-                }
+                Adapt.offlineStorage.setReadyStatus();
                 return;
             }
 
@@ -36,9 +36,7 @@ define([
             */
             Adapt.offlineStorage.get();
 
-            if (Adapt.offlineStorage.setReadyStatus) {
-                Adapt.offlineStorage.setReadyStatus();
-            }
+            Adapt.offlineStorage.setReadyStatus();
 
             this.setupEventListeners();
         },
