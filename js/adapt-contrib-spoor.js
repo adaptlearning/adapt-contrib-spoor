@@ -42,10 +42,7 @@ define([
         },
 
         onDataReady: function() {
-            Adapt.trigger('plugin:beginWait');
-            adaptStatefulSession.initialize(function() {
-                Adapt.trigger('plugin:endWait');
-            });
+            Adapt.wait.for(adaptStatefulSession.initialize.bind(adaptStatefulSession));
         },
 
         checkConfig: function() {
