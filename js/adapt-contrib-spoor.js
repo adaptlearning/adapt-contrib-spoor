@@ -16,7 +16,9 @@ define([
         initialize: function() {
             this.listenToOnce(Adapt, {
                 'offlineStorage:prepare': this.onPrepareOfflineStorage,
-                'app:dataReady': this.onDataReady
+                'app:dataReady': function() {
+                    Adapt.wait.for(adaptStatefulSession.initialize.bind(adaptStatefulSession));
+                }
             });
         },
 
@@ -41,15 +43,11 @@ define([
             this.setupEventListeners();
         },
 
-        onDataReady: function() {
-            Adapt.wait.for(adaptStatefulSession.initialize.bind(adaptStatefulSession));
-        },
-
         checkConfig: function() {
             this._config = Adapt.config.get('_spoor') || false;
 
             if (this._config && this._config._isEnabled !== false) return true;
-            
+
             return false;
         },
 
@@ -118,9 +116,7 @@ define([
         removeEventListeners: function() {
             $(window).off('beforeunload unload', this._onWindowUnload);
 
-            if (document.removeEventListener) {
-                document.removeEventListener("visibilitychange", this.onVisibilityChange);
-            }
+            document.removeEventListener("visibilitychange", this.onVisibilityChange);
         },
 
         onVisibilityChange: function() {
