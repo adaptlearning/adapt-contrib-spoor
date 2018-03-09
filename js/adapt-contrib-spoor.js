@@ -14,15 +14,17 @@ define([
     //Session Begin
 
         initialize: function() {
-            this.listenToOnce(Adapt, "configModel:dataLoaded", this.onConfigLoaded);
-            this.listenToOnce(Adapt, "app:dataReady", this.onDataReady);
+            this.listenToOnce(Adapt, {
+                'offlineStorage:prepare': this.onPrepareOfflineStorage,
+                'app:dataReady': function() {
+                    Adapt.wait.for(adaptStatefulSession.initialize.bind(adaptStatefulSession));
+                }
+            });
         },
 
-        onConfigLoaded: function() {
+        onPrepareOfflineStorage: function() {
             if (!this.checkConfig()) {
-                if (Adapt.offlineStorage.setReadyStatus) {// backwards-compatibility check - setReadyStatus was only introduced in framework v2.0.14
-                    Adapt.offlineStorage.setReadyStatus();
-                }
+                Adapt.offlineStorage.setReadyStatus();
                 return;
             }
 
@@ -36,25 +38,16 @@ define([
             */
             Adapt.offlineStorage.get();
 
-            if (Adapt.offlineStorage.setReadyStatus) {
-                Adapt.offlineStorage.setReadyStatus();
-            }
+            Adapt.offlineStorage.setReadyStatus();
 
             this.setupEventListeners();
-        },
-
-        onDataReady: function() {
-            Adapt.trigger('plugin:beginWait');
-            adaptStatefulSession.initialize(function() {
-                Adapt.trigger('plugin:endWait');
-            });
         },
 
         checkConfig: function() {
             this._config = Adapt.config.get('_spoor') || false;
 
             if (this._config && this._config._isEnabled !== false) return true;
-            
+
             return false;
         },
 
@@ -123,9 +116,7 @@ define([
         removeEventListeners: function() {
             $(window).off('beforeunload unload', this._onWindowUnload);
 
-            if (document.removeEventListener) {
-                document.removeEventListener("visibilitychange", this.onVisibilityChange);
-            }
+            document.removeEventListener("visibilitychange", this.onVisibilityChange);
         },
 
         onVisibilityChange: function() {

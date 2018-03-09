@@ -1,26 +1,27 @@
 define([
 	'core/js/adapt',
 	'./serializers/default',
-	'./serializers/questions'
-], function(Adapt, serializer, questions) {
+	'./serializers/questions',
+	'core/js/enums/completionStateEnum'
+], function(Adapt, serializer, questions, COMPLETION_STATE) {
 
-	//Implements Adapt session statefulness
-	
+	// Implements Adapt session statefulness
+
 	var AdaptStatefulSession = _.extend({
 
 		_config: null,
 		_shouldStoreResponses: true,
 		_shouldRecordInteractions: true,
 
-	//Session Begin
+		// Session Begin
 		initialize: function(callback) {
 			this._onWindowUnload = _.bind(this.onWindowUnload, this);
-			
+
 			this.getConfig();
 
 			this.getLearnerInfo();
-			
-			// restore state asynchronously to prevent IE8 freezes
+
+			// Restore state asynchronously to prevent IE8 freezes
 			this.restoreSessionState(_.bind(function() {
 				// still need to defer call because AdaptModel.check*Status functions are asynchronous
 				_.defer(_.bind(this.setupEventListeners, this));
@@ -30,18 +31,18 @@ define([
 
 		getConfig: function() {
 			this._config = Adapt.config.has('_spoor') ? Adapt.config.get('_spoor') : false;
-			
+
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
-			
-			// default should be to record interactions, so only avoid doing that if _shouldRecordInteractions is set to false
+
+			// Default should be to record interactions, so only avoid doing that if _shouldRecordInteractions is set to false
 			if (this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
 				this._shouldRecordInteractions = false;
 			}
 		},
 
 		/**
-		 * replace the hard-coded _learnerInfo data in _globals with the actual data from the LMS
-		 * if the course has been published from the AT, the _learnerInfo object won't exist so we'll need to create it
+		 * Replace the hard-coded _learnerInfo data in _globals with the actual data from the LMS
+		 * If the course has been published from the AT, the _learnerInfo object won't exist so we'll need to create it
 		 */
 		getLearnerInfo: function() {
 			var globals = Adapt.course.get('_globals');
@@ -69,7 +70,7 @@ define([
 
 			if (hasNoPairs) return callback();
 
-			// asynchronously restore block completion data because this has been known to be a choke-point resulting in IE8 freezes
+			// Asynchronously restore block completion data because this has been known to be a choke-point resulting in IE8 freezes
 			if (sessionPairs.completion) {
 				serializer.deserialize(sessionPairs.completion, doSynchronousPart);
 			} else {
@@ -87,7 +88,7 @@ define([
 			return sessionPairs;
 		},
 
-	//Session In Progress
+		// Session In Progress
 		setupEventListeners: function() {
 			$(window).on('beforeunload unload', this._onWindowUnload);
 
@@ -95,14 +96,16 @@ define([
 				this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
 			}
 
-			if(this._shouldRecordInteractions) {
+			if (this._shouldRecordInteractions) {
 				this.listenTo(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
 			}
 
 			this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
-			this.listenTo(Adapt.course, 'change:_isComplete', this.onCompletion);
-			this.listenTo(Adapt, 'assessment:complete', this.onAssessmentComplete);
-			this.listenTo(Adapt, 'app:languageChanged', this.onLanguageChanged);
+			this.listenTo(Adapt, {
+				'assessment:complete': this.onAssessmentComplete,
+				'app:languageChanged': this.onLanguageChanged,
+				'tracking:complete': this.onTrackingComplete
+			});
 		},
 
 		removeEventListeners: function () {
@@ -125,12 +128,34 @@ define([
 			this.saveSessionState();
 		},
 
-		onCompletion: function() {
-			if (!this.checkTrackingCriteriaMet()) return;
-
+		onTrackingComplete: function(completionData) {
 			this.saveSessionState();
 			
-			Adapt.offlineStorage.set("status", this._config._reporting._onTrackingCriteriaMet);
+			var completionStatus = completionData.status.asLowerCase;
+
+			// The config allows the user to override the completion state.
+			switch (completionData.status) {
+				case COMPLETION_STATE.COMPLETED:
+				case COMPLETION_STATE.PASSED: {
+					if (!this._config._reporting._onTrackingCriteriaMet) {
+						Adapt.log.warn("No value defined for '_onTrackingCriteriaMet', so defaulting to '" + completionStatus + "'");
+					} else {
+						completionStatus = this._config._reporting._onTrackingCriteriaMet;
+					}
+
+					break;
+				}
+
+				case COMPLETION_STATE.FAILED: {
+					if (!this._config._reporting._onAssessmentFailure) {
+						Adapt.log.warn("No value defined for '_onAssessmentFailure', so defaulting to '" + completionStatus + "'");
+					} else {
+						completionStatus = this._config._reporting._onAssessmentFailure;
+					}
+				}
+			}
+
+			Adapt.offlineStorage.set("status", completionStatus);
 		},
 
 		onAssessmentComplete: function(stateModel) {
@@ -139,12 +164,6 @@ define([
 			this.saveSessionState();
 
 			this.submitScore(stateModel);
-
-			if (stateModel.isPass) {
-				this.onCompletion();
-			} else if (this._config && this._config._tracking._requireAssessmentPassed) {
-				this.submitAssessmentFailed();
-			}
 		},
 
 		onQuestionRecordInteraction:function(questionView) {
@@ -194,34 +213,7 @@ define([
 			}
 		},
 
-		submitAssessmentFailed: function() {
-			if (this._config && this._config._reporting.hasOwnProperty("_onAssessmentFailure")) {
-				var onAssessmentFailure = this._config._reporting._onAssessmentFailure;
-				if (onAssessmentFailure === "") return;
-					
-				Adapt.offlineStorage.set("status", onAssessmentFailure);
-			}
-		},
-		
-		checkTrackingCriteriaMet: function() {
-			var criteriaMet = false;
-
-			if (!this._config) {
-				return false;
-			}
-
-			if (this._config._tracking._requireCourseCompleted && this._config._tracking._requireAssessmentPassed) { // user must complete all blocks AND pass the assessment
-				criteriaMet = (Adapt.course.get('_isComplete') && Adapt.course.get('_isAssessmentPassed'));
-			} else if (this._config._tracking._requireCourseCompleted) { //user only needs to complete all blocks
-				criteriaMet = Adapt.course.get('_isComplete');
-			} else if (this._config._tracking._requireAssessmentPassed) { // user only needs to pass the assessment
-				criteriaMet = Adapt.course.get('_isAssessmentPassed');
-			}
-
-			return criteriaMet;
-		},
-
-	//Session End
+		// Session End
 		onWindowUnload: function() {
 			this.removeEventListeners();
 		}
