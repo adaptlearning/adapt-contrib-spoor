@@ -29,7 +29,7 @@ define([
 		},
 
 		getConfig: function() {
-			this._config = Adapt.config.has('_spoor') ? Adapt.config.get('_spoor') : false;
+			this._config = Adapt.config.has('_elfh_spoor') ? Adapt.config.get('_elfh_spoor') : false;
 			
 			this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
 			

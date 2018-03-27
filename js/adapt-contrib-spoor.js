@@ -51,7 +51,7 @@ define([
         },
 
         checkConfig: function() {
-            this._config = Adapt.config.get('_spoor') || false;
+            this._config = Adapt.config.get('_elfh_spoor') || false;
 
             if (this._config && this._config._isEnabled !== false) return true;
             
@@ -101,12 +101,13 @@ define([
 
         setupEventListeners: function() {
             var advancedSettings = this._config._advancedSettings;
+            
             var shouldCommitOnVisibilityChange = (!advancedSettings ||
                 advancedSettings._commitOnVisibilityChangeHidden !== false) &&
                 document.addEventListener;
 
             this._onWindowUnload = _.bind(this.onWindowUnload, this);
-            $(window).on('beforeunload unload', this._onWindowUnload);
+            $(window).on('beforeunload unload pagehide', this._onWindowUnload);
 
             if (shouldCommitOnVisibilityChange) {
                 document.addEventListener("visibilitychange", this.onVisibilityChange);
@@ -121,9 +122,13 @@ define([
         },
 
         removeEventListeners: function() {
-            $(window).off('beforeunload unload', this._onWindowUnload);
+            $(window).off('beforeunload unload pagehide', this._onWindowUnload);
 
-            document.removeEventListener("visibilitychange", this.onVisibilityChange);
+            if (document.removeEventListener)
+            {
+                document.removeEventListener("visibilitychange", this.onVisibilityChange);
+            }
+            
         },
 
         onVisibilityChange: function() {

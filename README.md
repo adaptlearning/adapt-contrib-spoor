@@ -1,122 +1,64 @@
-# adapt-contrib-spoor  
+# adapt-elfh-spoor  
+<a id="top" style="display:none"></a>
 
-**Spoor** is an *extension* bundled with the [Adapt framework](https://github.com/adaptlearning/adapt_framework).  
+The **e-LfH Spoor** *extension* is for use with the the [Adapt framework](https://github.com/adaptlearning/adapt_framework).  It is based on the [adapt-contrib-spoor](https://github.com/adaptlearning/adapt-contrib-spoor) extension, which adds SCORM 1.2 tracking functionality to Adapt courses.  The e-LfH Spoor plugin adds **AICC HACP (HTTP-based AICC/CMI protocol)** tracking functionality, on top of existing SCORM tracking made available inside the adapt-contrib-spoor extension.
 
-This extension provides course tracking functionality (hence the name). Currently it only officially supports tracking to [SCORM](https://en.wikipedia.org/wiki/Sharable_Content_Object_Reference_Model) 1.2 [Learning Management Systems (LMS)](https://en.wikipedia.org/wiki/Learning_management_system), however, experienced users should be able to implement SCORM 2004 should this be needed as the underlying code is almost entirely version-agnostic (it's the packaging part you'll need to do yourself).
+Please be aware that this extension has so far been tested and verified to work in the following LMS's.  If you encounter any issues with other LMS's please report them:
 
-**Spoor** makes use of the excellent [pipwerks SCORM API Wrapper](https://github.com/pipwerks/scorm-api-wrapper/).
+- e-Learning for Healthcare's Hub
+- Moodle version 3.0 release candidate 4
 
-[Visit the **Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about its functionality and for explanations of key properties.  
+AICC HACP allows organisations to run courses in their LMS applications, which are sitting on another organisation's domain, usually inside some sort of content repository, without causing [cross site scriping](https://en.wikipedia.org/wiki/Cross-site_scripting) errors in the user's web browser.  Running courses in this way is not possible using SCORM, because a web browser will throw a cross site scripting error and prevent the course from running for security reasons.  Please note that AICC HACP will only work if an application exists to relay the HTTP requests posts to and from the LMS.  This **relay** application often exists as part of an organisation's content repository.  This extension completes one part of the AICC HACP implementation but a relay application and an LMS capable of launching external AICC content, is required to make the entire process work.
+
+**e-LfH Spoor** makes use of the [pipwerks SCORM API Wrapper](https://github.com/pipwerks/scorm-api-wrapper/).  Built on top of this wrapper, this extension has been designed so the additional AICC functionality is added unobstrusively.  Source code in the files aiccAPI.js and aiccLMS.js contain the additional tracking functionality and wrapper.js has been changed slightly to detect whether a request to run the course is made via HACP AICC or SCORM.  This means an Adapt course can be created which can switch between either AICC or SCORM using this single extension, without the need to create two versions of the same course, e.g. one version of the course containing the SCORM extension and another version containing an AICC extension.  Therefore removing the need to update two courses if the content is changed.
+
+An Adapt course built to include this extension will run in one of three possible *modes*:
+
+- if the course is launched outside of an LMS as a stand-alone website, the extension will not detect an AICC or SCORM LMS and the course will run without any tracking enabled.
+- if the extension detects an AICC identifier and url in the querystring, then the course will run with AICC tracking enabled.
+- if the extension detects a SCORM API in a parent frame, window or opener window, then the course will run with SCORM tracking enabled.
+
+It's important to note that this extension doesn't attempt to implement the entire [AICC specification](https://github.com/ADL-AICC/AICC-Document-Archive/), but more specifically section *6.0 Communicating via HTTP (The HACP Binding)* in the document *CMI Guidelines for Interoperability AICC* ([cmi001v4.pdf](https://github.com/ADL-AICC/AICC-Document-Archive/releases/tag/cmi001v4)).  The extension adds the ability for an [LMS](https://en.wikipedia.org/wiki/Learning_management_system) that has HACP AICC functionality (such as [Moodle](https://moodle.org/), or [Kallidus](https://www.kallidus.com/)), to store values returned from a course stored on a domain other than the domain the LMS is running from.
+
+For example, the course could be sitting on a domain that is acting as a content repository, e.g. *http://my-company/courses/course1*, and your client may want to run the course from their own Moodle LMS instance on their domain *http://the-client-LMS/*.  The administrator of the client's LMS would create a course in the LMS and configure it to point to the Adapt courses (containing the e-LfH Spoor extension) sitting on the other domain.
 
 ## Installation
 
-As one of Adapt's *[core extensions](https://github.com/adaptlearning/adapt_framework/wiki/Core-Plug-ins-in-the-Adapt-Learning-Framework#extensions),* **Spoor** is included with the [installation of the Adapt framework](https://github.com/adaptlearning/adapt_framework/wiki/Manual-installation-of-the-Adapt-framework#installation) and the [installation of the Adapt authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-Adapt-Origin).
+This plugin should be used instead of the core Spoor plugin (adapt-contrib-spoor), when both SCORM and AICC tracking might be required.  To use this extension, uninstall adapt-contrib-spoor and install adapt-elfh-spoor.
 
-* If **Spoor** has been uninstalled from the Adapt framework, it may be reinstalled.
-With the [Adapt CLI](https://github.com/adaptlearning/adapt-cli) installed, run the following from the command line:  
-`adapt install adapt-contrib-spoor`
+Within the Adapt authoring tool you can uninstall adapt-contrib-spoor and install adapt-elfh-spoor using the [Plug-in Manager](https://github.com/adaptlearning/adapt_authoring/wiki/Plugin-Manager).
 
-    Alternatively, this component can also be installed by adding the following line of code to the *adapt.json* file:  
-    `"adapt-contrib-spoor": "*"`  
-    Then running the command:  
-    `adapt install`  
-    (This second method will reinstall all plug-ins listed in *adapt.json*.)  
+If you are creating your course using the Adapt framework directly and outside of the authoring tool, you can use uninstall and install the extensions using the [Adapt CLI](https://github.com/adaptlearning/adapt-cli).  Run the following from the command line:
 
-* If **Spoor** has been uninstalled from the Adapt authoring tool, it may be reinstalled using the [Plug-in Manager](https://github.com/adaptlearning/adapt_authoring/wiki/Plugin-Manager).  
-<div float align=right><a href="#top">Back to Top</a></div>  
+1. `adapt uninstall adapt-contrib-spoor`
+2. `adapt install adapt-elfh-spoor`
 
-## Usage Instructions  
-The following must be completed in no specific order:  
-- [Edit the manifest file, *imsmanifest.xml*.](#edit-the-manifest-file)  
-- [Add tracking IDs in *blocks.json*.](#add-tracking-ids)  
-- [Configure *config.json*.](#configure-configjson)  
+## Usage Instructions
 
-### Edit the manifest file
-Edit the manifest file [*imsmanifest.xml*](https://github.com/adaptlearning/adapt-contrib-spoor/required/imsmanifest.xml) to contain information specific to your course.   
-
-First, change the three instances of the course title (currently set to "Adapt SCORM") and the description (currently set to "Responsive SCORM generated by the Adapt Framework") as required.
-
-Next, change the three identifiers ('adapt_manifest' and two instances of 'adapt_scorm') to be unique to your course. Any alphanumeric string that you know will not have already been used in a course on the LMS will be fine - for example '1234_manifest' and '1234_scorm'.
-
-There are many other ways the manifest can be set up and populated to your advantage. A full explanation is beyond the scope of this README. For more information, reference the [SCORM 1.2 documentation](http://www.adlnet.gov/resources/scorm-1-2-specification/), specifically the SCORM Content Aggregation Model ([SCORM_1.2_CAM](http://www.adlnet.gov/wp-content/uploads/2013/09/SCORM_1.2_CAM.pdf)).
-
-### Add tracking IDs  
-
-Each block in *blocks.json* **must** include the following attribute:  
-`"_trackingId": `  
-Its value must be a unique number. There is no requirement that these values be sequential, but it is recommended as it can aid in debugging tracking issues if they are. Best practice begins the sequence of tracking IDs with `0`.  
-
-An alternative to manually inserting the tracking IDs is to run the following grunt command. With your course root as the current working directory, run:  
-`grunt tracking-insert`  
-If later you add more blocks, run this again to assign tracking IDs to the new blocks. (`grunt tracking-insert` maintains a variable in *course.json* called `_latestTrackingId`. This variable is not used by **Spoor** itself, just by the grunt task.)  
-
-<div float align=right><a href="#top">Back to Top</a></div>  
-
-### Configure *config.json*  
-The attributes listed below are used in *config.json* to configure **Spoor**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json). Visit the [**Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).  
-
-#### Attributes
-
-**_spoor**: (object): The Spoor object that contains values for **_isEnabled**, **_tracking**, **_reporting**, and **_advancedSettings**.
- 
->**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS when the course is launched via *index_lms.html*. If one is not available, a 'Could not connect to LMS' error message will be displayed. This error can be avoided during course development either by setting this to `false` or - more easily - by launching the course via *index.html* or *main.html*. This latter technique is also useful if you are developing a course that could be run either from an LMS or a regular web server.
-
->>**_requireCourseCompleted** (boolean): Determines whether the learner must complete all the components in the course before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `false`.    
-
->>**_requireAssessmentPassed** (boolean): Determines whether the user must pass the course assessment, not simply complete it, before the course can be marked as finished in the LMS. Acceptable values are `true` or `false`. The default is `false`.  If this attribute and `_requireCourseCompleted` are both set to `true`, the learner must pass the course assessment as well as complete all components in order for the course can be marked as finished in the LMS.
-
->>**_shouldSubmitScore** (boolean): Determines whether the numeric scores attained in assessments will be reported to the LMS. Acceptable values are `true` or `false`. The default is `false`.  
-
->>**_shouldStoreResponses** (boolean): Determines whether the user's responses to questions should be persisted across sessions (by storing them in `cmi.suspend_data`) or not. Acceptable values are `true` or `false`. The default is `false`. Note that if you set this to `true`, the user will not be able to attempt questions within the course again unless some mechanism for resetting them is made available (for example, see `_isResetOnRevisit` in [adapt-contrib-assessment](https://github.com/adaptlearning/adapt-contrib-assessment)).
-
->>**_shouldRecordInteractions** (boolean): Determines whether the user's responses to questions should be tracked to  the `cmi.interactions` fields of the SCORM data model or not. Acceptable values are `true` or `false`. The default is `true`. Note that not all SCORM 1.2 conformant Learning Management Systems support `cmi.interactions`. The code will attempt to detect whether support is implemented or not and, if not, will fail gracefully. Occasionally the code is unable to detect when `cmi.interactions` are not supported, in those (rare) instances you can switch off interaction tracking using this property so as to avoid 'not supported' errors. You can also switch off interaction tracking for any individual question using the `_recordInteraction` property of question components. All core question components support recording of interactions, community components will not necessarily do so.
-
->**_reporting** (object): This object defines what status to report back to the LMS. Contains values for **_onTrackingCriteriaMet**, **_onAssessmentFailure** and **_resetStatusOnLanguageChange**.  
-
->>**_onTrackingCriteriaMet** (string): Specifies the status that is reported to the LMS when the tracking criteria are met. Acceptable values are: `"completed"`, `"passed"`, `"failed"`, and `"incomplete"`. If you are tracking a course by assessment, you would typically set this to `"passed"`. Otherwise, `"completed"` is the usual value.
-
->>**_onAssessmentFailure** (string): Specifies the status that is reported to the LMS when the assessment is failed. Acceptable values are `"failed"` and `"incomplete"`. Some Learning Management Systems will prevent the user from making further attempts at the course after status has been set to `"failed"`. Therefore, it is common to set this to `"incomplete"` to allow the user more attempts to pass an assessment.  
-
->>**_resetStatusOnLanguageChange** (boolean): If set to `true` the status of the course is set to "incomplete" when the languge is changed using the [adapt-contrib-languagePicker](https://github.com/adaptlearning/adapt-contrib-languagepicker) Plugin. Acceptable values are `true` or `false`. The default is `false`.       
-
->**_advancedSettings** (object): The advanced settings attribute group contains values for **_scormVersion**, **_showDebugWindow**, **_commitOnStatusChange**, **_timedCommitFrequency**, **_maxCommitRetries**, and **_commitRetryDelay**.
-
->>**_scormVersion** (string): This property defines what version of SCORM is targeted. Only SCORM 1.2 is officially supported by Adapt. SCORM 2004 should work, but the Adapt team don't include this version in testing. To enable SCORM 2004 support, change this value to `"2004"` and include the relevant SCORM 2004 packaging files (*imsmanifest.xml* and others - you can find examples over at [scorm.com](http://scorm.com/scorm-explained/technical-scorm/content-packaging/xml-schema-definition-files/)). The default is `"1.2"`.  
-
->>**_showDebugWindow** (boolean): If set to `true`, a pop-up window will be shown on course launch that gives detailed information about what SCORM calls are being made. This can be very useful for debugging SCORM issues. Note that this pop-up window will appear automatically if the SCORM code encounters an error, even if this is set to `false`. You can also hold down the keys 'd', 'e' and 'v' to force the popup window to open. The default is `false`. 
-
->>**_suppressErrors** (boolean): If set to `true`, an alert dialog will NOT be shown when a SCORM error occurs. Errors will still be logged but the user will not be informed that a problem has occurred. Note that setting **_showDebugWindow** to `true` will still cause the debug popup window to be shown on course launch, this setting merely suppresses the alert dialog that would normally be shown when a SCORM error occurs. *This setting should be used with extreme caution as, if enabled, users will not be told about any LMS connectivity issues or other SCORM tracking problems.*
-
->>**_commitOnStatusChange** (boolean): Determines whether a "commit" call should be made automatically every time the SCORM *lesson_status* is changed. The default is `true`.  
-
->>**_timedCommitFrequency** (number): Specifies the frequency - in minutes - at which a "commit" call will be made. Set this value to `0` to disable automatic commits. The default is `10`.  
-
->>**_maxCommitRetries** (number): If a "commit" call fails, this setting specifies how many more times the "commit" call will be attempted before giving up and throwing an error. The default is `5`.  
-
->>**_commitRetryDelay** (number): Specifies the interval in milliseconds between commit retries. The default is `2000`.
-
->>**_commitOnVisibilityChangeHidden** (boolean): Determines whether or not a "commit" call should be made when the [visibilityState](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState) of the course page changes to `"hidden"`. This functionality helps to ensure that tracking data is saved whenever the user switches to another tab or minimises the browser window - and is only available in [browsers that support the Page Visibility API](http://caniuse.com/#search=page%20visibility). The default is `true`.
-
-<div float align=right><a href="#top">Back to Top</a></div>  
-
-### Running a course without tracking while Spoor is installed  
-- Use *main.html* or *index.html* instead of *index_lms.html*.  
-*OR*  
-- Set `"_isEnabled": false` in *config.json*.
-
-### Client Local Storage / Fake LMS / Adapt LMS Behaviour Testing
-When **Spoor** is installed, *scorm_test_harness.html* can be used instead of *index.html* to allow the browser to store LMS states inside a browser cookie. This allows developer to test LMS specified behaviour outside of an LMS environment. If you run the command `grunt server-scorm`, this will start a local server and run the course using *scorm_test_harness.html* for you. 
-
-Note that due to the data storage limitations of browser cookies, there is less storage space available than an LMS would provide. In particular having `_shouldRecordInteractions` enabled can cause a lot of data to be written to the cookie, using up the available storage more quickly - it is advised that you disable this setting when testing via *scorm_test_harness.html*. As of v2.1.1, a browser alert will be displayed if the code detects that the cookie storage limit has been exceeded.
+Once installed, the extension will work automatically, provided it is configured properly.  You can should add an [IMS manifest file](https://github.com/adaptlearning/adapt-contrib-spoor#edit-the-manifest-file) if one is required, and any other appropriate details into [config.json](https://github.com/adaptlearning/adapt-contrib-spoor#configure-configjson) by following the instructions belonging to the adapt-contrib-spoor.
 
 ## Limitations
  
-Currently (officially) only supports SCORM 1.2  
+In AICC mode, only the following fields from the AICC specification, are available and are tracked:
+
+* Core.StudentId
+* Core.StudentName
+* Core.LessonLocation
+* Core.LessonStatus
+* Core.Exit
+* Core.Entry
+* Core.Score
+* Core.SessionTime
+* Core.TotalTime
+* SuspendData
+
+<div float align=right><a href="#top">Back to Top</a></div>  
 
 ----------------------------
-**Version number:**  2.1.1   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
+<a href="https://community.adaptlearning.org/" target="_blank"><img alt="@e-LfH" class="TableObject-item avatar" height="100" itemprop="image" src="https://avatars2.githubusercontent.com/u/30687181?v=4&amp;s=200" align="right"/></a> 
+**Version number:**  0.1.1
 **Framework versions:** 2.0.16
-**Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors) 
-**Accessibility support:** n/a   
-**RTL support:** n/a  
-**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge 12, IE 11, IE10, IE9, IE8, IE Mobile 11, Safari iOS 9+10, Safari OS X 9+10, Opera    
+**Author / maintainer:** e-Learning For Healthcare with [contributors](https://github.com/e-LfH/adapt-elfh-spoor/graphs/contributors) 
+**Accessibility support:** n/a
+**RTL support:** n/a
+**Cross-platform coverage:** Chrome, Chrome for Android, Firefox, Edge, IE 11, IE10, IE9, IE8, Safari iOS, Safari OS X
