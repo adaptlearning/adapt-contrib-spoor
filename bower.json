@@ -2,16 +2,15 @@
   "name": "adapt-contrib-spoor",
   "version": "2.1.1",
   "framework": "^2.0.16",
-  "homepage": "https://github.com/adaptlearning/adapt-contrib-spoor",
-  "issues": "https://github.com/adaptlearning/adapt_framework/issues/new?title=contrib-spoor%3A%20please%20enter%20a%20brief%20summary%20of%20the%20issue%20here&body=please%20provide%20a%20full%20description%20of%20the%20problem,%20including%20steps%20on%20how%20to%20replicate,%20what%20browser(s)/device(s)%20the%20problem%20occurs%20on%20and,%20where%20helpful,%20the%20contents%20of%20the%20SCORM%20debug%20window.",
-  "displayName" : "Spoor",
-  "extension" : "spoor",
-  "description": "An extension which allows basic SCORM tracking",
+  "homepage": "https://github.com/e-LfH/adapt-elfh-spoor",
+  "displayName": "e-LfH Spoor",
+  "extension": "e-LfH Spoor",
+  "description": "An extension based on adapt-contrib-spoor, which allows SCORM tracking but with the added ability to support HACP AICC tracking.",
   "main": "/js/adapt-contrib-spoor.js",
   "keywords": [
     "adapt-plugin",
     "adapt-extension"
   ],
   "license": "GPLv3",
-  "targetAttribute": "_spoor"
+  "targetAttribute": "_elfh_spoor"
 }

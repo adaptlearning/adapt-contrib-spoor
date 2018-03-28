@@ -1,6 +1,6 @@
 // to be added to course/config.json
 {
-	"_spoor": {
+	"_elfh_spoor": {
 		"_isEnabled": true,
 		"_tracking": {
 			"_requireCourseCompleted": true,
