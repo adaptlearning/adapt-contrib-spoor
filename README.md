@@ -59,9 +59,11 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 **_spoor**: (object): The Spoor object that contains values for **_isEnabled**, **_tracking**, **_reporting**, and **_advancedSettings**.
  
->>**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS when the course is launched via *index_lms.html*. If one is not available, a 'Could not connect to LMS' error message will be displayed. This error can be avoided during course development either by setting this to `false` or - more easily - by launching the course via *index.html*. This latter technique is also useful if you are developing a course that could be run either from an LMS or a regular web server.
+**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS when the course is launched via *index_lms.html*. If one is not available, a 'Could not connect to LMS' error message will be displayed. This error can be avoided during course development either by setting this to `false` or - more easily - by launching the course via *index.html*. This latter technique is also useful if you are developing a course that could be run either from an LMS or a regular web server.
 
->>**_shouldSubmitScore** (boolean): Determines whether the numeric scores attained in assessments will be reported to the LMS. Acceptable values are `true` or `false`. The default is `false`.  
+>**_tracking** (object): This object defines what kinds of data to record to the LMS. Contains values for **_shouldSubmitScore**, **_shouldStoreResponses** and **_shouldRecordInteractions**.  
+
+>>**_shouldSubmitScore** (boolean): Determines whether the assessment score will be reported to the LMS. Note that SCORM only supports one score per SCO, so if you have multiple assessments within your course, one aggregated score will be recorded. Acceptable values are `true` or `false`. The default is `false`.  
 
 >>**_shouldStoreResponses** (boolean): Determines whether the user's responses to questions should be persisted across sessions (by storing them in `cmi.suspend_data`) or not. Acceptable values are `true` or `false`. The default is `false`. Note that if you set this to `true`, the user will not be able to attempt questions within the course again unless some mechanism for resetting them is made available (for example, see `_isResetOnRevisit` in [adapt-contrib-assessment](https://github.com/adaptlearning/adapt-contrib-assessment)).
 
