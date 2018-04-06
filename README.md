@@ -43,7 +43,10 @@ If later you add more blocks, run this again to assign tracking IDs to the new b
 <div float align=right><a href="#top">Back to Top</a></div>  
 
 ### Configure *config.json*  
+**NOTE:**  as of Adapt/Spoor v3 you will first need to configure the settings in the **_completionCriteria** object in config.json to specify whether you want course completion to be based on content completion, assessment completion, or both. (In earlier versions of Spoor these settings were part of the spoor configuration - but were moved to the core of Adapt so that they could be used by other tracking extensions such as xAPI.)
+
 The attributes listed below are used in *config.json* to configure **Spoor**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json). Visit the [**Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).  
+
 
 #### Attributes
 
@@ -61,7 +64,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >**_reporting** (object): This object defines what status to report back to the LMS. Contains values for **_onTrackingCriteriaMet**, **_onAssessmentFailure** and **_resetStatusOnLanguageChange**.  
 
->>**_onTrackingCriteriaMet** (string): Specifies the status that is reported to the LMS when the tracking criteria are met. Acceptable values are: `"completed"`, `"passed"`, `"failed"`, and `"incomplete"`. If you are tracking a course by assessment, you would typically set this to `"passed"`. Otherwise, `"completed"` is the usual value.
+>>**_onTrackingCriteriaMet** (string): Specifies the status that is reported to the LMS when the tracking criteria (as defined in the **_completionCriteria** object in config.json) are met. Acceptable values are: `"completed"`, `"passed"`, `"failed"`, and `"incomplete"`. If you are tracking a course by assessment, you would typically set this to `"passed"`. Otherwise, `"completed"` is the usual value.
 
 >>**_onAssessmentFailure** (string): Specifies the status that is reported to the LMS when the assessment is failed. Acceptable values are `"failed"` and `"incomplete"`. Some Learning Management Systems will prevent the user from making further attempts at the course after status has been set to `"failed"`. Therefore, it is common to set this to `"incomplete"` to allow the user more attempts to pass an assessment.  
 
