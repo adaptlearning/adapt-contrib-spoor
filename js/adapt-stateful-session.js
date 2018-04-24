@@ -167,21 +167,14 @@ define([
 		},
 
 		onQuestionRecordInteraction:function(questionView) {
-			var responseType = typeof questionView.model.getResponseType === 'function' 
-				? questionView.model.getResponseType()
-				: questionView.getResponseType();
+			var responseType = questionView.getResponseType();
 
-			// If responseType doesn't contain any data, assume that the question 
-			// component hasn't been set up for cmi.interaction tracking
-			if (_.isEmpty(responseType)) return;
+			// if responseType doesn't contain any data, assume that the question component hasn't been set up for cmi.interaction tracking
+			if(_.isEmpty(responseType)) return;
 
 			var id = questionView.model.get('_id');
-			var response = typeof questionView.model.getResponse === 'function'
-				? questionView.model.getResponse()
-				: questionView.getResponse();
-			var result = typeof questionView.model.isCorrect === 'function' 
-				? questionView.model.isCorrect()
-				: questionView.isCorrect();
+			var response = questionView.getResponse();
+			var result = questionView.isCorrect();
 			var latency = questionView.getLatency();
 			
 			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
