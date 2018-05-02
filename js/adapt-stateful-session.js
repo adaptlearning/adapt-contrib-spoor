@@ -130,7 +130,7 @@ define([
 
 		onTrackingComplete: function(completionData) {
 			this.saveSessionState();
-			
+
 			var completionStatus = completionData.status.asLowerCase;
 
 			// The config allows the user to override the completion state.
@@ -160,30 +160,24 @@ define([
 
 		onAssessmentComplete: function(stateModel) {
 			Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
-			
+
 			this.saveSessionState();
 
 			this.submitScore(stateModel);
 		},
 
 		onQuestionRecordInteraction:function(questionView) {
-			var responseType = typeof questionView.model.getResponseType === 'function' 
-				? questionView.model.getResponseType()
-				: questionView.getResponseType();
+			var responseType = questionView.getResponseType();
 
-			// If responseType doesn't contain any data, assume that the question 
+			// If responseType doesn't contain any data, assume that the question
 			// component hasn't been set up for cmi.interaction tracking
-			if (_.isEmpty(responseType)) return;
+			if(_.isEmpty(responseType)) return;
 
 			var id = questionView.model.get('_id');
-			var response = typeof questionView.model.getResponse === 'function'
-				? questionView.model.getResponse()
-				: questionView.getResponse();
-			var result = typeof questionView.model.isCorrect === 'function' 
-				? questionView.model.isCorrect()
-				: questionView.isCorrect();
+			var response = questionView.getResponse();
+			var result = questionView.isCorrect();
 			var latency = questionView.getLatency();
-			
+
 			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
 		},
 
@@ -197,7 +191,7 @@ define([
 			this.reattachEventListeners();
 
 			this.saveSessionState();
-			
+
 			if (this._config._reporting && this._config._reporting._resetStatusOnLanguageChange === true) {
 				Adapt.offlineStorage.set("status", "incomplete");
 			}
@@ -217,7 +211,7 @@ define([
 		onWindowUnload: function() {
 			this.removeEventListeners();
 		}
-		
+
 	}, Backbone.Events);
 
 	return AdaptStatefulSession;
