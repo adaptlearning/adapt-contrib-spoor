@@ -127,11 +127,6 @@ define([
 			if (!response) return response;
 			if (responseType != 'choice' && responseType != 'matching') return response;
 
-			var zero = '0',
-				nine = '9',
-				a = 'a',
-				z = 'z';
-
 			response = response.split(/,|#/);
 
 			if (responseType == 'choice') {
@@ -147,10 +142,10 @@ define([
 				var i;
 
 				// if [0-9] then ok
-				if (r.length == 1 && r >= zero && r <= nine) return r;
+				if (r.length == 1 && r >= '0' && r <= '9') return r;
 
 				// if [a-z] then ok
-				if (r.length == 1 && r >= a && r <= z) return r;
+				if (r.length == 1 && r >= 'a' && r <= 'z') return r;
 
 				// try to map integers 10-35 to [a-z]
 				i = parseInt(r);
