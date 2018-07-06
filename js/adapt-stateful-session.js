@@ -1,10 +1,9 @@
 define([
 	'core/js/adapt',
-	'./scorm',
 	'./serializers/default',
 	'./serializers/questions',
 	'core/js/enums/completionStateEnum'
-], function(Adapt, scorm, serializer, questions, COMPLETION_STATE) {
+], function(Adapt, serializer, questions, COMPLETION_STATE) {
 
 	// Implements Adapt session statefulness
 
@@ -119,44 +118,6 @@ define([
 			this.setupEventListeners();
 		},
 
-		/*
-		* SCORM 1.2 requires that the identifiers in cmi.interactions.n.student_response for choice and matching activities be a character from [0-9a-z].
-		* When numeric identifiers are used this function attempts to map identifiers 10 to 35 to [a-z]. Resolves issues/1376.
-		*/
-		_checkResponse: function(response, responseType) {
-			if (!response) return response;
-			if (responseType != 'choice' && responseType != 'matching') return response;
-
-			response = response.split(/,|#/);
-
-			if (responseType == 'choice') {
-				response = response.map(checkIdentifier);
-			} else {
-				response = response.map(function(r) {
-					var identifiers = r.split('.');
-					return checkIdentifier(identifiers[0]) + '.' + checkIdentifier(identifiers[1]);
-				});
-			}
-
-			function checkIdentifier(r) {
-				var i;
-
-				// if [0-9] then ok
-				if (r.length == 1 && r >= '0' && r <= '9') return r;
-
-				// if [a-z] then ok
-				if (r.length == 1 && r >= 'a' && r <= 'z') return r;
-
-				// try to map integers 10-35 to [a-z]
-				i = parseInt(r);
-				if (isNaN(i) || i < 10 || i > 35) throw 'Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2';
-
-				return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
-			};
-
-			return response.join(',');
-		},
-
 		onBlockComplete: function(block) {
 			this.saveSessionState();
 		},
@@ -216,8 +177,6 @@ define([
 			var response = questionView.getResponse();
 			var result = questionView.isCorrect();
 			var latency = questionView.getLatency();
-
-			if (scorm.getVersion() == '1.2') response = this._checkResponse(response, responseType);
 
 			Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
 		},
