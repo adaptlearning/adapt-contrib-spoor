@@ -128,10 +128,9 @@ define([
 			if (responseType != 'choice' && responseType != 'matching') return response;
 
 			var zero = '0',
-				nine = '9';
-				a = 'a';
+				nine = '9',
+				a = 'a',
 				z = 'z';
-				base = a.charCodeAt(0);
 
 			response = response.split(/,|#/);
 
@@ -157,7 +156,7 @@ define([
 				i = parseInt(r);
 				if (isNaN(i) || i < 10 || i > 35) throw 'Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2';
 
-				return String.fromCharCode(base + i - 10); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
+				return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
 			};
 
 			return response.join(',');
