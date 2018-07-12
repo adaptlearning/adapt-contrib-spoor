@@ -33,8 +33,8 @@ define([
             scorm.initialize();
 
             /*
-            force offlineStorage-scorm to initialise suspendDataStore - this allows us to do things like store the user's 
-            chosen language before the rest of the course data loads 
+            force offlineStorage-scorm to initialise suspendDataStore - this allows us to do things like store the user's
+            chosen language before the rest of the course data loads
             */
             Adapt.offlineStorage.get();
 
@@ -132,7 +132,7 @@ define([
                 scorm.finish();
             }
         }
-        
+
     }, Backbone.Events);
 
     Spoor.initialize();

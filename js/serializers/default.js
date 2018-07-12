@@ -65,14 +65,14 @@ define([
                 if (!block) {
                     return;
                 }
-            
+
                 block.getChildren().each(function(child) {
                     child.set('_isComplete', true);
                 });
             }
 
             step();
-        },  
+        },
 
         deserializeSaveState: function (string) {
             var completionArray = string.split("");

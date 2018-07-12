@@ -108,7 +108,7 @@
 		default:
 			throw "Too many arguments";
 		}
-		
+
 	}
 	DataType.VARIABLELENGTHDESCRIPTORSIZE = 8;
 	DataType._types = {};
@@ -153,7 +153,7 @@
 		case "string":
 			variableDataType = DataType.getName("string");
 			break;
-		default: 
+		default:
 			var supportedItemDataTypes = DataType.getTypes(variableNativeType);
 			switch (supportedItemDataTypes.length) {
 			case 1:
@@ -163,7 +163,7 @@
 				throw "Type not found '"+variableNativeType+"'";
 			}
 		}
-	
+
 		if (!variableDataType) throw "Cannot assess type '"+variableNativeType+"'";
 
 		return variableDataType;
@@ -176,7 +176,7 @@
 			var itemDataType = DataType.getVariableType(item);
 
 			if (_.findWhere(foundItemTypes, { name: itemDataType.name })) continue;
-	
+
 			foundItemTypes.push(itemDataType);
 		}
 
@@ -186,7 +186,7 @@
 		case 1:
 			//single value type
 		 	return foundItemTypes[0];
-		default: 
+		default:
 			//many value types
 			var nativeTypeNames = _.pluck(foundItemTypes, 'type');
 			var uniqueNativeTypeNames = _.uniq(nativeTypeNames);
@@ -206,7 +206,7 @@
 
 			throw "Unsupported data types";
 		}
-		
+
 	};
 	(function() {
 		var types = [
@@ -292,7 +292,7 @@
 		}
 	})();
 
-	
+
 
 	function Converter(fromType, toType) {
 		fromType = Converter.translateTypeAlias(fromType);
@@ -303,7 +303,7 @@
 		if (fromType != "binary" && toType != "binary") {
 			if (!Converter._converters[fromType]) throw "Type not found '" + fromType + "'";
 			if (!Converter._converters[fromType]['binary']) throw "Type not found 'binary'";
-			
+
 			var bin = Converter._converters[fromType]['binary'].call(this, args[0], Converter.WRAPOUTPUT);
 
 			if (!Converter._converters['binary'][toType]) throw "Type not found '"+toType+"'";
@@ -398,10 +398,10 @@
 				var dblStr = dbl.toString(10);
 
 				var isMinus = dbl < 0;
-			
+
 				var baseStr, exponentStr, highStr, lowStr, decimalPosition, hasDecimal;
 
-				
+
 				var exponentPos = dblStr.indexOf("e");
 				if (exponentPos > -1) {
 					//exponential float representation "nE-x"
@@ -452,7 +452,7 @@
 				var binLong = Padding.fillBlockLeft (parseInt(baseStr, 10).toString(2), 4);
 				var binMinus = isMinus ? "1" : "0";
 				var binExponent = Padding.fillLeft( parseInt(exponentStr, 10).toString(2), 7);
-				
+
 				bin.push( binMinus );
 				bin.push( binExponent );
 				bin.push( binLong );
@@ -580,7 +580,7 @@
 					if (hasVariableLengthChildren) {
 						var VLDS = DataType.VARIABLELENGTHDESCRIPTORSIZE;
 						while ( binItems != "" ) {
-							
+
 							var variableLength = Converter._variableLength( binItems );
 							var binItem = binItems.substr(0, VLDS + variableLength);
 							binItems = binItems.substr(VLDS+variableLength);
@@ -614,7 +614,7 @@
 			    var base64 = "";
 			    for (var b = 0; b < 10000; b++) {
 			        if (b*6 >= binLength) break;
-			     
+
 			        var block = bin.substr(b*6,6);
 			        base64 += Base64(parseInt(block, 2));
 			    }
@@ -632,7 +632,7 @@
 			    var hex = "";
 			    for (var b = 0; b < 10000; b++) {
 			        if (b*4 >= binLength) break;
-			     
+
 			        var block = bin.substr(b*4,4);
 			        hex += parseInt(block, 2).toString(16);
 			    }
@@ -640,7 +640,7 @@
 			},
 			"double": function ConverterBinaryToDouble(bin, wrap) {
 				var typeDef = DataType("double");
-				
+
 				if (wrap !== false)
 					bin = Converter._variableUnwrapLength(bin);
 
@@ -674,7 +674,7 @@
 			}
 		}
 	};
-	
+
 	window.SCORMSuspendData = {
 		serialize: function SCORMSuspendDataSerialize(arr) {
 			return Converter ("array", "base64", arr);
