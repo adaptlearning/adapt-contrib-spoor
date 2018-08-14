@@ -448,7 +448,7 @@ define (function(require) {
 
         if(this.timedCommitFrequency > 0) {
             var delay = this.timedCommitFrequency * (60 * 1000);
-            this.timedCommitIntervalID = window.setInterval(_.bind(this.commit, this), delay);
+            this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
         }
     };
 
@@ -457,7 +457,7 @@ define (function(require) {
 
         this.commitRetryPending = true;// stop anything else from calling commit until this is done
 
-        this.retryCommitTimeoutID = window.setTimeout(_.bind(this.doRetryCommit, this), this.commitRetryDelay);
+        this.retryCommitTimeoutID = window.setTimeout(this.doRetryCommit.bind(this), this.commitRetryDelay);
     };
 
     ScormWrapper.prototype.doRetryCommit = function() {

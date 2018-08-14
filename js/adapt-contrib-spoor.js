@@ -98,7 +98,7 @@ define([
                 advancedSettings._commitOnVisibilityChangeHidden !== false) &&
                 document.addEventListener;
 
-            this._onWindowUnload = _.bind(this.onWindowUnload, this);
+            this._onWindowUnload = this.onWindowUnload.bind(this);
             $(window).on('beforeunload unload', this._onWindowUnload);
 
             if (shouldCommitOnVisibilityChange) {
