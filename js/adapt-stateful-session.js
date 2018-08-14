@@ -15,18 +15,18 @@ define([
 
         // Session Begin
         initialize: function(callback) {
-            this._onWindowUnload = _.bind(this.onWindowUnload, this);
+            this._onWindowUnload = this.onWindowUnload.bind(this);
 
             this.getConfig();
 
             this.getLearnerInfo();
 
             // Restore state asynchronously to prevent IE8 freezes
-            this.restoreSessionState(_.bind(function() {
+            this.restoreSessionState(function() {
                 // still need to defer call because AdaptModel.check*Status functions are asynchronous
-                _.defer(_.bind(this.setupEventListeners, this));
+                _.defer(this.setupEventListeners.bind(this));
                 callback();
-            }, this));
+            }.bind(this));
         },
 
         getConfig: function() {
@@ -61,12 +61,12 @@ define([
             var sessionPairs = Adapt.offlineStorage.get();
             var hasNoPairs = _.keys(sessionPairs).length === 0;
 
-            var doSynchronousPart = _.bind(function() {
+            var doSynchronousPart = function() {
                 if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
                 if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
                 if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
                 callback();
-            }, this);
+            }.bind(this);
 
             if (hasNoPairs) return callback();
 
