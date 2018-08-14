@@ -3,10 +3,6 @@ Logger = function() {
     this.registeredViews = [];
 };
 
-if (!Date.now) {
-    Date.now = function() { return new Date().getTime(); }
-}
-
 // static
 Logger.instance = null;
 Logger.LOG_TYPE_INFO = 0;
