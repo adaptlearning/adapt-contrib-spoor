@@ -1,5 +1,5 @@
 define([
-    './scorm/API',
+    'libraries/SCORM_API_wrapper',
     './scorm/wrapper',
     './scorm/logger'
 ], function(API, wrapper, logger) {
