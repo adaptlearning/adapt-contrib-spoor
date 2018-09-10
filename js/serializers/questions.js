@@ -36,7 +36,7 @@ define([
 
         captureData: function() {
             var data = [];
-            
+
             var trackingIds = Adapt.blocks.pluck("_trackingId");
             var blocks = {};
             var countInBlock = {};
@@ -74,7 +74,7 @@ define([
                         hasUserAnswer = false;
                         isUserAnswerArray = false;
                     }
-                    
+
                     var numericParameters = [
                             blockLocation,
                             block['_trackingId'],
@@ -128,11 +128,11 @@ define([
             } catch(e) {
                 console.error(e);
             }
-            
-        },    
+
+        },
 
         releaseData: function (arr) {
-            
+
             for (var i = 0, l = arr.length; i < l; i++) {
                 var dataItem = arr[i];
 
