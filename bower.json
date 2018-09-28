@@ -1,7 +1,7 @@
 {
   "name": "adapt-contrib-spoor",
-  "version": "2.1.1",
-  "framework": "^2.0.16",
+  "version": "3.0.0",
+  "framework": ">=3",
   "homepage": "https://github.com/e-LfH/adapt-elfh-spoor",
   "displayName": "e-LfH Spoor",
   "extension": "e-LfH Spoor",

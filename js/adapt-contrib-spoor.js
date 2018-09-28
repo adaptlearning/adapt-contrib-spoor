@@ -14,15 +14,17 @@ define([
     //Session Begin
 
         initialize: function() {
-            this.listenToOnce(Adapt, "configModel:dataLoaded", this.onConfigLoaded);
-            this.listenToOnce(Adapt, "app:dataReady", this.onDataReady);
+            this.listenToOnce(Adapt, {
+                'offlineStorage:prepare': this.onPrepareOfflineStorage,
+                'app:dataReady': function() {
+                    Adapt.wait.for(adaptStatefulSession.initialize.bind(adaptStatefulSession));
+                }
+            });
         },
 
-        onConfigLoaded: function() {
+        onPrepareOfflineStorage: function() {
             if (!this.checkConfig()) {
-                if (Adapt.offlineStorage.setReadyStatus) {// backwards-compatibility check - setReadyStatus was only introduced in framework v2.0.14
-                    Adapt.offlineStorage.setReadyStatus();
-                }
+                Adapt.offlineStorage.setReadyStatus();
                 return;
             }
 
@@ -31,30 +33,21 @@ define([
             scorm.initialize();
 
             /*
-            force offlineStorage-scorm to initialise suspendDataStore - this allows us to do things like store the user's 
-            chosen language before the rest of the course data loads 
+            force offlineStorage-scorm to initialise suspendDataStore - this allows us to do things like store the user's
+            chosen language before the rest of the course data loads
             */
             Adapt.offlineStorage.get();
 
-            if (Adapt.offlineStorage.setReadyStatus) {
-                Adapt.offlineStorage.setReadyStatus();
-            }
+            Adapt.offlineStorage.setReadyStatus();
 
             this.setupEventListeners();
-        },
-
-        onDataReady: function() {
-            Adapt.trigger('plugin:beginWait');
-            adaptStatefulSession.initialize(function() {
-                Adapt.trigger('plugin:endWait');
-            });
         },
 
         checkConfig: function() {
             this._config = Adapt.config.get('_elfh_spoor') || false;
 
             if (this._config && this._config._isEnabled !== false) return true;
-            
+
             return false;
         },
 
@@ -109,6 +102,7 @@ define([
             this._onWindowUnload = _.bind(this.onWindowUnload, this);
             $(window).on('beforeunload unload pagehide', this._onWindowUnload);
 
+
             if (shouldCommitOnVisibilityChange) {
                 document.addEventListener("visibilitychange", this.onVisibilityChange);
             }
@@ -144,7 +138,7 @@ define([
                 scorm.finish();
             }
         }
-        
+
     }, Backbone.Events);
 
     Spoor.initialize();

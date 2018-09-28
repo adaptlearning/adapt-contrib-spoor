@@ -33,13 +33,14 @@ If you are creating your course using the Adapt framework directly and outside o
 1. `adapt uninstall adapt-contrib-spoor`
 2. `adapt install adapt-elfh-spoor`
 
-## Usage Instructions
+### Configure *config.json*  
+**NOTE:**  as of Adapt/Spoor v3 you will first need to configure the settings in the **_completionCriteria** object in config.json to specify whether you want course completion to be based on content completion, assessment completion, or both. (In earlier versions of Spoor these settings were part of the spoor configuration - but were moved to the core of Adapt so that they could be used by other tracking extensions such as xAPI.)
 
-Once installed, the extension will work automatically, provided it is configured properly.  You can should add an [IMS manifest file](https://github.com/adaptlearning/adapt-contrib-spoor#edit-the-manifest-file) if one is required, and any other appropriate details into [config.json](https://github.com/adaptlearning/adapt-contrib-spoor#configure-configjson) by following the instructions belonging to the adapt-contrib-spoor.
+The attributes listed below are used in *config.json* to configure **Spoor**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json). Visit the [**Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).  
 
 ## Limitations
  
-In AICC mode, only the following fields from the AICC specification, are available and are tracked:
+Supports SCORM 1.2, but in AICC mode only the following fields from the specification are available and are tracked:
 
 * Core.StudentId
 * Core.StudentName
@@ -56,9 +57,10 @@ In AICC mode, only the following fields from the AICC specification, are availab
 
 ----------------------------
 <a href="https://community.adaptlearning.org/" target="_blank"><img alt="@e-LfH" class="TableObject-item avatar" height="100" itemprop="image" src="https://avatars2.githubusercontent.com/u/30687181?v=4&amp;s=200" align="right"/></a> 
-**Version number:**  0.1.1
-**Framework versions:** 2.0.16
+**Version number:**  see bower.json  
+**Framework versions:** 3.0.0+
 **Author / maintainer:** e-Learning For Healthcare with [contributors](https://github.com/e-LfH/adapt-elfh-spoor/graphs/contributors) 
 **Accessibility support:** n/a
 **RTL support:** n/a
-**Cross-platform coverage:** Chrome, Chrome for Android, Firefox, Edge, IE 11, IE10, IE9, IE8, Safari iOS, Safari OS X
+**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (latest version), Edge, IE11, Safari 10+11 for macOS+iOS
+
