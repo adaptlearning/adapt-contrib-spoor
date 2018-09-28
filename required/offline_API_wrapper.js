@@ -15,9 +15,9 @@ function storageWarning() {
 	var notificationMethod = alert;
 	this.__storageWarningTimeoutId = null;
 	if (require) Adapt = require('coreJS/adapt');
-	if (Adapt && Adapt.config && Adapt.config.has('_spoor')) {
-		if (Adapt.config.get('_spoor')._advancedSettings &&
-			Adapt.config.get('_spoor')._advancedSettings._suppressErrors === true) {
+	if (Adapt && Adapt.config && Adapt.config.has('_elfh_spoor')) {
+		if (Adapt.config.get('_elfh_spoor')._advancedSettings &&
+			Adapt.config.get('_elfh_spoor')._advancedSettings._suppressErrors === true) {
 			notificationMethod = console.error;
 		}
 	}

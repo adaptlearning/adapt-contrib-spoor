@@ -123,7 +123,7 @@ define([
         },
 
         useTemporaryStore: function() {
-            var cfg = Adapt.config.get('_spoor');
+            var cfg = Adapt.config.get('_elfh_spoor');
 
             if (!scorm.lmsConnected || (cfg && cfg._isEnabled === false)) return true;
             return false;

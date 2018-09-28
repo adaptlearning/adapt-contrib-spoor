@@ -16,7 +16,7 @@ define([
                 console.error(message);
             }
 
-            var excludeAssessments = Adapt.config.get('_spoor') && Adapt.config.get('_spoor')._tracking && Adapt.config.get('_spoor')._tracking._excludeAssessments;
+            var excludeAssessments = Adapt.config.get('_elfh_spoor') && Adapt.config.get('_elfh_spoor')._tracking && Adapt.config.get('_elfh_spoor')._tracking._excludeAssessments;
 
             // create the array to be serialised, pre-populated with dashes that represent unused tracking ids - because we'll never re-use a tracking id in the same course
             var data = [];
