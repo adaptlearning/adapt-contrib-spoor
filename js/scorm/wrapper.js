@@ -48,6 +48,7 @@ define (function(require) {
 
         this.logger = Logger.getInstance();
         this.scorm = pipwerks.SCORM;
+        this.aicc = elfh.AICC;
 
         this.suppressErrors = false;
 
@@ -88,8 +89,17 @@ define (function(require) {
     };
 
     ScormWrapper.prototype.initialize = function() {
+        
         this.logger.debug("ScormWrapper::initialize");
-        this.lmsConnected = this.scorm.init();
+        
+        if (this.aicc.init()) 
+		{
+			this.scorm = this.aicc;
+			this.lmsConnected = true;
+		}
+		else {
+			this.lmsConnected =  this.scorm.init();
+		}
 
         if (this.lmsConnected) {
             this.startTime = new Date();
