@@ -6,7 +6,7 @@ e-Learning For Healthcare AICC Wrapper for JavaScript (https://github.com/e-LfH/
 v0.1
 
 Created by Ian Robinson for e-Learning For Healthcare (http://www.e-lfh.org.uk), January 2017
-Inspired by API.js pipwerks SCORM Wrapper for JavaScript (v1.1.20160322), used in the Adapte framework, 
+Inspired by API.js pipwerks SCORM Wrapper for JavaScript (v1.1.20160322), used in the Adapt framework, 
 which was created by Philip Hutchison, January 2008-2016 - https://github.com/pipwerks/scorm-api-wrapper
 
 Currently has a dependence on the pipwerks.UTILS object for reporting status and error messages
