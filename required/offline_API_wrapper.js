@@ -68,14 +68,14 @@ var API = {
 	},
 	LMSStore: function(force) {
 		if (window.ISCOOKIELMS === false) return;
-		if (!force && API.cookie("_spoor") === undefined) return;
+		if (!force && API.cookie("_elfh_spoor") === undefined) return;
 
 		var stringified = JSON.stringify(this.data);
 
-		API.cookie("_spoor", stringified);
+		API.cookie("_elfh_spoor", stringified);
 
 		// a length mismatch will most likely indicate cookie storage limit exceeded
-		if (API.cookie("_spoor").length != stringified.length) {
+		if (API.cookie("_elfh_spoor").length != stringified.length) {
 			// defer call to avoid excessive alerts
 			if (this.__storageWarningTimeoutId == null) {
 				this.__storageWarningTimeoutId = setTimeout(function() {storageWarning.apply(API);}, 1000);
@@ -87,7 +87,7 @@ var API = {
 			this.data = {};
 			return;
 		}
-		this.data = API.cookie("_spoor");
+		this.data = API.cookie("_elfh_spoor");
 		if (this.data === undefined) {
 			this.data = {};
 			return false;
@@ -97,7 +97,7 @@ var API = {
 		}
 	},
 	LMSClear: function() {
-		API.removeCookie("_spoor");
+		API.removeCookie("_elfh_spoor");
 	}
 };
 
@@ -145,14 +145,14 @@ var API_1484_11 = {
 	},
 	LMSStore: function(force) {
 		if (window.ISCOOKIELMS === false) return;
-		if (!force && API_1484_11.cookie("_spoor") === undefined) return;
+		if (!force && API_1484_11.cookie("_elfh_spoor") === undefined) return;
 
 		var stringified = JSON.stringify(this.data);
 
-		API_1484_11.cookie("_spoor", stringified);
+		API_1484_11.cookie("_elfh_spoor", stringified);
 
 		// a length mismatch will most likely indicate cookie storage limit exceeded
-		if (API_1484_11.cookie("_spoor").length != stringified.length) {
+		if (API_1484_11.cookie("_elfh_spoor").length != stringified.length) {
 			// defer call to avoid excessive alerts
 			if (this.__storageWarningTimeoutId == null) {
 				this.__storageWarningTimeoutId = setTimeout(function() {storageWarning.apply(API_1484_11);}, 1000);
@@ -164,7 +164,7 @@ var API_1484_11 = {
 			this.data = {};
 			return;
 		}
-		this.data = API_1484_11.cookie("_spoor");
+		this.data = API_1484_11.cookie("_elfh_spoor");
 		if (this.data === undefined) {
 			this.data = {};
 			return false;
@@ -174,7 +174,7 @@ var API_1484_11 = {
 		}
 	},
 	LMSClear: function() {
-		API_1484_11.removeCookie("_spoor");
+		API_1484_11.removeCookie("_elfh_spoor");
 	}
 };
 
