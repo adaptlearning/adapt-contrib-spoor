@@ -148,7 +148,7 @@ elfh.AICC.init = function(){
         debug = aicc.debug,
         traceMsgPrefix = "AICC.connection.initialize ";
 
-    trace("aicc connection.initialize called.");
+    trace("AICC initialize called.");
 
     if(!aicc.isConnected){
 

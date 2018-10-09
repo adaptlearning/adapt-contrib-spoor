@@ -26,6 +26,7 @@ function AICC_LMS() {
     self.StudentName = "";
     self.TotalTime = 0;
     self.SessionTime = 0;
+    self.EntryValue = "";
     self.ExitValue = "";
     self.LmsResponseError = 0;
     self.LmsResponseErrorText = "";
@@ -34,6 +35,7 @@ function AICC_LMS() {
         self.Id = "";
         self.LmsUrl = "";
         self.LmsResponse = "";
+        self.EntryValue = "";
         self.ExitValue = "";
         self.SuspendData = "";
         self.MasteryScore = 0;
@@ -144,14 +146,28 @@ function AICC_LMS() {
                     else if (key == "student_name") {
                         self.StudentName = value;
                     }
-                    else if (key == "exit") {
-                        self.ExitValue = value;
-                    }
                     else if (key == "lesson_location") {
                         self.LessonLocation = value;
                     }
                     else if (key == "lesson_status") {
-                        self.LessonStatus = self.UnAbbreviateCompletionStatus(value);
+
+                        console.log("! first lesson_status code !");
+
+                        // this contains a comma, then this field contains both the lesson_status and the core.entry value
+                        // otherwise it contains on the lesson_status
+                        if (value.indexOf(",") > -1)
+                        {
+                            // split up lesson status and entry value
+                            var temp = value.split(",");
+                            
+                            self.LessonStatus = self.UnAbbreviateCompletionStatus(temp[0]);
+                            self.EntryValue = self.UnAbbreviateEntry(temp[1]);
+                            
+                        }
+                        else
+                        {
+                            self.LessonStatus = self.UnAbbreviateCompletionStatus(value);
+                        }
                     }
                     else if (key == "score") {
 
@@ -213,6 +229,8 @@ function AICC_LMS() {
                         switch (sName) {
                             case "lesson_status":
                                 {
+                                    console.log("second lesson_status code!");
+
                                     sValue = sValue.toLowerCase();
                                     var arValues = sValue.split(",");
 
@@ -250,28 +268,54 @@ function AICC_LMS() {
         }
     };
 
-    self.UnAbbreviateCompletionStatus = function(s) {
+    self.UnAbbreviateEntry = function(s) {
+        
+        var entry = s.trim().toLowerCase();
 
-        switch (s) {
-            case "c":
-                s = "completed";
+        switch (entry) {
+            case "a":
+            case "ab":
+                entry = "ab-initio";
                 break;
-            case "i":
-            case "i,resume":
-                s = "incomplete";
-                break;
-            case "n":
-                s = "not attempted";
-                break;
-            case "p":
-                s = "passed";
-                break;
-            case "f":
-                s = "failed";
+            case "r":
+                entry = "resume";
                 break;
         }
 
-        return s;
+        return entry;
+
+    };
+
+    self.UnAbbreviateCompletionStatus = function(s) {
+        // not attempted
+        // na
+        // n
+
+        var status = s.trim().toLowerCase();
+
+        switch (status) {
+            case "c":
+                status = "completed";
+                break;
+            case "i":
+                status = "incomplete";
+                break;
+            case "n":
+            case "na":
+                status = "not attempted";
+                break;
+            case "p":
+                status = "passed";
+                break;
+            case "f":
+                status = "failed";
+                break;
+            case "b":
+                status = "browser";
+                break;
+        }
+
+        return status;
     };
 
     self.PrepareData = function () {
@@ -282,10 +326,10 @@ function AICC_LMS() {
 
         sData += "[CORE]" + sCRLF;
         sData += "Lesson_Location=" + self.LessonLocation + sCRLF;
-        sData += "Lesson_Status=" + self.LessonStatus + sCRLF;
+        sData += "Lesson_Status=" + self.LessonStatus + "," + self.ExitValue + sCRLF;
         sData += "Score=" + self.Score + sCRLF;
         sData += "Time=" + self.SessionTime + sCRLF;
-        sData += "Exit=" + self.ExitValue + sCRLF;
+        //sData += "Exit=" + self.ExitValue + sCRLF;
         
 
         sData += "[CORE_LESSON]" + sCRLF;
@@ -438,6 +482,9 @@ function AICC_LMS() {
 
                 case "cmi.core.exit":
                     return self.ExitValue;
+                    break;
+                case "cmi.core.entry":
+                    return self.EntryValue;
                     break;
                 case "cmi.core.lesson_location":
                     return self.LessonLocation;
