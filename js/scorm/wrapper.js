@@ -1,4 +1,6 @@
-define (function(require) {
+define ([
+    'libraries/SCORM_API_wrapper'
+], function(pipwerks) {
 
     /*
         IMPORTANT: This wrapper uses the Pipwerks SCORM wrapper and should therefore support both SCORM 1.2 and 2004. Ensure any changes support both versions.
