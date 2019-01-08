@@ -185,6 +185,110 @@
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, a 'commit' call will be made whenever the course window is hidden/minimised. Requires a browser that supports the 'visibilitychange' event."
+                    },
+                    "_debugInteractions": {
+                      "type": "boolean",
+                      "default": false,
+                      "title": "Debug interactions",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, interactions data will be written to the offline API to aid debugging. N.B. this only applies to launch methods that use the offline API."
+                    },
+                    "_debugObjectives": {
+                      "type": "boolean",
+                      "default": false,
+                      "title": "Debug objectives",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, objectives data will be written to the offline API to aid debugging. N.B. this only applies to launch methods that use the offline API."
+                    }
+                  }
+                },
+                "_objectives": {
+                  "type": "object",
+                  "required": false,
+                  "title": "Objectives",
+                  "help": "Support for SCORM cmi.objectives",
+                  "properties": {
+                    "_isEnabled": {
+                      "type": "boolean",
+                      "required": true,
+                      "default": true,
+                      "title": "Is Enabled",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, the plugin will record objectives if any have been configured. Uncheck to switch off objectives tracking."
+                    },
+                    "_items": {
+                      "type": "array",
+                      "required": true,
+                      "title": "Objective items",
+                      "help": "A list of objectives to report back to the LMS.",
+                      "items": {
+                        "type": "object",
+                        "required": true,
+                        "properties": {
+                          "_id": {
+                            "type": "string",
+                            "required": true,
+                            "default": "",
+                            "title": "ID",
+                            "inputType": "Text",
+                            "validators": [],
+                            "help": "The string to use for the objective identifier or a path to the identifier (see documentation). The identifier is used for the cmi.objectives.[n].id field and therefore must be alphanumeric with no whitespace."
+                          },
+                          "_initialiseWithNotAttempted": {
+                            "type": "boolean",
+                            "required": true,
+                            "default": true,
+                            "title": "Initialise with 'not attempted'",
+                            "inputType": "Checkbox",
+                            "validators": [],
+                            "help": "If enabled, when the course is first launched the objective status will be set to 'not attempted'."
+                          },
+                          "_immutableStates": {
+                            "type":"array",
+                            "required": true,
+                            "title": "Immutable states",
+                            "help": "Once an objective enters one of the given states its status will not be changed thereafter.",
+                            "items": {
+                              "type": "object",
+                              "required": true,
+                              "properties": {
+                                "_status": {
+                                  "type": "string",
+                                  "required": true,
+                                  "default": "completed",
+                                  "title":"Status",
+                                  "enum": ["completed", "passed", "failed", "incomplete", "browsed", "not attempted"],
+                                  "inputType": {
+                                    "type": "Select",
+                                    "options": ["completed", "passed", "failed", "incomplete", "browsed", "not attempted"]
+                                  },
+                                  "validators": []
+                                }
+                              }
+                            }
+                          },
+                          "_content": {
+                            "type":"array",
+                            "required": false,
+                            "default": [""],
+                            "title": "Content model identifiers",
+                            "help": "Provide a list of one or more model identifiers if the objective is completion-based. When one of the listed models is completed the objective will move to the 'incomplete' state. When all listed models are completed the objective will move to the 'completed' state.",
+                            "inputType": "List"
+                          },
+                          "_event": {
+                            "type": "string",
+                            "required": false,
+                            "default": "",
+                            "title": "Event",
+                            "inputType": "Text",
+                            "validators": [],
+                            "help": "Provide a value for this property if the objective is event-based. The given string is the name of the event that should be triggered on the global Adapt object to indicate that the objective should change state. The state may be passed as an argument when the event is triggered."
+                          }
+                        }
+                      }
                     }
                   }
                 }

@@ -1,8 +1,9 @@
 define([
 	'core/js/adapt',
 	'./serializers/default',
-	'./serializers/questions'
-], function(Adapt, serializer, questions) {
+	'./serializers/questions',
+	'./adapt-objectives'
+], function(Adapt, serializer, questions, objectives) {
 
 	//Implements Adapt session statefulness
 	
@@ -26,6 +27,8 @@ define([
 				_.defer(_.bind(this.setupEventListeners, this));
 				callback();
 			}, this));
+
+			objectives.initialize();
 		},
 
 		getConfig: function() {

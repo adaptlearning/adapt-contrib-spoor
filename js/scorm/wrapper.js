@@ -533,7 +533,7 @@ define (function(require) {
 		
 		var maxLength = this.isSCORM2004() ? 250 : 255;
 
-		if(response.length > maxLength) {
+		if (response.length > maxLength) {
 			response = response.substr(0, maxLength);
 
 			this.logger.warn("ScormWrapper::recordInteractionFillIn: response data for " + id + " is longer than the maximum allowed length of " + maxLength + " characters; data will be truncated to avoid an error.");
@@ -542,6 +542,221 @@ define (function(require) {
 		var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
 		scormRecordInteraction.call(this, id, response, correct, latency, type);
+	};
+
+	ScormWrapper.prototype.setObjectiveScore = function(objectiveId, score, minScore, maxScore) {
+		
+		var objectiveIndex;
+		var retVal;
+		
+		this.logger.info("ScormWrapper::setObjectiveScore: objectiveId=" + objectiveId + ", score=" + score + ", maxScore=" + maxScore + ", minScore=" + minScore);
+		
+		objectiveIndex = this.findObjectiveIndexFromID(objectiveId);
+		
+		if (objectiveIndex == -1) {
+			this.logger.info("No objective with ID " + objectiveId);
+			objectiveIndex = 0;
+		}
+		
+		this.logger.info("objectiveIndex=" + objectiveIndex);
+		
+		retVal = this.setValue("cmi.objectives." + objectiveIndex + ".id", objectiveId);
+		retVal = retVal && this.setValue("cmi.objectives." + objectiveIndex + ".score.raw", score);
+		retVal = retVal && this.setValue("cmi.objectives." + objectiveIndex + ".score.max", maxScore);
+		retVal = retVal && this.setValue("cmi.objectives." + objectiveIndex + ".score.min", minScore);
+		
+		this.logger.info("Returning " + retVal);
+		
+		return retVal;
+	};
+
+	ScormWrapper.prototype.setObjectiveCompletionStatus = function(objectiveId, status) {
+
+		var objectiveIndex;
+		var retVal;
+		
+		this.logger.info("ScormWrapper::setObjectiveCompletionStatus: objectiveId=" + objectiveId + ", status=" + status);
+		
+		objectiveIndex = this.findObjectiveIndexFromID(objectiveId);
+		
+		if (objectiveIndex == -1) {
+			this.logger.info("No objective with ID " + objectiveId);
+			objectiveIndex = 0;
+		}
+		
+		this.logger.info("objectiveIndex=" + objectiveIndex);
+		
+		retVal = this.setValue("cmi.objectives." + objectiveIndex + ".id", objectiveId);
+		retVal = retVal && this.setValue("cmi.objectives." + objectiveIndex + (this.isSCORM2004() ? ".completion_status" : ".status"), status);
+		
+		this.logger.info("Returning " + retVal);
+		
+		return retVal;
+	};
+
+	ScormWrapper.prototype.setObjectiveSuccessStatus = function(objectiveId, status) {
+
+		var objectiveIndex;
+		var retVal;
+		
+		this.logger.info("ScormWrapper::setObjectiveSuccessStatus: objectiveId=" + objectiveId + ", status=" + status);
+		
+		objectiveIndex = this.findObjectiveIndexFromID(objectiveId);
+		
+		if (objectiveIndex == -1) {
+			this.logger.info("No objective with ID " + objectiveId);
+			objectiveIndex = 0;
+		}
+		
+		this.logger.info("objectiveIndex=" + objectiveIndex);
+		
+		retVal = this.setValue("cmi.objectives." + objectiveIndex + ".id", objectiveId);
+		retVal = retVal && this.setValue("cmi.objectives." + objectiveIndex + (this.isSCORM2004() ? ".success_status" : ".status"), status);
+		
+		this.logger.info("Returning " + retVal);
+		
+		return retVal;
+	};
+
+	ScormWrapper.prototype.getObjectiveScore = function(objectiveId) {
+
+		var objectiveIndex;
+		
+		this.logger.info("ScormWrapper::getObjectiveScore: objectiveId=" + objectiveId);
+		
+		objectiveIndex = this.findObjectiveIndexFromID(objectiveId);
+		
+		if (objectiveIndex == -1) {
+			this.logger.info("No objective with ID " + objectiveId);
+			
+			return null;
+		} else {	
+			this.logger.info("objectiveIndex=" + objectiveIndex);
+			
+			return this.getValue("cmi.objectives." + objectiveIndex + ".score.raw");
+		}
+	};
+
+	ScormWrapper.prototype.getObjectiveCompletionStatus = function(objectiveId) {
+
+		var objectiveIndex;
+		var status;
+		
+		this.logger.info("ScormWrapper::getObjectiveCompletionStatus: objectiveId=" + objectiveId);
+		
+		objectiveIndex = this.findObjectiveIndexFromID(objectiveId);
+		
+		if (objectiveIndex == -1) {
+			this.logger.info("No objective with ID " + objectiveId);
+			
+			return null;
+		} else {
+			this.logger.info("objectiveIndex=" + objectiveIndex);
+			
+			status = this.getValue("cmi.objectives." + objectiveIndex + (this.isSCORM2004() ? ".completion_status" : ".status"));
+			
+			if (status == "passed" && !this.isSCORM2004()) {
+				this.logger.info("returning passed");
+				return "passed";
+			} else if (status == "failed" && !this.isSCORM2004()) {
+				this.logger.info("Returning failed");
+				return "failed";
+			} else if (status == "completed") {
+				this.logger.info("Returning completed");
+				return "completed";
+			} else if (status == "incomplete") {
+				this.logger.info("Returning incomplete");
+				return "incomplete";
+			} else if (status == "browsed") {
+				this.logger.info("Returning browsed");
+				return "browsed";
+			} else if (status == "not attempted" || status == "") {
+				this.logger.info("Returning not attempted");
+				return "not attempted";
+			} else if (status == "unknown" && this.isSCORM2004()) {
+				this.logger.info("Returning unknown");
+				return "unknown";
+			} else{
+				this.logger.warn("Got invalid objective status (" + status + ") or status not yet set for objective (" + objectiveId + ")");
+				return null;
+			}
+		}
+	};
+
+	ScormWrapper.prototype.getObjectiveSuccessStatus = function(objectiveId) {
+
+		var objectiveIndex;
+		var status;
+		
+		this.logger.info("ScormWrapper::getObjectiveSuccessStatus: objectiveId=" + objectiveId);
+		
+		objectiveIndex = this.findObjectiveIndexFromID(objectiveId);
+		
+		if (objectiveIndex == -1) {
+			this.logger.info("No objective with ID " + objectiveId);
+			
+			return null;
+		} else {
+			this.logger.info("objectiveIndex=" + objectiveIndex);
+			
+			status = this.getValue("cmi.objectives." + objectiveIndex + (this.isSCORM2004() ? ".success_status" : ".status"));
+			
+			if (status == "passed") {
+				this.logger.info("returning passed");
+				return "passed";
+			} else if (status == "failed") {
+				this.logger.info("Returning failed");
+				return "failed";
+			} else if (status == "completed" && !this.isSCORM2004()) {
+				this.logger.info("Returning completed");
+				return "completed";
+			} else if (status == "incomplete" && !this.isSCORM2004()) {
+				this.logger.info("Returning incomplete");
+				return "incomplete";
+			} else if (status == "browsed" && !this.isSCORM2004()) {
+				this.logger.info("Returning browsed");
+				return "browsed";
+			} else if ((status == "not attempted" && !this.isSCORM2004()) || status == "") {
+				this.logger.info("Returning not attempted");
+				return "not attempted";
+			} else if (status == "unknown" && this.isSCORM2004()) {
+				this.logger.info("Returning unknown");
+				return "unknown";
+			} else {
+				this.logger.warn("Got invalid objective status (" + status + ") or status not yet set for objective (" + objectiveId + ")");
+				return null;
+			}
+		}
+	};
+
+	ScormWrapper.prototype.findObjectiveIndexFromID = function(objectiveId) {
+
+		var count, temp;
+		
+		this.logger.info("ScormWrapper::findObjectiveIndexFromID");
+		
+		count = this.getValue("cmi.objectives._count");
+		
+		if (count == "") {
+			this.logger.info("Setting count to 0");
+			return 0;
+		}
+		
+		count = parseInt(count);
+		
+		this.logger.info("count=" + count);
+		
+		for (var i = 0; i < count; i++) {
+		
+			temp = this.getValue("cmi.objectives." + i + ".id");
+			
+			if (temp == objectiveId) {
+				this.logger.info("Found index of objective (" + objectiveId + ") at " + i);
+				return i;
+			}
+		}
+		
+		return count > 0 ? count : -1;
 	};
 
 	ScormWrapper.prototype.showDebugWindow = function() {

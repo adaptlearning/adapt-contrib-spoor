@@ -24,7 +24,51 @@
 			"_timedCommitFrequency": 10,
 			"_maxCommitRetries": 5,
 			"_commitRetryDelay": 2000,
-			"_commitOnVisibilityChangeHidden": true
-		}
+			"_commitOnVisibilityChangeHidden": true,
+            "_debugInteractions": false,
+            "_debugObjectives": false
+		},
+        "_objectives": {
+            "_isEnabled": true,
+            "_items": [
+                {
+                    "comment": "Listen for completion of the given content object. The objective ID is obtained from the content object JSON.",
+                    "_content": [
+                        "co-05"
+                    ],
+                    "_id": "@@contentObjects._byAdaptID[co-05][0]._objectiveId",
+                    "_initialiseWithNotAttempted": true,
+                    "_immutableStates": [
+                    	"completed"
+                    ]
+                },
+                {
+                    "comment": "Listen for completion of the given blocks. The objective ID is obtained from the course JSON.",
+                    "_content": [
+                        "b-40",
+                        "b-45",
+                        "b-50",
+                        "b-55",
+                        "b-60"
+                    ],
+                    "_id": "@@course._objectives._objectiveId",
+                    "_initialiseWithNotAttempted": true,
+                    "_immutableStates": [
+                    	"completed"
+                    ]
+                },
+                {
+                    "comment": "Listen for completion of the given content object. The objective ID is obtained from the content object JSON.",
+                    "_content": [
+                        "co-15"
+                    ],
+                    "_id": "@@contentObjects._byAdaptID[co-15][0]._objectiveId",
+                    "_initialiseWithNotAttempted": true,
+                    "_immutableStates": [
+                    	"completed"
+                    ]
+                }
+            ]
+        }
 	}
 }

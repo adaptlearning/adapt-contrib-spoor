@@ -6,7 +6,7 @@ function createResetButton(API) {
 	$button.on("click", function() {
 		if (API) API.LMSClear();
 		alert("Status Reset");
-		window.location.reload();
+		window.location = window.location.pathname;
 	});
 }
 
@@ -24,18 +24,41 @@ function storageWarning() {
 	notificationMethod('Warning: possible cookie storage limit exceeded - tracking may malfunction');
 }
 
+function debugInteractions() {
+	if (require) Adapt = require('coreJS/adapt');
+	if (Adapt && Adapt.config && Adapt.config.has('_spoor')) {
+		if (Adapt.config.get('_spoor')._advancedSettings &&
+			Adapt.config.get('_spoor')._advancedSettings._debugInteractions === true) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function debugObjectives() {
+	if (require) Adapt = require('coreJS/adapt');
+	if (Adapt && Adapt.config && Adapt.config.has('_spoor')) {
+		if (Adapt.config.get('_spoor')._advancedSettings &&
+			Adapt.config.get('_spoor')._advancedSettings._debugObjectives === true) {
+			return true;
+		}
+	}
+	return false;
+}
+
 var API = {
 	
 	__offlineAPIWrapper:true,
 
 	LMSInitialize: function() {
-		//if (window.ISCOOKIELMS !== false) createResetButton(this);
+		if (window.ISCOOKIELMS !== false) createResetButton(this);
 		if (!API.LMSFetch()) {
 			this.data["cmi.core.lesson_status"] = "not attempted";
 			this.data["cmi.suspend_data"] = "";
 			this.data["cmi.core.student_name"] = "Surname, Sam";
 			this.data["cmi.core.student_id"] = "sam.surname@example.org";
 			this.data["cmi.interactions._count"] = 0;
+			this.data["cmi.objectives._count"] = 0;
 			API.LMSStore(true);
 		}
 		return "true";
@@ -47,20 +70,29 @@ var API = {
 		return this.data[key];
 	},
 	LMSSetValue: function(key, value) {
-		var str = 'cmi.interactions.';
+		var isInteraction = key.indexOf('cmi.interactions.') != -1;
+		var isObjective = key.indexOf('cmi.objectives') != -1;
+
+		if (isInteraction && !debugInteractions()) return "true";
+		if (isObjective && !debugObjectives()) return "true";
 
 		this.data[key] = value;
 
-		if (key.indexOf(str) != -1) {
-			var map = [];
-			var strLen = str.length;
+		if (isInteraction) setCount.call(this, key, 'cmi.interactions.');
+		if (isObjective) setCount.call(this, key, 'cmi.objectives.');
 
-			_.each(_.keys(this.data), function(key) {
-				var index = key.indexOf(str);
-				if (index != -1) map[key.substring(strLen, key.indexOf(".", strLen))] = true;
-			});
-			
-			this.data["cmi.interactions._count"] = _.compact(map).length;
+		function setCount(key, prefix) {
+			if (key.indexOf(prefix) != -1) {
+				var map = [];
+				var prefixLen = prefix.length;
+
+				_.each(_.keys(this.data), function(key) {
+					var index = key.indexOf(prefix);
+					if (index != -1) map[key.substring(prefixLen, key.indexOf(".", prefixLen))] = true;
+				});
+				
+				this.data[prefix+"_count"] = _.compact(map).length;
+			}
 		}
 		
 		API.LMSStore();
@@ -125,6 +157,7 @@ var API_1484_11 = {
 			this.data["cmi.learner_name"] = "Surname, Sam";
 			this.data["cmi.learner_id"] = "sam.surname@example.org";
 			this.data["cmi.interactions._count"] = 0;
+			this.data["cmi.objectives._count"] = 0;
 			API_1484_11.LMSStore(true);
 		}
 		return "true";
@@ -136,20 +169,29 @@ var API_1484_11 = {
 		return this.data[key];
 	},
 	SetValue: function(key, value) {
-		var str = 'cmi.interactions.';
+		var isInteraction = key.indexOf('cmi.interactions.') != -1;
+		var isObjective = key.indexOf('cmi.objectives') != -1;
+
+		if (isInteraction && !debugInteractions()) return "true";
+		if (isObjective && !debugObjectives()) return "true";
 
 		this.data[key] = value;
 
-		if (key.indexOf(str) != -1) {
-			var map = [];
-			var strLen = str.length;
+		if (isInteraction) setCount.call(this, key, 'cmi.interactions.');
+		if (isObjective) setCount.call(this, key, 'cmi.objectives.');
 
-			_.each(_.keys(this.data), function(key) {
-				var index = key.indexOf(str);
-				if (index != -1) map[key.substring(strLen, key.indexOf(".", strLen))] = true;
-			});
-			
-			this.data["cmi.interactions._count"] = _.compact(map).length;
+		function setCount(key, prefix) {
+			if (key.indexOf(prefix) != -1) {
+				var map = [];
+				var prefixLen = prefix.length;
+
+				_.each(_.keys(this.data), function(key) {
+					var index = key.indexOf(prefix);
+					if (index != -1) map[key.substring(prefixLen, key.indexOf(".", prefixLen))] = true;
+				});
+				
+				this.data[prefix+"_count"] = _.compact(map).length;
+			}
 		}
 
 		API_1484_11.LMSStore();

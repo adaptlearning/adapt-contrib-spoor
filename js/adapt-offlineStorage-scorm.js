@@ -14,6 +14,8 @@ define([
 	Adapt.offlineStorage.initialize({
 
 		get: function(name) {
+			var args = [].slice.call(arguments, 1);
+			
 			if (name === undefined) {
 				//If not connected return just temporary store.
 				if (this.useTemporaryStore()) return temporaryStore;
@@ -39,6 +41,12 @@ define([
 
 			//Get by name
 			switch (name.toLowerCase()) {
+				case "objectivecompletionstatus":
+					return scorm.getObjectiveCompletionStatus.apply(scorm, args);
+				case "objectivesuccessstatus":
+					return scorm.getObjectiveSuccessStatus.apply(scorm, args);
+				case "objectivescore":
+					return scorm.getObjectiveScore.apply(scorm, args);
 				case "location":
 					return scorm.getLessonLocation();
 				case "score":
@@ -75,6 +83,12 @@ define([
 			}
 
 			switch (name.toLowerCase()) {
+				case "objectivecompletionstatus":
+					return scorm.setObjectiveCompletionStatus.apply(scorm, args);
+				case "objectivesuccessstatus":
+					return scorm.setObjectiveSuccessStatus.apply(scorm, args);
+				case "objectivescore":
+					return scorm.setObjectiveScore.apply(scorm, args);
 				case "interaction":
 					return scorm.recordInteraction.apply(scorm, args);
 				case "location":

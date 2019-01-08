@@ -57,7 +57,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 #### Attributes
 
-**_spoor**: (object): The Spoor object that contains values for **_isEnabled**, **_tracking**, **_reporting**, and **_advancedSettings**.
+**_spoor**: (object): The Spoor object that contains values for **_isEnabled**, **_tracking**, **_reporting**, **_advancedSettings**, and **_objectives**.
  
 >**_isEnabled** (boolean): Enables/disables the **Spoor** extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS when the course is launched via *index_lms.html*. If one is not available, a 'Could not connect to LMS' error message will be displayed. This error can be avoided during course development either by setting this to `false` or - more easily - by launching the course via *index.html* or *main.html*. This latter technique is also useful if you are developing a course that could be run either from an LMS or a regular web server.
 
@@ -97,6 +97,26 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_commitOnVisibilityChangeHidden** (boolean): Determines whether or not a "commit" call should be made when the [visibilityState](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState) of the course page changes to `"hidden"`. This functionality helps to ensure that tracking data is saved whenever the user switches to another tab or minimises the browser window - and is only available in [browsers that support the Page Visibility API](http://caniuse.com/#search=page%20visibility). The default is `true`.
 
+>>**_debugInteractions** (boolean): Determines whether interactions data may be written to the offline API. Useful for development purposes. See **Client Local Storage / Fake LMS / Adapt LMS Behaviour Testing**.
+
+>>**_debugObjectives** (boolean): Determines whether objectives data may be written to the offline API. Useful for development purposes. See **Client Local Storage / Fake LMS / Adapt LMS Behaviour Testing**.
+
+>**_objectives** (object): The objectives settings attribute group contains values for **_isEnabled** and **_items**.
+
+>>>**_isEnabled** (boolean): Optional. Determines whether writing objectives to the tracking API will be enabled/disabled. Defaults to `true` if not specified.
+
+>>**_items** (array): Each *item* represents an objective and contains values for **_content**, **_event**, **_id**, **_initialiseWithNotAttempted** and **_immutableStates**.
+
+>>>**_content** (array): Optional. Each *item* is an Adapt content model ID. To be used with completion-based objectives. When one of the given models is completed the objective will move to the `incomplete` state. When all given models are completed the objective will move to the `completed` state.
+
+>>>**_event** (string): Optional. The name of an event that will be triggered on the global `Adapt` object. To be used with event-based objectives. Request that the objective move to a given state by passing it as an argument when the event is triggered. The requested state defaults to `completed` if no argument is given.
+
+>>>**_id** (string): The identifier of the objective. The identifier can optionally be specified by a path relative to the global `Adapt` object. Prefix with `@@` and use dot and array notation. See `example.json`. The string must be alphanumeric. If a path is given it must resolve to an alphanumeric string.
+
+>>>**_initialiseWithNotAttempted** (boolean): Optional. Determines whether the objective state will be set to `not attempted` on first run of the course. Defaults to `false` if not specified.
+
+>>>**_immutableStates** (array): Optional. Each *item* is the name of a state. Once the objective enters any of the given states it will be locked into that state; its state will not change thereafter. Acceptable values are `completed`, `incomplete`, `passed`, `failed`, `not attempted`, `browsed`. Defaults to `["completed"]` if this property is not specified.
+
 <div float align=right><a href="#top">Back to Top</a></div>  
 
 ### Running a course without tracking while Spoor is installed  
@@ -107,14 +127,14 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 ### Client Local Storage / Fake LMS / Adapt LMS Behaviour Testing
 When **Spoor** is installed, *scorm_test_harness.html* can be used instead of *index.html* to allow the browser to store LMS states inside a browser cookie. This allows developer to test LMS specified behaviour outside of an LMS environment. If you run the command `grunt server-scorm`, this will start a local server and run the course using *scorm_test_harness.html* for you. 
 
-Note that due to the data storage limitations of browser cookies, there is less storage space available than an LMS would provide. In particular having `_shouldRecordInteractions` enabled can cause a lot of data to be written to the cookie, using up the available storage more quickly - it is advised that you disable this setting when testing via *scorm_test_harness.html*. As of v2.1.1, a browser alert will be displayed if the code detects that the cookie storage limit has been exceeded.
+Note that due to the data storage limitations of browser cookies, there is less storage space available than an LMS would provide. In particular having `_shouldRecordInteractions` enabled can cause a lot of data to be written to the cookie, using up the available storage more quickly - it is advised that you disable this setting when testing via *scorm_test_harness.html*. As of v2.1.1, a browser alert will be displayed if the code detects that the cookie storage limit has been exceeded. To temporarily override this behaviour for development purposes see `_debugInteractions` and `_debugObjectives` under `_advancedSettings`.
 
 ## Limitations
  
 Currently (officially) only supports SCORM 1.2  
 
 ----------------------------
-**Version number:**  2.1.3   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
+**Version number:**  2.1.4   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a> 
 **Framework versions:** 2.0.16+
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors) 
 **Accessibility support:** n/a   
