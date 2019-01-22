@@ -167,6 +167,15 @@
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, a 'commit' call will be made whenever the course window is hidden/minimised. Requires a browser that supports the 'visibilitychange' event."
+                    },
+                    "_manifestIdentifier": {
+                      "type": "string",
+                      "required": true,
+                      "default": "adapt_scorm",
+                      "title": "Manifest identifier",
+                      "inputType": "Text",
+                      "validators": ["required"],
+                      "help": "Sets the 'identifier' attribute in the imsmanifest.xml"
                     }
                   }
                 }
