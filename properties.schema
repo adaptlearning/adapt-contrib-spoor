@@ -171,7 +171,7 @@
                     "_manifestIdentifier": {
                       "type": "string",
                       "required": true,
-                      "default": "adapt_scorm",
+                      "default": "adapt_manifest",
                       "title": "Manifest identifier",
                       "inputType": "Text",
                       "validators": ["required"],
