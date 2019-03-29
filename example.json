@@ -1,28 +1,28 @@
 // to be added to course/config.json
 {
-	"_spoor": {
-		"_isEnabled": true,
-		"_tracking": {
-			"_shouldSubmitScore": false,
-			"_shouldStoreResponses": false,
-			"_shouldRecordInteractions": true
-		},
-		"_reporting": {
-			"_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
-			"_onTrackingCriteriaMet": "completed",
-			"_onAssessmentFailure": "incomplete",
-			"_resetStatusOnLanguageChange": false
-		},
-		"_advancedSettings": {
-			"_comment": "Only include this section if you want to change any of the default values. You only need include settings you want to change.",
-			"_scormVersion": "1.2",
-			"_showDebugWindow": false,
-			"_suppressErrors": false,
-			"_commitOnStatusChange": true,
-			"_timedCommitFrequency": 10,
-			"_maxCommitRetries": 5,
-			"_commitRetryDelay": 2000,
-			"_commitOnVisibilityChangeHidden": true
-		}
-	}
+  "_spoor": {
+    "_isEnabled": true,
+    "_tracking": {
+      "_shouldSubmitScore": false,
+      "_shouldStoreResponses": false,
+      "_shouldRecordInteractions": true
+    },
+    "_reporting": {
+      "_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
+      "_onTrackingCriteriaMet": "completed",
+      "_onAssessmentFailure": "incomplete",
+      "_resetStatusOnLanguageChange": false
+    },
+    "_advancedSettings": {
+      "_comment": "Only include this section if you want to change any of the default values. You only need include settings you want to change.",
+      "_scormVersion": "1.2",
+      "_showDebugWindow": false,
+      "_suppressErrors": false,
+      "_commitOnStatusChange": true,
+      "_timedCommitFrequency": 10,
+      "_maxCommitRetries": 5,
+      "_commitRetryDelay": 2000,
+      "_commitOnVisibilityChangeHidden": true
+    }
+  }
 }
