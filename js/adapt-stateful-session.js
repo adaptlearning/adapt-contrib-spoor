@@ -1,4 +1,3 @@
-
 define([
   'core/js/adapt',
   './serializers/default',
