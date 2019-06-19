@@ -78,6 +78,22 @@ define([
                 if(settings.hasOwnProperty("_commitRetryDelay")) {
                     scorm.commitRetryDelay = settings._commitRetryDelay;
                 }
+
+                if (settings.hasOwnProperty("_exitStateIfIncomplete")) {
+                    if (settings._exitStateIfIncomplete === "'' (empty string)") {
+                        scorm.exitStateIfIncomplete = "";
+                    } else {
+                        scorm.exitStateIfIncomplete = settings._exitStateIfIncomplete;
+                    }
+                }
+
+                if (settings.hasOwnProperty("_exitStateIfComplete")) {
+                    if (settings._exitStateIfComplete === "'' (empty string)") {
+                        scorm.exitStateIfComplete = "";
+                    } else {
+                        scorm.exitStateIfComplete = settings._exitStateIfComplete;
+                    }
+                }
             } else {
                 /**
                 * force use of SCORM 1.2 by default - some LMSes (SABA/Kallidus for instance) present both APIs to the SCO and, if given the choice,
