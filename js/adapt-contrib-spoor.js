@@ -80,19 +80,11 @@ define([
                 }
 
                 if (settings.hasOwnProperty("_exitStateIfIncomplete")) {
-                    if (settings._exitStateIfIncomplete === "'' (empty string)") {
-                        scorm.exitStateIfIncomplete = "";
-                    } else {
-                        scorm.exitStateIfIncomplete = settings._exitStateIfIncomplete;
-                    }
+                    scorm.exitStateIfIncomplete = settings._exitStateIfIncomplete;
                 }
 
                 if (settings.hasOwnProperty("_exitStateIfComplete")) {
-                    if (settings._exitStateIfComplete === "'' (empty string)") {
-                        scorm.exitStateIfComplete = "";
-                    } else {
-                        scorm.exitStateIfComplete = settings._exitStateIfComplete;
-                    }
+                    scorm.exitStateIfComplete = settings._exitStateIfComplete;
                 }
             } else {
                 /**

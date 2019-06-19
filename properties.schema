@@ -185,7 +185,15 @@
                       "enum": ["auto", "suspend", "normal", ""],
                       "inputType": {
                         "type": "Select",
-                        "options": ["auto", "suspend", "normal", "'' (empty string)"]
+                        "options": [
+                          "auto",
+                          "suspend",
+                          "normal",
+                          {
+                            "val": "",
+                            "label": "'' (empty string)"
+                          }
+                        ]
                       },
                       "validators": [],
                       "help": "What exit status to use if the course is incomplete."
@@ -198,7 +206,15 @@
                       "enum": ["auto", "suspend", "normal", ""],
                       "inputType": {
                         "type": "Select",
-                        "options": ["auto", "suspend", "normal", "'' (empty string)"]
+                        "options": [
+                          "auto",
+                          "suspend",
+                          "normal",
+                          {
+                            "val": "",
+                            "label": "'' (empty string)"
+                          }
+                        ]
                       },
                       "validators": [],
                       "help": "What exit status to use if the course is complete."
