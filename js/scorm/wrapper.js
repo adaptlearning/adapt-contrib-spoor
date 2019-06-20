@@ -59,6 +59,8 @@ define ([
 
         this.logger = Logger.getInstance();
         this.scorm = pipwerks.SCORM;
+        // Prevent the Pipwerks SCORM API wrapper's handling of the exit status
+        this.scorm.handleExitMode = false;
 
         this.suppressErrors = false;
 
@@ -89,9 +91,6 @@ define ([
     ScormWrapper.prototype.setVersion = function(value) {
         this.logger.debug("ScormWrapper::setVersion: " + value);
         this.scorm.version = value;
-
-        // Prevent the Pipwerks SCORM API wrapper's handling of the exit status
-        this.scorm.handleExitMode = false;
     };
 
     ScormWrapper.prototype.initialize = function() {
@@ -306,30 +305,13 @@ define ([
 
             this.endTime = new Date();
 
-            var exit_property = "cmi.core.exit";
-            var exit_value = "";
-            var is_complete = this.scorm.data.completionStatus === "completed" || this.scorm.data.completionStatus === "passed";
-
             if (this.isSCORM2004()) {
                 this.scorm.set("cmi.session_time", this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
-                exit_property = "cmi.exit";
-
-                if (is_complete) {
-                    exit_value = this.exitStateIfComplete === "auto" ? "normal" : this.exitStateIfComplete;
-                } else {
-                    exit_value = this.exitStateIfIncomplete === "auto" ? "suspend" : this.exitStateIfIncomplete;
-                }
+                this.scorm.set("cmi.exit", this.getExitState());
             } else {
                 this.scorm.set("cmi.core.session_time", this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
-
-                if (is_complete) {
-                    exit_value = this.exitStateIfComplete === "auto" ? "" : this.exitStateIfComplete;
-                } else {
-                    exit_value = this.exitStateIfIncomplete === "auto" ? "" : this.exitStateIfIncomplete;
-                }
+                this.scorm.set("cmi.core.exit", this.getExitState());
             }
-
-            this.scorm.set(exit_property, exit_value);
 
             // api no longer available from this point
             this.lmsConnected = false;
@@ -736,6 +718,22 @@ define ([
         }
 
         return response.join(',');
+    };
+
+    ScormWrapper.prototype.getExitState = function() {
+        var completionStatus = this.scorm.data.completionStatus;
+        var isComplete = completionStatus === 'completed' || completionStatus === 'passed';
+        var exitState = isComplete ? this.exitStateIfComplete : this.exitStateIfIncomplete;
+
+        switch (exitState) {
+            case undefined:
+            case 'auto':
+                if (!this.isSCORM2004()) return '';
+
+                return isComplete ? 'normal' : 'suspend';
+            default:
+                return exitState;
+        }
     };
 
     return ScormWrapper;
