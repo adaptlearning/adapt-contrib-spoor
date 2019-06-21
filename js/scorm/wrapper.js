@@ -59,7 +59,9 @@ define ([
 
         this.logger = Logger.getInstance();
         this.scorm = pipwerks.SCORM;
-        // Prevent the Pipwerks SCORM API wrapper's handling of the exit status
+        /**
+         * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
+         */
         this.scorm.handleExitMode = false;
 
         this.suppressErrors = false;
