@@ -727,15 +727,11 @@ define ([
         var isComplete = completionStatus === 'completed' || completionStatus === 'passed';
         var exitState = isComplete ? this.exitStateIfComplete : this.exitStateIfIncomplete;
 
-        switch (exitState) {
-            case undefined:
-            case 'auto':
-                if (!this.isSCORM2004()) return '';
+        if (exitState !== 'auto') return exitState;
 
-                return isComplete ? 'normal' : 'suspend';
-            default:
-                return exitState;
-        }
+        if (this.isSCORM2004()) return (isComplete ? 'normal' : 'suspend');
+
+        return '';
     };
 
     return ScormWrapper;
