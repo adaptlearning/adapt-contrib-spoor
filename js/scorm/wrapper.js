@@ -724,12 +724,12 @@ define ([
 
     ScormWrapper.prototype.getExitState = function() {
         var completionStatus = this.scorm.data.completionStatus;
-        var isComplete = completionStatus === 'completed' || completionStatus === 'passed';
+        var isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
         var exitState = isComplete ? this.exitStateIfComplete : this.exitStateIfIncomplete;
 
         if (exitState !== 'auto') return exitState;
 
-        if (this.isSCORM2004()) return (isComplete ? 'normal' : 'suspend');
+        if (this.isSCORM2004()) return (isIncomplete ? 'suspend' : 'normal');
 
         return '';
     };
