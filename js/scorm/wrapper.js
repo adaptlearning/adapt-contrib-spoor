@@ -725,7 +725,7 @@ define ([
     ScormWrapper.prototype.getExitState = function() {
         var completionStatus = this.scorm.data.completionStatus;
         var isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
-        var exitState = isComplete ? this.exitStateIfComplete : this.exitStateIfIncomplete;
+        var exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
 
         if (exitState !== 'auto') return exitState;
 
