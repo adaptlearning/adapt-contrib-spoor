@@ -90,7 +90,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_exitStateIfIncomplete** (string): Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2004) to set if the course hasn't been completed. The default behaviour will cause the exit state to be set to an empty string for SCORM 1.2 courses, or `"suspend"` for SCORM 2004 courses. The default behaviour should be left in place unless you are confident you know what you are doing!
 
->>**_exitStateIfComplete** (string): Determines the exit state to return if the course hasn't been completed. The default behaviour returns an empty string for SCORM 1.2 courses, or `"logout"` for SCORM 2004 courses. The default behaviour should be left in place unless you are confident you know what you are doing!
+>>**_exitStateIfComplete** (string): Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2004) to set when the course has been completed. The default behaviour will cause the exit state to be set to an empty string for SCORM 1.2 courses, or `"normal"` for SCORM 2004 courses. The default behaviour should be left in place unless you are confident you know what you are doing! Note: if you are using SCORM 2004, you can set this to `"suspend"` to prevent the LMS from clearing all progress tracking when a previously-completed course is re-launched by the learner.
 
 <div float align=right><a href="#top">Back to Top</a></div>  
 
