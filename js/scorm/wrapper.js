@@ -38,6 +38,15 @@ define ([
          * not currently used - but you could include in an error message to show when data was last saved
          */
         this.lastCommitSuccessTime = null;
+        /**
+         * The exit state to use when course isn't completed yet
+         */
+        this.exitStateIfIncomplete = "auto";
+        /**
+         * The exit state to use when the course has been completed/passed
+         */
+        this.exitStateIfComplete = "auto";
+
 
         this.timedCommitIntervalID = null;
         this.retryCommitTimeoutID = null;
@@ -50,6 +59,10 @@ define ([
 
         this.logger = Logger.getInstance();
         this.scorm = pipwerks.SCORM;
+        /**
+         * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
+         */
+        this.scorm.handleExitMode = false;
 
         this.suppressErrors = false;
 
@@ -80,13 +93,6 @@ define ([
     ScormWrapper.prototype.setVersion = function(value) {
         this.logger.debug("ScormWrapper::setVersion: " + value);
         this.scorm.version = value;
-        /**
-         * stop the pipwerks code from setting cmi.core.exit to suspend/logout when targeting SCORM 1.2.
-         * there doesn't seem to be any tangible benefit to doing this in 1.2 and it can actually cause problems with some LMSes
-         * (e.g. setting it to 'logout' apparently causes Plateau to log the user completely out of the LMS!)
-         * It needs to be on for SCORM 2004 though, otherwise the LMS might not restore the suspend_data
-         */
-        this.scorm.handleExitMode = this.isSCORM2004();
     };
 
     ScormWrapper.prototype.initialize = function() {
@@ -303,10 +309,10 @@ define ([
 
             if (this.isSCORM2004()) {
                 this.scorm.set("cmi.session_time", this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
-            }
-            else {
+                this.scorm.set("cmi.exit", this.getExitState());
+            } else {
                 this.scorm.set("cmi.core.session_time", this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
-                this.scorm.set("cmi.core.exit", "");
+                this.scorm.set("cmi.core.exit", this.getExitState());
             }
 
             // api no longer available from this point
@@ -714,6 +720,18 @@ define ([
         }
 
         return response.join(',');
+    };
+
+    ScormWrapper.prototype.getExitState = function() {
+        var completionStatus = this.scorm.data.completionStatus;
+        var isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
+        var exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
+
+        if (exitState !== 'auto') return exitState;
+
+        if (this.isSCORM2004()) return (isIncomplete ? 'suspend' : 'normal');
+
+        return '';
     };
 
     return ScormWrapper;

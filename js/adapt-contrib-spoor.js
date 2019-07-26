@@ -59,24 +59,32 @@ define([
 
                 scorm.setVersion(settings._scormVersion || "1.2");
 
-                if(settings.hasOwnProperty("_suppressErrors")) {
+                if(settings._suppressErrors) {
                     scorm.suppressErrors = settings._suppressErrors;
                 }
 
-                if(settings.hasOwnProperty("_commitOnStatusChange")) {
+                if(settings._commitOnStatusChange) {
                     scorm.commitOnStatusChange = settings._commitOnStatusChange;
                 }
 
-                if(settings.hasOwnProperty("_timedCommitFrequency")) {
+                if(_.isFinite(settings._timedCommitFrequency)) {
                     scorm.timedCommitFrequency = settings._timedCommitFrequency;
                 }
 
-                if(settings.hasOwnProperty("_maxCommitRetries")) {
+                if(_.isFinite(settings._maxCommitRetries)) {
                     scorm.maxCommitRetries = settings._maxCommitRetries;
                 }
 
-                if(settings.hasOwnProperty("_commitRetryDelay")) {
+                if(_.isFinite(settings._commitRetryDelay)) {
                     scorm.commitRetryDelay = settings._commitRetryDelay;
+                }
+
+                if ("_exitStateIfIncomplete" in settings) {
+                    scorm.exitStateIfIncomplete = settings._exitStateIfIncomplete;
+                }
+
+                if ("_exitStateIfComplete" in settings) {
+                    scorm.exitStateIfComplete = settings._exitStateIfComplete;
                 }
             } else {
                 /**

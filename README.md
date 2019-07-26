@@ -88,6 +88,10 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**_commitOnVisibilityChangeHidden** (boolean): Determines whether or not a "commit" call should be made when the [visibilityState](https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState) of the course page changes to `"hidden"`. This functionality helps to ensure that tracking data is saved whenever the user switches to another tab or minimises the browser window - and is only available in [browsers that support the Page Visibility API](http://caniuse.com/#search=page%20visibility). The default is `true`.
 
+>>**_exitStateIfIncomplete** (string): Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2004) to set if the course hasn't been completed. The default behaviour will cause the exit state to be set to an empty string for SCORM 1.2 courses, or `"suspend"` for SCORM 2004 courses. The default behaviour should be left in place unless you are confident you know what you are doing!
+
+>>**_exitStateIfComplete** (string): Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2004) to set when the course has been completed. The default behaviour will cause the exit state to be set to an empty string for SCORM 1.2 courses, or `"normal"` for SCORM 2004 courses. The default behaviour should be left in place unless you are confident you know what you are doing! Note: if you are using SCORM 2004, you can set this to `"suspend"` to prevent the LMS from clearing all progress tracking when a previously-completed course is re-launched by the learner.
+
 <div float align=right><a href="#top">Back to Top</a></div>  
 
 ### Running a course without tracking while Spoor is installed  
