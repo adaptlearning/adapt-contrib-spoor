@@ -176,6 +176,48 @@
                       "inputType": "Text",
                       "validators": ["required"],
                       "help": "Sets the 'identifier' attribute in the imsmanifest.xml"
+                    },
+                    "_exitStateIfIncomplete": {
+                      "type": "string",
+                      "required": false,
+                      "default": "auto",
+                      "title": "Exit state if incomplete",
+                      "enum": ["auto", "suspend", "normal", ""],
+                      "inputType": {
+                        "type": "Select",
+                        "options": [
+                          "auto",
+                          "suspend",
+                          "normal",
+                          {
+                            "val": "",
+                            "label": "'' (empty string)"
+                          }
+                        ]
+                      },
+                      "validators": [],
+                      "help": "What exit status to use if the course is incomplete."
+                    },
+                    "_exitStateIfComplete": {
+                      "type": "string",
+                      "required": false,
+                      "default": "auto",
+                      "title": "Exit state if complete",
+                      "enum": ["auto", "suspend", "normal", ""],
+                      "inputType": {
+                        "type": "Select",
+                        "options": [
+                          "auto",
+                          "suspend",
+                          "normal",
+                          {
+                            "val": "",
+                            "label": "'' (empty string)"
+                          }
+                        ]
+                      },
+                      "validators": [],
+                      "help": "What exit status to use if the course is complete."
                     }
                   }
                 }
