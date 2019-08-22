@@ -60,10 +60,10 @@
                   }
                 },
                 "_reporting": {
-                  "type":"object",
-                  "required":true,
+                  "type": "object",
+                  "required": true,
                   "title": "Reporting",
-                  "properties":{
+                  "properties": {
                     "_onTrackingCriteriaMet": {
                       "type":"string",
                       "required":true,
