@@ -19,7 +19,6 @@
       <title><![CDATA[@@course.title]]></title>
       <item identifier="item_1" isvisible="true" identifierref="res1">
         <title><![CDATA[@@course.title]]></title>
-         <!-- <adlcp:masteryscore>70</adlcp:masteryscore> -->
       </item>
     </organization>
   </organizations>
