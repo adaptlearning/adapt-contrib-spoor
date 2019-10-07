@@ -691,6 +691,8 @@ define ([
 
     response = response.split(/,|#/);
 
+    var self = this;
+
     if (responseType == 'choice') {
       response = response.map(checkIdentifier);
     } else {
@@ -713,7 +715,7 @@ define ([
       i = parseInt(r);
 
       if (isNaN(i) || i < 10 || i > 35) {
-        this.handleError('Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2');
+        self.handleError('Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2');
       }
 
       return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
