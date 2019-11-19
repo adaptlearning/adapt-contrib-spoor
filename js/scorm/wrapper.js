@@ -212,6 +212,10 @@ define(function(require) {
 
             if (this.isSupported("cmi.core.score.max")) this.setValue("cmi.core.score.max", _maxScore);
         }
+        // IR - 19 Nov 2019 - add a commit because Adapt assessment sessions are setting score but not committing
+        // until the finish is called.  We're finding finish not being called and therefore assessments with passed as
+        // the lesson status but no score in our LMS.
+        this.commit();
     };
 
     ScormWrapper.prototype.getLessonLocation = function() {
@@ -255,6 +259,9 @@ define(function(require) {
             if (this.commitRetryPending) {
                 this.logger.debug("ScormWrapper::commit: skipping this commit call as one is already pending.");
             } else {
+
+                this.setSessionTime();
+
                 if (this.scorm.save()) {
                     this.commitRetries = 0;
                     this.lastCommitSuccessTime = new Date();
@@ -278,6 +285,18 @@ define(function(require) {
         }
     };
 
+    ScormWrapper.prototype.setSessionTime = function() {
+        
+        this.endTime = new Date();
+
+        if (this.isSCORM2004()) {
+            this.scorm.set("cmi.session_time", this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
+        } else {
+            this.scorm.set("cmi.core.session_time", this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
+            this.scorm.set("cmi.core.exit", "");
+        }
+    }
+
     ScormWrapper.prototype.finish = function() {
 
         this.logger.debug("ScormWrapper::finish");
@@ -298,15 +317,8 @@ define(function(require) {
                 this.logOutputWin.close();
             }
 
-            this.endTime = new Date();
-
-            if (this.isSCORM2004()) {
-                this.scorm.set("cmi.session_time", this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
-            } else {
-                this.scorm.set("cmi.core.session_time", this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
-                this.scorm.set("cmi.core.exit", "");
-            }
-
+            this.setSessionTime();
+            
             // api no longer available from this point
             this.lmsConnected = false;
 
