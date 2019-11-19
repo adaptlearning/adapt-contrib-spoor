@@ -43,6 +43,7 @@ define(function(require) {
         this.startTime = null;
         this.endTime = null;
 
+        this.lessonStatus = "";
         this.lmsConnected = false;
         this.finishCalled = false;
 
@@ -118,37 +119,51 @@ define(function(require) {
     };
 
     ScormWrapper.prototype.setIncomplete = function() {
-        this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", "incomplete");
+
+        this.lessonStatus = "incomplete";
+
+        this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", this.lessonStatus);
 
         if (this.commitOnStatusChange) this.commit();
     };
 
     ScormWrapper.prototype.setCompleted = function() {
-        this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", "completed");
+
+        this.lessonStatus = "completed";
+
+        this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", this.lessonStatus);
 
         if (this.commitOnStatusChange) this.commit();
     };
 
     ScormWrapper.prototype.setPassed = function() {
+        
+        this.lessonStatus = "passed";
+
         if (this.isSCORM2004()) {
+            
             this.setValue("cmi.completion_status", "completed");
-            this.setValue("cmi.success_status", "passed");
+            this.setValue("cmi.success_status", this.lessonStatus);
         } else {
-            this.setValue("cmi.core.lesson_status", "passed");
+            this.lessonStatus = "passed";
+            this.setValue("cmi.core.lesson_status", this.lessonStatus);
         }
 
         if (this.commitOnStatusChange) this.commit();
     };
 
     ScormWrapper.prototype.setFailed = function() {
+
+        this.lessonStatus = "failed";
+
         if (this.isSCORM2004()) {
-            this.setValue("cmi.success_status", "failed");
+            this.setValue("cmi.success_status", this.lessonStatus);
 
             if (this.setCompletedWhenFailed) {
                 this.setValue("cmi.completion_status", "completed");
             }
         } else {
-            this.setValue("cmi.core.lesson_status", "failed");
+            this.setValue("cmi.core.lesson_status", this.lessonStatus);
         }
 
         if (this.commitOnStatusChange) this.commit();
@@ -253,15 +268,17 @@ define(function(require) {
     };
 
     ScormWrapper.prototype.commit = function() {
-        this.logger.debug("ScormWrapper::commit");
+        
 
         if (this.lmsConnected) {
             if (this.commitRetryPending) {
                 this.logger.debug("ScormWrapper::commit: skipping this commit call as one is already pending.");
             } else {
 
+                
                 this.setSessionTime();
-
+                this.logger.debug("ScormWrapper::commit");
+                
                 if (this.scorm.save()) {
                     this.commitRetries = 0;
                     this.lastCommitSuccessTime = new Date();
@@ -290,10 +307,10 @@ define(function(require) {
         this.endTime = new Date();
 
         if (this.isSCORM2004()) {
-            this.scorm.set("cmi.session_time", this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
+            this.setValue("cmi.session_time", this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
         } else {
-            this.scorm.set("cmi.core.session_time", this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
-            this.scorm.set("cmi.core.exit", "");
+            this.setValue("cmi.core.session_time", this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
+            
         }
     }
 
@@ -318,6 +335,26 @@ define(function(require) {
             }
 
             this.setSessionTime();
+
+            if(this.lessonStatus !== "completed" && this.lessonStatus !== "passed"){
+        
+                if (this.isSCORM2004()) {
+                    this.setValue("cmi.exit", "suspend");
+                } else {
+                    this.setValue("cmi.core.exit", "suspend");
+                    
+                }
+
+            } else {
+
+                if (this.isSCORM2004()) {
+                    this.setValue("cmi.exit", "normal");
+                } else {
+                    this.setValue("cmi.core.exit", "logout");
+                    
+                }
+
+            }
             
             // api no longer available from this point
             this.lmsConnected = false;
@@ -390,7 +427,7 @@ define(function(require) {
     };
 
     ScormWrapper.prototype.setValue = function(_property, _value) {
-        this.logger.debug("ScormWrapper::setValue: _property=" + _property + " _value=" + _value);
+        
 
         if (this.finishCalled) {
             this.logger.debug("ScormWrapper::setValue: ignoring request as 'finish' has been called");
@@ -398,6 +435,9 @@ define(function(require) {
         }
 
         if (this.lmsConnected) {
+            
+            this.logger.debug("ScormWrapper::setValue: _property=" + _property + " _value=" + _value);
+
             var _success = this.scorm.set(_property, _value);
             var _errorCode = this.scorm.debug.getCode();
             var _errorMsg = "";
