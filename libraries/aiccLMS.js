@@ -349,25 +349,31 @@ function AICC_LMS() {
 
             var sSend = "command=ExitAU&version=" + escape(self.Version) + "&session_id=" + escape(self.Id);
 
-            $.ajax({
-                method: "POST",
-                async: false,
-                url: self.LmsUrl,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                data: sSend
-            })
-            .fail(function (jqXHR, textStatus) {
-                var error = new SCORM_Error(SCORM_Error_Enum.CONST_LMSFinish_ERROR, "Error disconnecting from AICC LMS: " + jqXHR.statusText);
-                alert(error.message);
-                throw error;
-            })
-            .done(function (response) {
-                self.Reset();
-                self.Connected = false;
-                result = true;
-            });
+            if (navigator.sendBeacon !== undefined) {
+
+                navigator.sendBeacon(self.LmsUrl, sSend);
+
+            } else {
+                $.ajax({
+                    method: "POST",
+                    async: false,
+                    url: self.LmsUrl,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    data: sSend
+                })
+                .fail(function (jqXHR, textStatus) {
+                    var error = new SCORM_Error(SCORM_Error_Enum.CONST_LMSFinish_ERROR, "Error disconnecting from AICC LMS: " + jqXHR.statusText);
+                    alert(error.message);
+                    throw error;
+                })
+                .done(function (response) {
+                    self.Reset();
+                    self.Connected = false;
+                    result = true;
+                });
+            }
 
         }
         catch (e) {
@@ -385,15 +391,15 @@ function AICC_LMS() {
         {
             var sAiccData = self.PrepareData();
             var sSend = "command=PutParam&version=" + escape(self.Version) + "&session_id=" + escape(self.Id) + "&AICC_Data=" + escape(sAiccData);
-
+                
             $.ajax({
-              method: "POST",
-              async: false,
-               headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-              },
-              url: self.LmsUrl,
-              data: sSend
+                method: "POST",
+                async: false,
+                headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            url: self.LmsUrl,
+            data: sSend
             })
             .fail(function(jqXHR, textStatus) {
                 var error = new SCORM_Error(SCORM_Error_Enum.CONST_LMSCommit_ERROR, "Error saving data to AICC LMS: " + jqXHR.statusText);
