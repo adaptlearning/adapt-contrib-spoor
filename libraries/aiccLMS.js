@@ -151,7 +151,6 @@ function AICC_LMS() {
                     }
                     else if (key == "lesson_status") {
 
-                        console.log("! first lesson_status code !");
 
                         // this contains a comma, then this field contains both the lesson_status and the core.entry value
                         // otherwise it contains on the lesson_status
