@@ -319,7 +319,7 @@ define(function(require) {
         this.logger.debug("ScormWrapper::finish");
 
         if (this.lmsConnected && !this.finishCalled) {
-            this.finishCalled = true;
+            
 
             if (this.timedCommitIntervalID !== null) {
                 window.clearInterval(this.timedCommitIntervalID);
@@ -356,12 +356,14 @@ define(function(require) {
 
             }
             
-            // api no longer available from this point
-            this.lmsConnected = false;
-
             if (!this.scorm.quit()) {
                 this.handleError("Course could not finish");
             }
+
+            // api no longer available from this point
+            this.lmsConnected = false;
+            this.finishCalled = true;
+
         } else {
             this.handleError("Course is not connected to the LMS");
         }
