@@ -308,7 +308,7 @@ elfh.AICC.quit = function() {
             }
 
             // save the exit status
-            success = aicc.save();
+            success = makeBoolean(API.LMSCommitAsync("")); 
 
             if(success){
 

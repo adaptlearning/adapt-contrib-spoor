@@ -345,13 +345,18 @@ function AICC_LMS() {
 
         try {
 
-            var sSend = "command=ExitAU&version=" + escape(self.Version) + "&session_id=" + escape(self.Id);
-
             if (navigator.sendBeacon !== undefined) {
-
-                navigator.sendBeacon(self.LmsUrl, sSend);
+                
+                var fd = new FormData();
+                fd.append("command", "ExitAU");
+                fd.append("version", self.Version);
+                fd.append("session_id", self.Id);
+                
+                result = navigator.sendBeacon(self.LmsUrl, fd);
 
             } else {
+                var sSend = "command=ExitAU&version=" + escape(self.Version) + "&session_id=" + escape(self.Id);
+
                 $.ajax({
                     method: "POST",
                     async: false,
@@ -378,6 +383,28 @@ function AICC_LMS() {
             throw e;
         }
 
+        return result;
+    };
+
+    self.LMSCommitAsync = function () {
+        var result = false;
+
+        if (navigator.sendBeacon !== undefined) {
+
+            var sAiccData = self.PrepareData();
+
+            var fd = new FormData();
+            fd.append("command", "PutParam");
+            fd.append("version", self.Version);
+            fd.append("session_id", self.Id);
+            fd.append("AICC_Data", sAiccData);
+
+            result = navigator.sendBeacon(self.LmsUrl, fd);
+
+        } else {  // async isn't support so use a sync Ajax fall back
+            result = self.LMSCommit();
+        }
+    
         return result;
     };
 
