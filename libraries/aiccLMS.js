@@ -228,7 +228,6 @@ function AICC_LMS() {
                         switch (sName) {
                             case "lesson_status":
                                 {
-                                    console.log("second lesson_status code!");
 
                                     sValue = sValue.toLowerCase();
                                     var arValues = sValue.split(",");
