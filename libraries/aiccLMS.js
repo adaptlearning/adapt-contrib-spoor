@@ -344,27 +344,34 @@ function AICC_LMS() {
         var result = false;
 
         try {
+            var sAiccData = self.PrepareData();
 
             if (navigator.sendBeacon !== undefined) {
                 
                 var fd = new FormData();
-                fd.append("command", "ExitAU");
+                fd.append("command", "ExitParam"); // AICC command should be ExitAU but we have created a customised one for e-LfH
                 fd.append("version", self.Version);
-                fd.append("session_id", self.Id);
-                
+                fd.append("session_id", self.Id);                
+                fd.append("AICC_Data", sAiccData); // normal ExitAU command would not include an AICC_Data param.
+
                 result = navigator.sendBeacon(self.LmsUrl, fd);
 
             } else {
-                var sSend = "command=ExitAU&version=" + escape(self.Version) + "&session_id=" + escape(self.Id);
 
-                $.ajax({
+                // make sure any outstanding data is saved (syncronous call)
+                self.LMSCommit();
+                
+                // do another call to exit the AU now
+                var exitData = "command=ExitAU&version=" + escape(self.Version) + "&session_id=" + escape(self.Id);
+
+                $.ajax({ // send the exit / finish command to the LMS via the hub
                     method: "POST",
                     async: false,
                     url: self.LmsUrl,
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    data: sSend
+                    data: exitData
                 })
                 .fail(function (jqXHR, textStatus) {
                     var error = new SCORM_Error(SCORM_Error_Enum.CONST_LMSFinish_ERROR, "Error disconnecting from AICC LMS: " + jqXHR.statusText);
@@ -376,6 +383,8 @@ function AICC_LMS() {
                     self.Connected = false;
                     result = true;
                 });
+
+                
             }
 
         }
@@ -383,28 +392,6 @@ function AICC_LMS() {
             throw e;
         }
 
-        return result;
-    };
-
-    self.LMSCommitAsync = function () {
-        var result = false;
-
-        if (navigator.sendBeacon !== undefined) {
-
-            var sAiccData = self.PrepareData();
-
-            var fd = new FormData();
-            fd.append("command", "PutParam");
-            fd.append("version", self.Version);
-            fd.append("session_id", self.Id);
-            fd.append("AICC_Data", sAiccData);
-
-            result = navigator.sendBeacon(self.LmsUrl, fd);
-
-        } else {  // async isn't support so use a sync Ajax fall back
-            result = self.LMSCommit();
-        }
-    
         return result;
     };
 
