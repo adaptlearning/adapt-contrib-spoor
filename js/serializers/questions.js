@@ -99,11 +99,10 @@ define([
           if (hasUserAnswer) {
             var userAnswer = isUserAnswerArray ? component['_userAnswer'] : [component['_userAnswer']];
 
-            var arrayType = SCORMSuspendData.DataType.getArrayType(userAnswer);
+            var invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
 
-            switch(arrayType.name) {
-            case "string": case "variable":
-              console.log("Cannot store _userAnswers from component " + component._id + " as array is of variable or string type.");
+            if (invalidError) {
+              console.log("Cannot store _userAnswers from component " + component._id + " as array is invalid", invalidError);
               continue;
             }
 
