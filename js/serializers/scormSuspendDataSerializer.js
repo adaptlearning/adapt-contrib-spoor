@@ -222,9 +222,9 @@
    * In ES5
    * var a;
    * var b;
-   * _es5spread = call();
-   * a = _es5spread[0];
-   * b = _es5spread[1];
+   * _es5destruct_ = call();
+   * a = _es5destruct_[0];
+   * b = _es5destruct_[1];
    *
    */
   var _es5destruct_;
@@ -987,7 +987,7 @@
    */
   function Converter() {}
   /**
-   * Checks the give value for conversion errors and returns the error
+   * Checks the given value for conversion errors and returns the error
    * @param {string|number|Array} value
    * @returns {undefined|Error}
    */
