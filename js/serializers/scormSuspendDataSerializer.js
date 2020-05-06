@@ -206,12 +206,6 @@
    * question states will occupy just half of the available space in SCORM's 4096
    * character suspend data.
    *
-   * Test data:
-   *
-   *  var vanilla_course = [[[0,7,0,0],[true,true,true,true,false],[false,false,false,true]],[[0,8,1,0],[true,true,true,true,true],[false,true,false]],[[0,9,1,0],[true,true,true,true,true],[65536]],[[0,10,0.33,0],[true,true,true,true,false],[0,3,1]],[[0,11,0,0],[true,false,true,true,false],[4]],[[0,12,0,0],[true,true,true,true,false],[true,true,true,true]],[[0,13,0,0],[true,true,true,true,false],[true,true,true,true,true]],[[0,15,0,0],[true,true,true,true,false],[true,true,true,true]],[[0,16,0,0],[true,true,true,true,false],[false,false,false,true]],[[0,17,0,0],[true,true,true,true,false],[true,true,true,true]]];
-   *  old algorithm  "CIE6IFhAcADgx4KAFOiBYQIEA4MfCgSaogWECRAODHyZAAAQAAmohaUDAAAwAoQAiEMAADgx4SEAxTogWECwAODFgoRE6IFhAwADgx4KA9SiBYQNAA4MeDgx9OiBYQPAA4MeCgPXogmIABAAAA4MeCgBXogmIABEAAA4MeCgP"
-   *  this algorithm "oAFRycOAryBOTCEEK+ZHJhCSFfH5gACAAByegQoFCBXj4MnJhCwFWHocmEMAV5HnJhDQFeV85MIeAryPOTCIAK8gTkwiICvI8A"
-   *
    * Note:
    * Intentionally written in ES5 for backwards compatibility with earlier versions
    * of Adapt.
