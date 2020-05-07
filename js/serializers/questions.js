@@ -6,8 +6,7 @@ define([
   //Captures the completion status and user selections of the question components
   //Returns and parses a base64 style string
   var includes = {
-      "_isQuestionType": true,
-      "_isResetOnRevisit": false
+    "_isQuestionType": true
   };
 
   var serializer = {
@@ -40,6 +39,8 @@ define([
       var trackingIds = Adapt.blocks.pluck("_trackingId");
       var blocks = {};
       var countInBlock = {};
+      var config = Adapt.config.get('_spoor');
+      var shouldStoreAttempts = config && config._tracking && config._tracking._shouldStoreAttempts;
 
       for (var i = 0, l = trackingIds.length; i < l; i++) {
 
@@ -62,17 +63,19 @@ define([
 
           var blockLocation = countInBlock[blockId];
 
-          if (component['_isInteractionComplete'] === false || component['_isComplete'] === false) {
-            //if component is not currently complete skip it
-            continue;
-          }
-
           var hasUserAnswer = (component['_userAnswer'] !== undefined);
           var isUserAnswerArray = (component['_userAnswer'] instanceof Array);
 
           if (hasUserAnswer && isUserAnswerArray && component['_userAnswer'].length === 0) {
             hasUserAnswer = false;
             isUserAnswerArray = false;
+          }
+
+          var hasAttemptStates = (component['_attemptStates'] !== undefined);
+          var isAttemptStatesArray = (component['_attemptStates'] instanceof Array);
+          if (hasAttemptStates && isAttemptStatesArray && component['_userAnswer'].length === 0) {
+            hasAttemptStates = false;
+            isAttemptStatesArray = false;
           }
 
           var numericParameters = [
@@ -85,6 +88,8 @@ define([
           var booleanParameters = [
             hasUserAnswer,
             isUserAnswerArray,
+            hasAttemptStates,
+            isAttemptStatesArray,
             component['_isInteractionComplete'],
             component['_isSubmitted'],
             component['_isCorrect'] || false
@@ -107,6 +112,19 @@ define([
             }
 
             dataItem.push(userAnswer);
+          }
+
+          if (shouldStoreAttempts && hasAttemptStates) {
+            var attemptStates = isAttemptStatesArray ? component['_attemptStates'] : [component['_attemptStates']];
+
+            var invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
+
+            if (invalidError) {
+              console.log("Cannot store _attemptStates from component " + component._id + " as array is invalid", invalidError);
+              continue;
+            }
+
+            dataItem.push(attemptStates);
           }
 
           data.push(dataItem);
@@ -132,6 +150,9 @@ define([
 
     releaseData: function (arr) {
 
+      var config = Adapt.config.get('_spoor');
+      var shouldStoreAttempts = config && config._tracking && config._tracking._shouldStoreAttempts;
+
       for (var i = 0, l = arr.length; i < l; i++) {
         var dataItem = arr[i];
 
@@ -145,9 +166,11 @@ define([
 
         var hasUserAnswer = booleanParameters[0];
         var isUserAnswerArray = booleanParameters[1];
-        var isInteractionComplete = booleanParameters[2];
-        var isSubmitted = booleanParameters[3];
-        var isCorrect = booleanParameters[4];
+        var hasAttemptStates = booleanParameters[2];
+        var isAttemptStatesArray = booleanParameters[3];
+        var isInteractionComplete = booleanParameters[4];
+        var isSubmitted = booleanParameters[5];
+        var isCorrect = booleanParameters[6];
 
         var block = Adapt.blocks.findWhere({_trackingId: trackingId});
         var components = block.getChildren();
@@ -168,6 +191,12 @@ define([
           component.set("_userAnswer", userAnswer);
         }
 
+        if (shouldStoreAttempts && hasAttemptStates) {
+          var attemptStates = dataItem[3];
+          if (!isAttemptStatesArray) attemptStates = attemptStates[0];
+
+          component.set("_attemptStates", attemptStates);
+        }
 
       }
     }
