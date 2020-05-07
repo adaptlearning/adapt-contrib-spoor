@@ -36,7 +36,7 @@ define([
     captureData: function() {
       var data = [];
 
-      var trackingIds = Adapt.blocks.pluck("_trackingId");
+      var trackingIds = Adapt.blocks.pluck("_trackingId").filter(id => (Number.isInteger(id) && id >= 0));
       var blocks = {};
       var countInBlock = {};
       var config = Adapt.config.get('_spoor');
