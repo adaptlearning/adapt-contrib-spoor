@@ -8,7 +8,7 @@
    *
    * The algorithm is weighted heavily in efficiency towards storing data by
    * its occurrence frequency when it is used to save Adapt question responses,
-   * booleans, arrays of <8 length and numbers of <4 value.
+   * booleans, arrays of <16 length and numbers of <4 value.
    *
    * Numbers can be 2 precision decimals, positive and negative numbers between
    * -4294967295.99 and 4294967295.99. Arrays can have 0 to 65535 entries. Arrays
@@ -19,7 +19,7 @@
    *
    *           VALUES                                VALUETYPE     PER ENTRY
    * VALUETYPE MIN           MAX            DECIMAL  BITS          MIN BITS  MAX BITS  STORES
-   * ARRAY     0             65535 (items)  NO       2             5         23        Array length and valuetype
+   * ARRAY     0             65535 (items)  NO       2             6         23        Array length and valuetype
    * BOOLEAN   0             1              NO       1             1         1         Entry value
    * UINT3     0             7              NO       4             3         3         Entry value
    * VINT8+    0             255            NO       3             3         9         Entry value
@@ -51,9 +51,9 @@
    *   Stores the number and type of items.
    *
    *          BINARY
-   *   BITS | SMALL LENGTH (UNIT3/16) VALUETYPE = VALUE
-   *   5    | 1     000               0         = zero length boolean array
-   *   5    | 1     111               0         = 7 length boolean array
+   *   BITS | SMALL LENGTH (UNIT4/16) VALUETYPE = VALUE
+   *   6    | 1     0000              0         = zero length boolean array
+   *   6    | 1     1111              0         = 15 length boolean array
    *   23   | 0     1000000000000000  111111    = 8 length sdec39 array
    *   23   | 0     1111111111111111  111111    = 65535 length sdec39 array
    *
@@ -807,7 +807,7 @@
   const arrayType = new VariableArrayType({
     name:  'array',
     binType: '10',
-    intBitSizes: [3,16]
+    intBitSizes: [4,16]
   });
 
   const booleanType = new FixedBooleanType({
