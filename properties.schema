@@ -248,7 +248,6 @@
         },
         "component": {
           "type":"object"
-          }
         }
       }
     }
