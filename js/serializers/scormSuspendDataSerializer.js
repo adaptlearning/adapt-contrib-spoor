@@ -468,7 +468,7 @@
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
      */
-    valueToBin(integer, logStats) {
+    valueToBin(integer, logStats = null) {
       let bin = uintToBin(integer, this.valueBinLength);
       logStats && this.log(bin);
       bin = [bin];
@@ -544,7 +544,7 @@
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
      */
-    valueToBin(integer) {
+    valueToBin(integer, logStats = null) {
       const parentName = this.parent.name;
       const sizeIndex = this.maxValues.findIndex(maxValue => (integer <= maxValue));
       if (sizeIndex === -1) {
@@ -553,10 +553,12 @@
       const sizeBin = uintToBin(sizeIndex, this.sizeBinLen);
       const valueLen = this.bitSizes[sizeIndex];
       const name = this.name;
-      logs.typeLengths[parentName] = logs.typeLengths[parentName] || {};
-      logs.typeLengths[parentName][name] = logs.typeLengths[parentName][name] || {};
-      logs.typeLengths[parentName][name][valueLen] = logs.typeLengths[parentName][name][valueLen] || 0;
-      logs.typeLengths[parentName][name][valueLen]++;
+      if (logStats) {
+        logs.typeLengths[parentName] = logs.typeLengths[parentName] || {};
+        logs.typeLengths[parentName][name] = logs.typeLengths[parentName][name] || {};
+        logs.typeLengths[parentName][name][valueLen] = logs.typeLengths[parentName][name][valueLen] || 0;
+        logs.typeLengths[parentName][name][valueLen]++;
+      }
       const integerBin = uintToBin(integer, valueLen);
       const bin = [sizeBin, integerBin];
       return bin;
@@ -605,9 +607,9 @@
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
      */
-    valueToBin(integer, logStats) {
+    valueToBin(integer, logStats = null) {
       integer = integer.toFixed(0);
-      let bin = this.int.valueToBin(Math.abs(integer));
+      let bin = this.int.valueToBin(Math.abs(integer), logStats);
       logStats && this.log(bin);
       return bin;
     }
@@ -651,7 +653,7 @@
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[Array|string]}
      */
-    valueToBin(arr, logStats) {
+    valueToBin(arr, logStats = null) {
       const arrLength = arr.length;
       const bin = super.valueToBin(arrLength);
       if (arrLength) {
@@ -709,11 +711,11 @@
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
      */
-    valueToBin(integer, logStats) {
+    valueToBin(integer, logStats = null) {
       integer = integer.toFixed(0);
       const isNegative = (integer < 0);
       const signBin = isNegative ? '1' : '0';
-      const integerBin = this.int.valueToBin(Math.abs(integer));
+      const integerBin = this.int.valueToBin(Math.abs(integer), logStats);
       const bin = [signBin, integerBin];
       logStats && this.log(bin);
       return bin;
@@ -764,7 +766,7 @@
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
      */
-    valueToBin(float, logStats) {
+    valueToBin(float, logStats = null) {
       float = float.toFixed(2);
       const isNegative = (float < 0);
       float = Math.abs(float);
@@ -772,8 +774,8 @@
       const higherInt = parseInt(parts[0]);
       const lowerInt = parseInt(zeroPadRightToLen(parts[1] || 0, 2));
       const signBin = isNegative ? '1' : '0';
-      const intValueBin = this.int.valueToBin(higherInt);
-      const decValueBin = this.dec.valueToBin(lowerInt);
+      const intValueBin = this.int.valueToBin(higherInt, logStats);
+      const decValueBin = this.dec.valueToBin(lowerInt, logStats);
       const bin = [signBin, intValueBin, decValueBin];
       logStats && this.log(bin);
       return bin;
@@ -1059,7 +1061,7 @@
      * @param {string} [typeName] To force an internal data type for testing
      * @returns {number|boolean|Array}
      */
-    valueFromBin(bin, typeName) {
+    valueFromBin(bin, typeName = null) {
       bin = _.flatten(bin).join('');
       let valueType;
       if (typeof typeName === 'string') {
@@ -1108,6 +1110,7 @@
       const base64 = binToBase64(bin);
       return base64;
     }
+
     /**
      * Convert the base64 string back into an array, boolean or number.
      * @param {string} base64 A string representation of data from serialize
@@ -1118,7 +1121,7 @@
       const bin = base64ToBin(base64);
       const value = this.valueFromBin(bin, typeName);
       return value;
-    };
+    }
 
   }
 
