@@ -322,7 +322,7 @@
     if (binLen === 0) {
       return '';
     }
-    var bin = Math.abs(integer).toString(2);
+    let bin = Math.abs(integer).toString(2);
     if (typeof binLen === 'undefined') {
       return bin;
     }
@@ -376,7 +376,7 @@
     bin = zeroPadRightToMultiple(bin, BYTE_BIT_LENGTH);
     const bytesCount = bin.length / BYTE_BIT_LENGTH;
     const charCodes = new Array(bytesCount);
-    for (var i = 0, l = bytesCount; i < l; i++) {
+    for (let i = 0, l = bytesCount; i < l; i++) {
       [ charCodes[i], bin ] = shiftUintFromBin(bin, BYTE_BIT_LENGTH);
     }
     let base64 = btoa(byteArrToStr(charCodes))
@@ -398,7 +398,7 @@
     const charCodes = strToByteArr(atob(base64));
     const bytesCount = charCodes.length;
     let bin = new Array(bytesCount);
-    for (var i = 0, l = bytesCount; i < l; i++) {
+    for (let i = 0, l = bytesCount; i < l; i++) {
       bin[i] = uintToBin(charCodes[i], BYTE_BIT_LENGTH);
     }
     bin = bin.join('');
@@ -571,8 +571,8 @@
     shiftValueFromBin(bin) {
       let sizeBin;
       [sizeBin, bin] = shiftBin(bin, this.sizeBinLen);
-      var sizeIndex = binToUint(sizeBin);
-      var valueLen = this.bitSizes[sizeIndex];
+      const sizeIndex = binToUint(sizeBin);
+      const valueLen = this.bitSizes[sizeIndex];
       let int;
       [int, bin] = shiftUintFromBin(bin, valueLen);
       return [int, bin];
@@ -677,7 +677,7 @@
       if (arrLength) {
         let valueType;
         [valueType, bin] = shiftValueTypeFromBin(bin);
-        for (var i = 0, l = arrLength; i < l; i++) {
+        for (let i = 0, l = arrLength; i < l; i++) {
           [value[i], bin] = valueType.shiftValueFromBin(bin);
         }
       }
