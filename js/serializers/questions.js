@@ -90,6 +90,7 @@ define([
             isUserAnswerArray,
             hasAttemptStates,
             isAttemptStatesArray,
+            component['_isComplete'],
             component['_isInteractionComplete'],
             component['_isSubmitted'],
             component['_isCorrect'] || false
@@ -168,16 +169,17 @@ define([
         var isUserAnswerArray = booleanParameters[1];
         var hasAttemptStates = booleanParameters[2];
         var isAttemptStatesArray = booleanParameters[3];
-        var isInteractionComplete = booleanParameters[4];
-        var isSubmitted = booleanParameters[5];
-        var isCorrect = booleanParameters[6];
+        var isComplete = booleanParameters[4];
+        var isInteractionComplete = booleanParameters[5];
+        var isSubmitted = booleanParameters[6];
+        var isCorrect = booleanParameters[7];
 
         var block = Adapt.blocks.findWhere({_trackingId: trackingId});
         var components = block.getChildren();
         components = components.where(includes);
         var component = components[blockLocation];
 
-        component.set("_isComplete", true);
+        component.set("_isComplete", isComplete);
         component.set("_isInteractionComplete", isInteractionComplete);
         component.set("_isSubmitted", isSubmitted);
         component.set("_score", score);
