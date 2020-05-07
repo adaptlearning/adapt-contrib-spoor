@@ -205,32 +205,10 @@
    * to store 500 of the above mcq state arrays in just 3755 characters. About 270
    * question states will occupy just half of the available space in SCORM's 4096
    * character suspend data.
-   *
-   * Note:
-   * Intentionally written in ES5 for backwards compatibility with earlier versions
-   * of Adapt.
    */
-
-  /**
-   * @type {[]} A placeholder for capturing returned arrays to perform destructuring assignment.
-   *
-   * In ES6
-   * var a;
-   * var b;
-   * [ a, b ] = call();
-   *
-   * In ES5
-   * var a;
-   * var b;
-   * _es5destruct_ = call();
-   * a = _es5destruct_[0];
-   * b = _es5destruct_[1];
-   *
-   */
-  var _es5destruct_;
 
   // Cache for zero strings of various lengths
-  var ZeroStr = {};
+  const ZeroStr = {};
   /**
    * Make and cache a zero string up to the supplied length
    * @param {number} length
@@ -240,7 +218,7 @@
     return ZeroStr[length] = ZeroStr[length] || (new Array(length + 1)).join('0');
   }
   // Initialize zero string cache up to 64 characters in length
-  for (var i = 1, l = 64; i <= l; i++) {
+  for (let i = 1, l = 64; i <= l; i++) {
     makeZeroStr(i);
   }
 
@@ -251,7 +229,7 @@
    * @returns {string}
    */
   function zeroPadRightToLen(str, length) {
-    var padLen = (length - str.length);
+    const padLen = (length - str.length);
     if (padLen > 0) {
       str = str + makeZeroStr(padLen);
     }
@@ -265,7 +243,7 @@
    * @returns {string}
    */
   function zeroPadLeftToLen(str, length) {
-    var padLen = (length - str.length);
+    const padLen = (length - str.length);
     if (padLen > 0) {
       str = makeZeroStr(padLen) + str;
     }
@@ -279,7 +257,7 @@
    * @returns {string}
    */
   function zeroPadRightToMultiple(str, multiple) {
-    var padLen = multiple - (str.length % multiple);
+    const padLen = multiple - (str.length % multiple);
     if (padLen !== multiple) {
       str = str + makeZeroStr(padLen);
     }
@@ -287,7 +265,7 @@
   }
 
   /**
-   * Returns a positive integer from the supplied bin and binLen, returning the integer
+   * Returns a positive integer from the supplied bin and binLen
    * @param {string} bin
    * @param {number} binLen
    * @returns {number}
@@ -297,7 +275,7 @@
       return 0;
     }
     bin = zeroPadLeftToLen(bin, binLen);
-    var integer = parseInt(bin.slice(0, binLen), 2);
+    const integer = parseInt(bin.slice(0, binLen), 2);
     return integer;
   }
 
@@ -313,8 +291,8 @@
       return [0, bin];
     }
     bin = zeroPadLeftToLen(bin, binLen);
-    var integer = parseInt(bin.slice(0, binLen), 2);
-    var bin = bin.slice(binLen);
+    const integer = parseInt(bin.slice(0, binLen), 2);
+    bin = bin.slice(binLen);
     return [integer, bin];
   }
 
@@ -330,7 +308,7 @@
       return ['', bin];
     }
     bin = zeroPadLeftToLen(bin, binLen);
-    var shifted = bin.slice(0, binLen);
+    const shifted = bin.slice(0, binLen);
     bin = bin.slice(binLen);
     return [shifted, bin];
   }
@@ -348,9 +326,9 @@
     if (typeof binLen === 'undefined') {
       return bin;
     }
-    var length = bin.length;
+    const length = bin.length;
     if (length > binLen) {
-      throw new Error('Integer too big for specified binary length. int: ' + integer + ' binlen: ' + binLen);
+      throw new Error(`Integer too big for specified binary length. int: ${integer} binlen: ${binLen}`);
     }
     bin = zeroPadLeftToLen(bin, binLen);
     return bin;
@@ -362,9 +340,9 @@
    * @returns {string}
    */
   function byteArrToStr(arr) {
-    var arrLength = arr.length;
-    var str = new Array(arrLength);
-    for (var i = 0, l = arrLength; i < l; i++) {
+    const arrLength = arr.length;
+    let str = new Array(arrLength);
+    for (let i = 0, l = arrLength; i < l; i++) {
       str[i] = String.fromCharCode(arr[i]);
     }
     str = str.join('');
@@ -377,16 +355,16 @@
    * @returns {[number]}
    */
   function strToByteArr(str) {
-    var strLength = str.length;
-    var arr = new Array(strLength);
-    for (var i = 0, l = strLength; i < l; i++) {
+    const strLength = str.length;
+    const arr = new Array(strLength);
+    for (let i = 0, l = strLength; i < l; i++) {
       arr[i] = str.charCodeAt(i);
     }
     return arr;
   }
 
   /** @type {number} Number of bits per byte */
-  var BYTE_BIT_LENGTH = 8;
+  const BYTE_BIT_LENGTH = 8;
 
   /**
    * Converts a binary string or nested arrays of binary strings to a base64 string
@@ -396,13 +374,12 @@
   function binToBase64(bin) {
     bin = _.flatten(bin).join('');
     bin = zeroPadRightToMultiple(bin, BYTE_BIT_LENGTH);
-    var bytesCount = bin.length / BYTE_BIT_LENGTH;
-    var charCodes = new Array(bytesCount);
+    const bytesCount = bin.length / BYTE_BIT_LENGTH;
+    const charCodes = new Array(bytesCount);
     for (var i = 0, l = bytesCount; i < l; i++) {
-      _es5destruct_ = shiftUintFromBin(bin, BYTE_BIT_LENGTH);
-      charCodes[i] = _es5destruct_[0]; bin = _es5destruct_[1];
+      [ charCodes[i], bin ] = shiftUintFromBin(bin, BYTE_BIT_LENGTH);
     }
-    var base64 = btoa(byteArrToStr(charCodes))
+    let base64 = btoa(byteArrToStr(charCodes))
     // Remove padding = or == as not necessary here
     base64 = base64.replace(/=/g,'');
     // Can't handle base64 with the + sign so swap with a -
@@ -418,9 +395,9 @@
   function base64ToBin(base64) {
     // base64 should have a + instead of a -
     base64 = base64.replace(/\-/g,'+');
-    var charCodes = strToByteArr(atob(base64));
-    var bytesCount = charCodes.length;
-    var bin = new Array(bytesCount);
+    const charCodes = strToByteArr(atob(base64));
+    const bytesCount = charCodes.length;
+    let bin = new Array(bytesCount);
     for (var i = 0, l = bytesCount; i < l; i++) {
       bin[i] = uintToBin(charCodes[i], BYTE_BIT_LENGTH);
     }
@@ -429,7 +406,7 @@
   }
 
   // Console output store
-  var logs = {
+  const logs = {
     usedTypes: {},
     typeLengths: {},
     binarySamples: {}
@@ -437,360 +414,409 @@
 
   /**
    * An abstract base class for a ValueType value to and from binary string converter
-   * @param {Object} options
-   * @param {string} options.name Name identifying the type
-   * @param {string} options.binType Binary string identifying the type
    */
-  function AbstractValueType(options) {
-    _.extend(this, options);
-    this.binTypeLength = this.binType.length;
-  };
-  /**
-   * Adds a record of the binary string production to the logging store
-   * @param {[Array|string]} bin
-   */
-  AbstractValueType.prototype.log = function(bin) {
-    var name = this.name;
-    logs.usedTypes[name] = logs.usedTypes[name] || 0;
-    logs.usedTypes[name]++;
-    logs.binarySamples[name] = logs.binarySamples[name] || [];
-    logs.binarySamples[name].push(bin);
+  class AbstractValueType {
+
+    /**
+     * @param {Object} options
+     * @param {string} options.name Name identifying the type
+     * @param {string} options.binType Binary string identifying the type
+     */
+    constructor(options) {
+      Object.assign(this, options);
+      this.binTypeLength = this.binType.length;
+    }
+
+    /**
+     * Adds a record of the binary string production to the logging store
+     * @param {[Array|string]} bin
+     */
+    log(bin) {
+      const name = this.name;
+      logs.usedTypes[name] = logs.usedTypes[name] || 0;
+      logs.usedTypes[name]++;
+      logs.binarySamples[name] = logs.binarySamples[name] || [];
+      logs.binarySamples[name].push(bin);
+    }
+
   };
 
   /**
    * Converts a fixed length positive integer to and from a binary string.
-   * @param {Object} options
-   * @param {string} options.name Name identifying the type
-   * @param {string} options.binType Binary string identifying the type
-   * @param {number} options.valueBinLength Bit length of the integer
    */
-  function FixedIntegerType(options) {
-    AbstractValueType.call(this, options);
-    this.esType = 'number';
-    if (!this.valueBinLength) {
-      return;
+  class FixedIntegerType extends AbstractValueType {
+
+    /**
+     * @param {Object} options
+     * @param {string} options.name Name identifying the type
+     * @param {string} options.binType Binary string identifying the type
+     * @param {number} options.valueBinLength Bit length of the integer
+     */
+    constructor(options) {
+      super(options);
+      this.esType = 'number';
+      if (!this.valueBinLength) {
+        return;
+      }
+      this.minValue = options.minValue || 0;
+      this.maxValue = options.maxValue || Math.pow(2, this.valueBinLength) - 1;
     }
-    this.minValue = options.minValue || 0;
-    this.maxValue = options.maxValue || Math.pow(2, this.valueBinLength) - 1;
+
+    /**
+     * Converts a fixed length positive integer to a binary string array.
+     * @param {number} integer
+     * @param {boolean} [logStats] Log the type usage for output to the console
+     * @returns {[string]}
+     */
+    valueToBin(integer, logStats) {
+      let bin = uintToBin(integer, this.valueBinLength);
+      logStats && this.log(bin);
+      bin = [bin];
+      return bin;
+    }
+
+    /**
+     * Shifts a fixed length positive integer from the binary string, returning
+     * the integer and the next part of the binary string.
+     * @param {string} bin
+     * @returns {[number, string]}
+     */
+    shiftValueFromBin(bin) {
+      let int;
+      [int, bin] = shiftUintFromBin(bin, this.valueBinLength);
+      return [int, bin];
+    }
+
   }
-  FixedIntegerType.prototype = Object.create(AbstractValueType.prototype);
-  /**
-   * Converts a fixed length positive integer to a binary string array.
-   * @param {number} integer
-   * @param {boolean} [logStats] Log the type usage for output to the console
-   * @returns {[string]}
-   */
-  FixedIntegerType.prototype.valueToBin = function(integer, logStats) {
-    var bin = uintToBin(integer, this.valueBinLength);
-    logStats && this.log(bin);
-    bin = [bin];
-    return bin;
-  };
-  /**
-   * Shifts a fixed length positive integer from the binary string, returning
-   * the integer and the next part of the binary string.
-   * @param {string} bin
-   * @returns {[number, string]}
-   */
-  FixedIntegerType.prototype.shiftValueFromBin = function(bin) {
-    var _es5destruct_ = shiftUintFromBin(bin, this.valueBinLength);
-    var int = _es5destruct_[0]; bin = _es5destruct_[1];
-    return [int, bin];
-  };
 
   /**
    * Converts a boolean to and from a binary string.
-   * @param {Object} options
-   * @param {string} options.name Name identifying the type
-   * @param {string} options.binType Binary string identifying the type
    */
-  function FixedBooleanType(options) {
-    options.valueBinLength = 1;
-    FixedIntegerType.call(this, options);
-    this.esType = 'boolean';
+  class FixedBooleanType extends FixedIntegerType {
+
+    /**
+     * @param {Object} options
+     * @param {string} options.name Name identifying the type
+     * @param {string} options.binType Binary string identifying the type
+     */
+    constructor(options) {
+      options.valueBinLength = 1;
+      super(options);
+      this.esType = 'boolean';
+    }
+
+    /**
+     * Shifts a boolean from the binary string, returning
+     * the boolean and the next part of the binary string.
+     * @param {string} bin
+     * @returns {[boolean, string]}
+     */
+    shiftValueFromBin(bin)  {
+      const bool = (bin[0] === '1' ? true : false);
+      bin = bin.slice(1);
+      return [bool, bin];
+    }
+
   }
-  FixedBooleanType.prototype = Object.create(FixedIntegerType.prototype);
-  /**
-   * Shifts a boolean from the binary string, returning
-   * the boolean and the next part of the binary string.
-   * @param {string} bin
-   * @returns {[boolean, string]}
-   */
-  FixedBooleanType.prototype.shiftValueFromBin = function(bin)  {
-    var bool = (bin[0] === '1' ? true : false);
-    bin = bin.slice(1);
-    return [bool, bin];
-  };
 
   /**
    * A helper for converting variable length positive integers to and from a binary string.
-   * @param {string} parent The parent AbstractValueType
-   * @param {string} name The sub parent value part name "inc" or "dec"
-   * @param {[number]} bitSizes An ordered array of expressible bit lengths
    */
-  function LengthAndValueBin(parent, name, bitSizes) {
-    this.parent = parent;
-    this.name = name;
-    this.bitSizes = bitSizes;
-    this.maxValues = _.flatten(this.bitSizes).map(function(value) {
-      return Math.pow(2, value) - 1;
-    }),
-    this.maxValue = this.maxValues[this.maxValues.length-1]
-    this.sizeBinLen = uintToBin(this.bitSizes.length-1).length;
-  };
-  /**
-   * Converts a positive integer to a binary string array.
-   * @param {number} integer
-   * @param {boolean} [logStats] Log the type usage for output to the console
-   * @returns {[string]}
-   */
-  LengthAndValueBin.prototype.valueToBin = function(integer) {
-    var parentName = this.parent.name;
-    var sizeIndex = _.findIndex(this.maxValues, function(maxValue) {
-      return (integer <= maxValue);
-    });
-    if (sizeIndex === -1) {
-      throw new Error('Value is to large for type: ' + parentName + ' value: ' + integer + ' max: ' + this.maxValue);
+  class LengthAndValueBin {
+
+    /**
+     * @param {string} parent The parent AbstractValueType
+     * @param {string} name The sub parent value part name "inc" or "dec"
+     * @param {[number]} bitSizes An ordered array of expressible bit lengths} parent
+     */
+    constructor(parent, name, bitSizes) {
+      this.parent = parent;
+      this.name = name;
+      this.bitSizes = bitSizes;
+      this.maxValues = _.flatten(this.bitSizes).map(value => (Math.pow(2, value) - 1));
+      this.maxValue = this.maxValues[this.maxValues.length-1]
+      this.sizeBinLen = uintToBin(this.bitSizes.length-1).length;
     }
-    var sizeBin = uintToBin(sizeIndex, this.sizeBinLen);
-    var valueLen = this.bitSizes[sizeIndex];
-    var name = this.name;
-    logs.typeLengths[parentName] = logs.typeLengths[parentName] || {};
-    logs.typeLengths[parentName][name] = logs.typeLengths[parentName][name] || {};
-    logs.typeLengths[parentName][name][valueLen] = logs.typeLengths[parentName][name][valueLen] || 0;
-    logs.typeLengths[parentName][name][valueLen]++;
-    var integerBin = uintToBin(integer, valueLen);
-    var bin = [sizeBin, integerBin];
-    return bin;
-  };
-  /**
-   * Shifts a positive integer from the binary string, returning
-   * the integer and the next part of the binary string.
-   * @param {string} bin
-   * @returns {[number, string]}
-   */
-  LengthAndValueBin.prototype.shiftValueFromBin = function(bin) {
-    _es5destruct_ = shiftBin(bin, this.sizeBinLen);
-    var sizeBin = _es5destruct_[0]; bin = _es5destruct_[1];
-    var sizeIndex = binToUint(sizeBin);
-    var valueLen = this.bitSizes[sizeIndex];
-    _es5destruct_ = shiftUintFromBin(bin, valueLen);
-    var int = _es5destruct_[0]; bin = _es5destruct_[1];
-    return [int, bin];
-  };
+
+    /**
+     * Converts a positive integer to a binary string array.
+     * @param {number} integer
+     * @param {boolean} [logStats] Log the type usage for output to the console
+     * @returns {[string]}
+     */
+    valueToBin(integer) {
+      const parentName = this.parent.name;
+      const sizeIndex = this.maxValues.findIndex(maxValue => (integer <= maxValue));
+      if (sizeIndex === -1) {
+        throw new Error('Value is too large for type: ' + parentName + ' value: ' + integer + ' max: ' + this.maxValue);
+      }
+      const sizeBin = uintToBin(sizeIndex, this.sizeBinLen);
+      const valueLen = this.bitSizes[sizeIndex];
+      const name = this.name;
+      logs.typeLengths[parentName] = logs.typeLengths[parentName] || {};
+      logs.typeLengths[parentName][name] = logs.typeLengths[parentName][name] || {};
+      logs.typeLengths[parentName][name][valueLen] = logs.typeLengths[parentName][name][valueLen] || 0;
+      logs.typeLengths[parentName][name][valueLen]++;
+      const integerBin = uintToBin(integer, valueLen);
+      const bin = [sizeBin, integerBin];
+      return bin;
+    }
+
+    /**
+     * Shifts a positive integer from the binary string, returning
+     * the integer and the next part of the binary string.
+     * @param {string} bin
+     * @returns {[number, string]}
+     */
+    shiftValueFromBin(bin) {
+      let sizeBin;
+      [sizeBin, bin] = shiftBin(bin, this.sizeBinLen);
+      var sizeIndex = binToUint(sizeBin);
+      var valueLen = this.bitSizes[sizeIndex];
+      let int;
+      [int, bin] = shiftUintFromBin(bin, valueLen);
+      return [int, bin];
+    }
+
+  }
 
   /**
    * Converts a variable length positive or negative integer to and from a binary string.
-   * @param {Object} options
-   * @param {string} options.name Name identifying the type
-   * @param {string} options.binType Binary string identifying the type
-   * @param {number} options.minValue Minimum value for the integer
-   * @param {number} options.maxValue Maximum value for the integer
-   * @param {[number]} options.intBitSizes Expressible storage bit sizes
    */
-  function VariableIntegerType(options) {
-    FixedIntegerType.call(this, options);
-    this.isNegative = this.minValue < 0 && this.maxValue === 0;
-    this.int = new LengthAndValueBin(this, 'int', options.intBitSizes);
-  }
-  VariableIntegerType.prototype = Object.create(FixedIntegerType.prototype);
-  /**
-   * Converts a positive or negative integer to a binary string array.
-   * @param {number} integer
-   * @param {boolean} [logStats] Log the type usage for output to the console
-   * @returns {[string]}
-   */
-  VariableIntegerType.prototype.valueToBin = function(integer, logStats) {
-    integer = integer.toFixed(0);
-    var bin = this.int.valueToBin(Math.abs(integer));
-    logStats && this.log(bin);
-    return bin;
-  };
-  /**
-   * Shifts a positive or negative integer from the binary string, returning
-   * the integer and the next part of the binary string.
-   * @param {string} bin
-   * @returns {[number, string]}
-   */
-  VariableIntegerType.prototype.shiftValueFromBin = function(bin) {
-    _es5destruct_ = this.int.shiftValueFromBin(bin);
-    var int = _es5destruct_[0]; bin = _es5destruct_[1];
-    if (this.isNegative) {
-      int = -int;
+  class VariableIntegerType extends FixedIntegerType {
+
+    /**
+     * @param {Object} options
+     * @param {string} options.name Name identifying the type
+     * @param {string} options.binType Binary string identifying the type
+     * @param {number} options.minValue Minimum value for the integer
+     * @param {number} options.maxValue Maximum value for the integer
+     * @param {[number]} options.intBitSizes Expressible storage bit sizes
+     */
+    constructor(options) {
+      super(options);
+      this.isNegative = this.minValue < 0 && this.maxValue === 0;
+      this.int = new LengthAndValueBin(this, 'int', options.intBitSizes);
     }
-    return [int, bin];
-  };
+
+    /**
+     * Converts a positive or negative integer to a binary string array.
+     * @param {number} integer
+     * @param {boolean} [logStats] Log the type usage for output to the console
+     * @returns {[string]}
+     */
+    valueToBin(integer, logStats) {
+      integer = integer.toFixed(0);
+      let bin = this.int.valueToBin(Math.abs(integer));
+      logStats && this.log(bin);
+      return bin;
+    }
+
+    /**
+     * Shifts a positive or negative integer from the binary string, returning
+     * the integer and the next part of the binary string.
+     * @param {string} bin
+     * @returns {[number, string]}
+     */
+    shiftValueFromBin(bin) {
+      let int;
+      [int, bin] = this.int.shiftValueFromBin(bin);
+      if (this.isNegative) {
+        int = -int;
+      }
+      return [int, bin];
+    }
+
+  }
 
   /**
    * Converts a variable length array to and from a binary string.
-   * @param {Object} options
-   * @param {string} options.name Name identifying the type
-   * @param {string} options.binType Binary string identifying the type
-   * @param {[number]} options.intBitSizes Expressible storage bit sizes
    */
-  function VariableArrayType(options) {
-    VariableIntegerType.call(this, options);
-    this.esType = 'array';
-  }
-  VariableArrayType.prototype = Object.create(VariableIntegerType.prototype);
-  /**
-   * Converts an array to a binary string array.
-   * @param {Array} arr
-   * @param {boolean} [logStats] Log the type usage for output to the console
-   * @returns {[Array|string]}
-   */
-  VariableArrayType.prototype.valueToBin = function(arr, logStats) {
-    var arrLength = arr.length;
-    var bin = VariableIntegerType.prototype.valueToBin.call(this, arrLength);
-    if (arrLength) {
-      var valueType = findValueTypeFromValues(arr);
-      bin.push(valueType.binType);
-      bin.type = valueType.name;
-      bin.push(arr.map(function(value) {
-        return valueType.valueToBin(value, logStats);
-      }));
+  class VariableArrayType extends VariableIntegerType {
+
+    /**
+     * @param {Object} options
+     * @param {string} options.name Name identifying the type
+     * @param {string} options.binType Binary string identifying the type
+     * @param {[number]} options.intBitSizes Expressible storage bit sizes
+     */
+    constructor(options) {
+      super(options);
+      this.esType = 'array';
     }
-    logStats && this.log(bin);
-    return bin;
-  };
-  /**
-   * Shifts an array from the binary string, returning
-   * the array and the next part of the binary string.
-   * @param {string} bin
-   * @returns {[Array, string]}
-   */
-  VariableArrayType.prototype.shiftValueFromBin = function(bin) {
-    _es5destruct_ = VariableIntegerType.prototype.shiftValueFromBin.call(this, bin);
-    var arrLength = _es5destruct_[0]; bin = _es5destruct_[1];
-    var value = new Array(arrLength);
-    if (arrLength) {
-      _es5destruct_ = shiftValueTypeFromBin(bin);
-      var valueType = _es5destruct_[0]; bin = _es5destruct_[1];
-      for (var i = 0, l = arrLength; i < l; i++) {
-        _es5destruct_ = valueType.shiftValueFromBin(bin);
-        value[i] = _es5destruct_[0]; bin = _es5destruct_[1];
+
+    /**
+     * Converts an array to a binary string array.
+     * @param {Array} arr
+     * @param {boolean} [logStats] Log the type usage for output to the console
+     * @returns {[Array|string]}
+     */
+    valueToBin(arr, logStats) {
+      const arrLength = arr.length;
+      const bin = super.valueToBin(arrLength);
+      if (arrLength) {
+        const valueType = findValueTypeFromValues(arr);
+        bin.push(valueType.binType);
+        bin.type = valueType.name;
+        bin.push(arr.map(value => valueType.valueToBin(value, logStats)));
       }
+      logStats && this.log(bin);
+      return bin;
     }
-    return [value, bin];
-  };
+
+    /**
+     * Shifts an array from the binary string, returning
+     * the array and the next part of the binary string.
+     * @param {string} bin
+     * @returns {[Array, string]}
+     */
+    shiftValueFromBin(bin) {
+      let arrLength;
+      [arrLength, bin] = super.shiftValueFromBin(bin);
+      const value = new Array(arrLength);
+      if (arrLength) {
+        let valueType;
+        [valueType, bin] = shiftValueTypeFromBin(bin);
+        for (var i = 0, l = arrLength; i < l; i++) {
+          [value[i], bin] = valueType.shiftValueFromBin(bin);
+        }
+      }
+      return [value, bin];
+    }
+
+  }
 
   /**
    * Converts a variable length signed integer to and from a binary string.
-   * @param {Object} options
-   * @param {string} options.name Name identifying the type
-   * @param {string} options.binType Binary string identifying the type
-   * @param {number} options.minValue Minimum value for the integer
-   * @param {number} options.maxValue Maximum value for the integer
-   * @param {[number]} options.intBitSizes Expressible storage bit sizes
    */
-  function VariableSignedIntegerType(options) {
-    VariableIntegerType.call(this, options);
-  }
-  VariableSignedIntegerType.prototype = Object.create(VariableIntegerType.prototype);
-  /**
-   * Converts a signed positive or negative integer to a binary string array.
-   * @param {number} integer
-   * @param {boolean} [logStats] Log the type usage for output to the console
-   * @returns {[string]}
-   */
-  VariableSignedIntegerType.prototype.valueToBin = function(integer, logStats) {
-    integer = integer.toFixed(0);
-    var isNegative = (integer < 0);
-    var signBin = isNegative ? '1' : '0';
-    var integerBin = this.int.valueToBin(Math.abs(integer));
-    var bin = [signBin, integerBin];
-    logStats && this.log(bin);
-    return bin;
-  };
-  /**
-   * Shifts the first signed integer value from the binary string, returning
-   * the next part of the binary string and the integer value.
-   * @param {string} bin
-   * @returns {[number, string]}
-   */
-  VariableSignedIntegerType.prototype.shiftValueFromBin = function(bin) {
-    _es5destruct_ = shiftUintFromBin(bin, 1);
-    var isNegative = _es5destruct_[0]; bin = _es5destruct_[1];
-    _es5destruct_ = this.int.shiftValueFromBin(bin);
-    var int = _es5destruct_[0]; bin = _es5destruct_[1];
-    if (isNegative) {
-      int = -int;
+  class VariableSignedIntegerType extends VariableIntegerType {
+
+    /**
+     * @param {Object} options
+     * @param {string} options.name Name identifying the type
+     * @param {string} options.binType Binary string identifying the type
+     * @param {number} options.minValue Minimum value for the integer
+     * @param {number} options.maxValue Maximum value for the integer
+     * @param {[number]} options.intBitSizes Expressible storage bit sizes
+     */
+    constructor (options) {
+      super(options);
     }
-    return [int, bin];
-  };
+
+    /**
+     * Converts a signed positive or negative integer to a binary string array.
+     * @param {number} integer
+     * @param {boolean} [logStats] Log the type usage for output to the console
+     * @returns {[string]}
+     */
+    valueToBin(integer, logStats) {
+      integer = integer.toFixed(0);
+      const isNegative = (integer < 0);
+      const signBin = isNegative ? '1' : '0';
+      const integerBin = this.int.valueToBin(Math.abs(integer));
+      const bin = [signBin, integerBin];
+      logStats && this.log(bin);
+      return bin;
+    }
+
+    /**
+     * Shifts the first signed integer value from the binary string, returning
+     * the next part of the binary string and the integer value.
+     * @param {string} bin
+     * @returns {[number, string]}
+     */
+    shiftValueFromBin(bin) {
+      let isNegative;
+      [isNegative, bin] = shiftUintFromBin(bin, 1);
+      let int;
+      [int, bin] = this.int.shiftValueFromBin(bin);
+      if (isNegative) {
+        int = -int;
+      }
+      return [int, bin];
+    }
+
+  }
 
   /**
    * Converts a variable length 2 precision decimal to and from a binary string.
-   * @param {Object} options
-   * @param {string} options.name Name identifying the type
-   * @param {string} options.binType Binary string identifying the type
-   * @param {number} options.minValue Minimum value for the integer
-   * @param {number} options.maxValue Maximum value for the integer
-   * @param {[number]} options.intBitSizes Expressible integer storage bit sizes
-   * @param {[number]} options.decBitSizes Expressible decimal storage bit sizes
    */
-  function VariableDecimalType(options) {
-    VariableIntegerType.call(this, options);
-    this.isFloat = true;
-    this.dec = new LengthAndValueBin(this, 'dec',options.decBitSizes);
-  }
-  VariableDecimalType.prototype = Object.create(VariableIntegerType.prototype);
-  /**
-   * Converts a signed 2 precision decimal to a binary string array.
-   * @param {number} float
-   * @param {boolean} [logStats] Log the type usage for output to the console
-   * @returns {[string]}
-   */
-  VariableDecimalType.prototype.valueToBin = function(float, logStats) {
-    float = float.toFixed(2);
-    var isNegative = (float < 0);
-    float = Math.abs(float);
-    var parts = String(float).split('.');
-    var higherInt = parseInt(parts[0]);
-    var lowerInt = parseInt(zeroPadRightToLen(parts[1] || 0, 2));
-    var signBin = isNegative ? '1' : '0';
-    var intValueBin = this.int.valueToBin(higherInt);
-    var decValueBin = this.dec.valueToBin(lowerInt);
-    var bin = [signBin, intValueBin, decValueBin];
-    logStats && this.log(bin);
-    return bin;
-  };
-  /**
-   * Shifts the first signed 2 precision decimal value from the binary string, returning
-   * the decimal value and the next part of the binary string.
-   * @param {string} bin
-   * @returns {[number, string]}
-   */
-  VariableDecimalType.prototype.shiftValueFromBin = function(bin) {
-    _es5destruct_ = shiftUintFromBin(bin, 1);
-    var isNegative = _es5destruct_[0]; bin = _es5destruct_[1];
-    _es5destruct_ = this.int.shiftValueFromBin(bin);
-    var higherInt = _es5destruct_[0]; bin = _es5destruct_[1];
-    _es5destruct_ = this.dec.shiftValueFromBin(bin);
-    var lowerInt = _es5destruct_[0]; bin = _es5destruct_[1];
-    lowerInt = zeroPadLeftToLen(String(lowerInt), 2);
-    var float = parseFloat(higherInt + '.' + lowerInt);
-    if (isNegative) {
-      float = -float;
-    }
-    return [float, bin];
-  };
+  class VariableDecimalType extends VariableIntegerType {
 
-  var arrayType = new VariableArrayType({
-    name:  'ARRAY',
+    /**
+     * @param {Object} options
+     * @param {string} options.name Name identifying the type
+     * @param {string} options.binType Binary string identifying the type
+     * @param {number} options.minValue Minimum value for the integer
+     * @param {number} options.maxValue Maximum value for the integer
+     * @param {[number]} options.intBitSizes Expressible integer storage bit sizes
+     * @param {[number]} options.decBitSizes Expressible decimal storage bit sizes
+     */
+    constructor(options) {
+      super(options);
+      this.isFloat = true;
+      this.dec = new LengthAndValueBin(this, 'dec',options.decBitSizes);
+    }
+
+    /**
+     * Converts a signed 2 precision decimal to a binary string array.
+     * @param {number} float
+     * @param {boolean} [logStats] Log the type usage for output to the console
+     * @returns {[string]}
+     */
+    valueToBin(float, logStats) {
+      float = float.toFixed(2);
+      const isNegative = (float < 0);
+      float = Math.abs(float);
+      const parts = String(float).split('.');
+      const higherInt = parseInt(parts[0]);
+      const lowerInt = parseInt(zeroPadRightToLen(parts[1] || 0, 2));
+      const signBin = isNegative ? '1' : '0';
+      const intValueBin = this.int.valueToBin(higherInt);
+      const decValueBin = this.dec.valueToBin(lowerInt);
+      const bin = [signBin, intValueBin, decValueBin];
+      logStats && this.log(bin);
+      return bin;
+    }
+
+    /**
+     * Shifts the first signed 2 precision decimal value from the binary string, returning
+     * the decimal value and the next part of the binary string.
+     * @param {string} bin
+     * @returns {[number, string]}
+     */
+    shiftValueFromBin(bin) {
+      let isNegative;
+      [isNegative, bin] = shiftUintFromBin(bin, 1);
+      let higherInt;
+      [higherInt, bin] = this.int.shiftValueFromBin(bin);
+      let lowerInt;
+      [lowerInt, bin]= this.dec.shiftValueFromBin(bin);
+      lowerInt = zeroPadLeftToLen(String(lowerInt), 2);
+      let float = parseFloat(higherInt + '.' + lowerInt);
+      if (isNegative) {
+        float = -float;
+      }
+      return [float, bin];
+    }
+
+  }
+
+  const arrayType = new VariableArrayType({
+    name:  'array',
     binType: '10',
     intBitSizes: [3,16]
   });
 
-  var booleanType = new FixedBooleanType({
-    name: 'BOOLEAN',
+  const booleanType = new FixedBooleanType({
+    name: 'boolean',
     binType: '0'
   });
 
   /**
    * @type {[FixedIntegerType|VariableIntegerType]}
    */
-  var integerTypes = [
+  const integerTypes = [
     new FixedIntegerType({
       name: 'uint3',
       binType: '1110',
@@ -822,7 +848,7 @@
   /**
    * @type {[VariableDecimalType]}
    */
-  var decimalTypes = [
+  const decimalTypes = [
     new VariableDecimalType({
       name: 'sdec15',
       binType: '111101',
@@ -842,11 +868,9 @@
   ];
 
   // Store and index all of the value types for searching by binType and name.
-  var ValueTypes = [booleanType, arrayType].concat(integerTypes).concat(decimalTypes);
+  const ValueTypes = [booleanType, arrayType].concat(integerTypes).concat(decimalTypes);
   ValueTypes.nameIndex = {};
-  ValueTypes.forEach(function (valueType) {
-    ValueTypes.nameIndex[valueType.name] = valueType;
-  });
+  ValueTypes.forEach(valueType => (ValueTypes.nameIndex[valueType.name] = valueType));
 
   /**
    * Extends the native typeof keyword with array and null.
@@ -876,7 +900,7 @@
    * @returns {AbstractValueType}
    */
   function findValueTypeFromValue(value) {
-    var esType = esTypeOf(value);
+    const esType = esTypeOf(value);
     switch (esType) {
       case 'array':
         return arrayType;
@@ -884,16 +908,12 @@
         return booleanType;
     }
     value = value.toFixed(2);
-    var isFloat = !Number.isInteger(value);
-    var valueType = isFloat ?
-      _.find(decimalTypes, function(valueType) {
-        return (value >= valueType.minValue && value <= valueType.maxValue);
-      }) :
-      _.find(integerTypes, function(valueType) {
-        return (value >= valueType.minValue && value <= valueType.maxValue);
-      });
+    const isFloat = !Number.isInteger(value);
+    const valueType = isFloat ?
+      decimalTypes.find(valueType => (value >= valueType.minValue && value <= valueType.maxValue)) :
+      integerTypes.find(valueType => (value >= valueType.minValue && value <= valueType.maxValue));
     if (!valueType) {
-      throw new Error('Cannot find type from value: ' + value);
+      throw new Error(`Cannot find type from value: ${value}`);
     }
     return valueType;
   }
@@ -907,11 +927,11 @@
     if (!values.length) {
       return;
     }
-    var minValue = 0;
-    var maxValue = 0;
-    var isFloat = false;
-    var esTypes = values.map(function(value) {
-      var valueType = findValueTypeFromValue(value, isFloat);
+    let minValue = 0;
+    let maxValue = 0;
+    let isFloat = false;
+    const esTypes = values.map(value => {
+      const valueType = findValueTypeFromValue(value, isFloat);
       if (valueType.esType === 'number') {
         minValue = _.min([valueType.minValue, minValue]);
         maxValue = _.max([valueType.maxValue, maxValue]);
@@ -919,26 +939,22 @@
       }
       return valueType.esType;
     });
-    var uniqESTypes = _.uniq(esTypes);
+    const uniqESTypes = _.uniq(esTypes);
     if (uniqESTypes.length > 1) {
-      throw new Error('Cannot resolve array to one type: ' + uniqESTypes.join());
+      throw new Error(`Cannot resolve array to one type: ${uniqESTypes.join()}`);
     }
-    var esType = uniqESTypes[0];
+    const esType = uniqESTypes[0];
     switch (esType) {
       case 'array':
         return arrayType;
       case 'boolean':
         return booleanType;
     }
-    var valueType = isFloat ?
-      _.find(decimalTypes, function(valueType) {
-        return (minValue >= valueType.minValue && maxValue <= valueType.maxValue);
-      }) :
-      _.find(integerTypes, function(valueType) {
-        return (minValue >= valueType.minValue && maxValue <= valueType.maxValue);
-      });
+    const valueType = isFloat ?
+      decimalTypes.find(valueType => (minValue >= valueType.minValue && maxValue <= valueType.maxValue)) :
+      integerTypes.find(valueType => (minValue >= valueType.minValue && maxValue <= valueType.maxValue));
     if (!valueType) {
-      throw new Error('Cannot find type from value. min: ' + minValue + ' max: ' + maxValue + ' isfloat: ' + isFloat);
+      throw new Error(`Cannot find type from value. min: ${minValue} max: ${maxValue} isfloat: ${isFloat}`);
     }
     return valueType;
   }
@@ -950,12 +966,12 @@
    * @returns {[AbstractValueType, string]}
    */
   function shiftValueTypeFromBin(bin) {
-    var valueType = _.find(ValueTypes, function(valueType) {
-      var binType = bin.slice(0, valueType.binTypeLength);
+    const valueType = ValueTypes.find(valueType => {
+      const binType = bin.slice(0, valueType.binTypeLength);
       return (binType === valueType.binType);
     });
     if (!valueType) {
-      throw new Error('Cannot find type from binary: ' + bin.slice(0, 6) + '...');
+      throw new Error(`Cannot find type from binary: ${bin.slice(0, 6)}...`);
     }
     bin = bin.slice(valueType.binTypeLength);
     return [valueType, bin];
@@ -968,7 +984,7 @@
    * @returns {number|boolean|Array}
    */
   function convertValuesToNumbers(value) {
-    var esType = esTypeOf(value);
+    const esType = esTypeOf(value);
     switch (esType) {
       case 'array':
         return value.map(convertValuesToNumbers);
@@ -979,125 +995,132 @@
       case 'number':
         return value;
     }
-    throw new Error('Cannot convert ' + esType + ' to number');
+    throw new Error(`Cannot convert ${esType} to number`);
   }
 
   /**
    * Main API
    */
-  function Converter() {}
-  /**
-   * Checks the given value for conversion errors and returns the error
-   * @param {string|number|Array} value
-   * @returns {undefined|Error}
-   */
-  Converter.prototype.getInvalidTypeError = function(value) {
-    try {
+  class Converter {
+
+    /**
+     * Checks the given value for conversion errors and returns the error
+     * @param {string|number|Array} value
+     * @returns {undefined|Error}
+     */
+    getInvalidTypeError(value) {
+      try {
+        value = convertValuesToNumbers(value);
+        if (esTypeOf(value) === 'array') {
+          findValueTypeFromValues(value);
+        } else {
+          findValueTypeFromValue(value);
+        }
+        return;
+      } catch(err) {
+        return err;
+      }
+    }
+
+    /**
+     * Convert an array, boolean or number into a string binary representation
+     * @param {number|boolean|Array} value
+     * @param {string} [typeName] To force an internal data type for testing
+     * @param {boolean} [logStats] Console logs statistics on type use
+     * @returns {string}
+     */
+    valueToBin(value, typeName = null, logStats = null) {
+      this.clearLog();
+      const hasInitialType = (typeof typeName === 'string');
       value = convertValuesToNumbers(value);
-      if (esTypeOf(value) === 'array') {
-        findValueTypeFromValues(value);
+      let valueType;
+      if (hasInitialType) {
+        valueType = findValueTypeFromName(typeName);
+        if (!valueType) {
+          throw new Error(`Could not find value type from name "${typeName}" accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave empty for auto-detect.`);
+        }
       } else {
-        findValueTypeFromValue(value);
+        valueType = findValueTypeFromValue(value);
+        if (!valueType) {
+          throw new Error(`Could not find value type from value "${value}" accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave empty for auto-detect.`);
+        }
       }
-      return;
-    } catch(err) {
-      return err;
+      const bin = valueType.valueToBin(value, logStats);
+      if (!hasInitialType) {
+        bin.unshift(valueType.binType);
+      }
+      logStats && this.printLog();
+      return bin;
     }
-  };
-  /**
-   * Convert an array, boolean or number into a string binary representation
-   * @param {number|boolean|Array} value
-   * @param {string} [typeName] To force an internal data type for testing
-   * @param {boolean} [logStats] Console logs statistics on type use
-   * @returns {string}
-   */
-  Converter.prototype.valueToBin = function(value, typeName, logStats) {
-    this.clearLog();
-    var hasInitialType = (typeof typeName === 'string');
-    value = convertValuesToNumbers(value);
-    var valueType;
-    if (hasInitialType) {
-      valueType = findValueTypeFromName(typeName);
-      if (!valueType) {
-        throw new Error('Could not find value type from name "' + typeName + '" accepts: ' + Object.keys(ValueTypes.nameIndex) + '. Leave empty for auto-detect.');
+
+    /**
+     * Convert the string binary representation back into an array, boolean or number.
+     * @param {string} bin A string binary representation of data from valueToBin
+     * @param {string} [typeName] To force an internal data type for testing
+     * @returns {number|boolean|Array}
+     */
+    valueFromBin(bin, typeName) {
+      bin = _.flatten(bin).join('');
+      let valueType;
+      if (typeof typeName === 'string') {
+        valueType = findValueTypeFromName(typeName);
+        if (!valueType) {
+          throw new Error(`Could not find value type from name "${typeName}" accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave empty for auto-detect.`);
+        }
+      } else {
+        [valueType, bin]= shiftValueTypeFromBin(bin);
+        if (!valueType || !(valueType instanceof AbstractValueType)) {
+          throw new Error(`Could not find value type from value "${value}" accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave empty for auto-detect.`);
+        }
       }
-    } else {
-      valueType = findValueTypeFromValue(value);
-      if (!valueType) {
-        throw new Error('Could not find value type from value "' + value + '" accepts: ' + Object.keys(ValueTypes.nameIndex) + '. Leave empty for auto-detect.');
-      }
+      let value;
+      [value] = valueType.shiftValueFromBin(bin);
+      return value;
     }
-    var bin = valueType.valueToBin(value, logStats);
-    if (!hasInitialType) {
-      bin.unshift(valueType.binType);
+
+    /**
+     * Clears any previous logs
+     */
+    clearLog() {
+      logs.usedTypes = {};
+      logs.typeLengths = {};
+      logs.binarySamples = {};
     }
-    logStats && this.printLog();
-    return bin;
-  };
-  /**
-   * Convert the string binary representation back into an array, boolean or number.
-   * @param {string} bin A string binary representation of data from valueToBin
-   * @param {string} [typeName] To force an internal data type for testing
-   * @returns {number|boolean|Array}
-   */
-  Converter.prototype.valueFromBin = function(bin, typeName) {
-    bin = _.flatten(bin).join('');
-    var valueType;
-    if (typeof typeName === 'string') {
-      valueType = findValueTypeFromName(typeName);
-      if (!valueType) {
-        throw new Error('Could not find value type from name "' + typeName + '" accepts: ' + Object.keys(ValueTypes.nameIndex) + '. Leave empty for auto-detect.');
-      }
-    } else {
-      _es5destruct_ = shiftValueTypeFromBin(bin);
-      valueType = _es5destruct_[0]; bin = _es5destruct_[1];
-      if (!valueType || !(valueType instanceof AbstractValueType)) {
-        throw new Error('Could not find value type from value "' + value + '" accepts: ' + Object.keys(ValueTypes.nameIndex) + '. Leave empty for auto-detect.');
-      }
+
+    /**
+     * Prints logs from last run
+     */
+    printLog() {
+      console.log('Types used count:', logs.usedTypes);
+      console.log('Type lengths used count:', logs.typeLengths);
+      console.log('Type binary samples:', logs.binarySamples);
     }
-    _es5destruct_ = valueType.shiftValueFromBin(bin);
-    var value = _es5destruct_[0];
-    return value;
-  };
-  /**
-   * Clears any previous logs
-   */
-  Converter.prototype.clearLog = function() {
-    logs.usedTypes = {};
-    logs.typeLengths = {};
-    logs.binarySamples = {};
-  };
-  /**
-   * Prints logs from last run
-   */
-  Converter.prototype.printLog = function() {
-    console.log('Types used count:', logs.usedTypes);
-    console.log('Type lengths used count:', logs.typeLengths);
-    console.log('Type binary samples:', logs.binarySamples);
-  };
-  /**
-   * Convert an array, boolean or number into a base64 string
-   * @param {number|boolean|Array} value
-   * @param {string} [typeName] To force an internal data type for testing
-   * @param {boolean} [logStats] Console logs statistics on type use
-   * @returns {string}
-   */
-  Converter.prototype.serialize = function(value, typeName, logStats = true) {
-    var bin = this.valueToBin(value, typeName, logStats);
-    var base64 = binToBase64(bin);
-    return base64;
-  };
-  /**
-   * Convert the base64 string back into an array, boolean or number.
-   * @param {string} base64 A string representation of data from serialize
-   * @param {string} [typeName] To force an internal data type for testing
-   * @returns {number|boolean|Array}
-   */
-  Converter.prototype.deserialize = function(base64, typeName) {
-    var bin = base64ToBin(base64);
-    var value = this.valueFromBin(bin, typeName);
-    return value;
-  };
+
+    /**
+     * Convert an array, boolean or number into a base64 string
+     * @param {number|boolean|Array} value
+     * @param {string} [typeName] To force an internal data type for testing
+     * @param {boolean} [logStats] Console logs statistics on type use
+     * @returns {string}
+     */
+    serialize(value, typeName = null, logStats = null) {
+      const bin = this.valueToBin(value, typeName, logStats);
+      const base64 = binToBase64(bin);
+      return base64;
+    }
+    /**
+     * Convert the base64 string back into an array, boolean or number.
+     * @param {string} base64 A string representation of data from serialize
+     * @param {string} [typeName] To force an internal data type for testing
+     * @returns {number|boolean|Array}
+     */
+    deserialize(base64, typeName = null) {
+      const bin = base64ToBin(base64);
+      const value = this.valueFromBin(bin, typeName);
+      return value;
+    };
+
+  }
 
   window.SCORMSuspendData = new Converter();
 })();
