@@ -73,7 +73,7 @@ define([
 
           var hasAttemptStates = (component['_attemptStates'] !== undefined);
           var isAttemptStatesArray = (component['_attemptStates'] instanceof Array);
-          if (hasAttemptStates && isAttemptStatesArray && component['_userAnswer'].length === 0) {
+          if (hasAttemptStates && isAttemptStatesArray && component['_attemptStates'].length === 0) {
             hasAttemptStates = false;
             isAttemptStatesArray = false;
           }
@@ -113,6 +113,8 @@ define([
             }
 
             dataItem.push(userAnswer);
+          } else {
+            dataItem.push([]);
           }
 
           if (shouldStoreAttempts && hasAttemptStates) {
@@ -126,6 +128,8 @@ define([
             }
 
             dataItem.push(attemptStates);
+          } else {
+            dataItem.push([]);
           }
 
           data.push(dataItem);
