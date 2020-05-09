@@ -13,6 +13,14 @@ define([
 
   Adapt.offlineStorage.initialize({
 
+    save: function() {
+      Adapt.trigger('tracking:save');
+    },
+
+    serialize: SCORMSuspendData.serialize.bind(SCORMSuspendData),
+
+    deserialize:  SCORMSuspendData.deserialize.bind(SCORMSuspendData),
+
     get: function(name) {
       if (name === undefined) {
         //If not connected return just temporary store.

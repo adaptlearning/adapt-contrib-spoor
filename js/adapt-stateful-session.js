@@ -104,7 +104,8 @@ define([
       this.listenTo(Adapt, {
         'assessment:complete': this.onAssessmentComplete,
         'app:languageChanged': this.onLanguageChanged,
-        'tracking:complete': this.onTrackingComplete
+        'tracking:complete': this.onTrackingComplete,
+        'tracking:save': this.saveSessionState
       });
     },
 
