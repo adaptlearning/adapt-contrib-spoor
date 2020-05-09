@@ -49,6 +49,12 @@ define([
           return scorm.getStudentName();
         case "learnerinfo":
           return this.getLearnerInfo();
+        case "completion":
+          const courseState = this.getCustomState('c');
+          return courseState && SCORMSuspendData.deserialize(courseState).slice(2).map(Number).map(String).join('') || '';
+        case "questions":
+          const questionsState = this.getCustomState('q');
+          return questionsState || '';
         default:
           return this.getCustomState(name);
       }

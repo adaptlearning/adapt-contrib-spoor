@@ -61,29 +61,36 @@ define([
       var sessionPairs = Adapt.offlineStorage.get();
       var hasNoPairs = _.keys(sessionPairs).length === 0;
 
+      var courseState;
       var doSynchronousPart = function() {
-        if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
-        if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
-        if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
+        if (sessionPairs.q && this._shouldStoreResponses) questions.deserialize(sessionPairs.q);
+        if (courseState) Adapt.course.set('_isComplete', courseState[0]);
+        if (courseState) Adapt.course.set('_isAssessmentPassed', courseState[1]);
         callback();
       }.bind(this);
 
       if (hasNoPairs) return callback();
 
+      if (sessionPairs.c) {
+        courseState = SCORMSuspendData.deserialize(sessionPairs.c);
+      }
+
       // Asynchronously restore block completion data because this has been known to be a choke-point resulting in IE8 freezes
-      if (sessionPairs.completion) {
-        serializer.deserialize(sessionPairs.completion, doSynchronousPart);
+      if (courseState) {
+        serializer.deserialize(courseState.slice(2).map(Number).map(String).join(''), doSynchronousPart);
       } else {
         doSynchronousPart();
       }
     },
 
     getSessionState: function() {
+      var courseState = SCORMSuspendData.serialize([
+        Adapt.course.get("_isComplete") || false,
+        Adapt.course.get('_isAssessmentPassed') || false,
+      ].concat(serializer.serialize().split('').map(Number).map(Boolean)));
       var sessionPairs = {
-        "completion": serializer.serialize(),
-        "questions": (this._shouldStoreResponses === true ? questions.serialize() : ""),
-        "_isCourseComplete": Adapt.course.get("_isComplete") || false,
-        "_isAssessmentPassed": Adapt.course.get('_isAssessmentPassed') || false
+        "c": courseState,
+        "q": (this._shouldStoreResponses === true ? questions.serialize() : "")
       };
       return sessionPairs;
     },
