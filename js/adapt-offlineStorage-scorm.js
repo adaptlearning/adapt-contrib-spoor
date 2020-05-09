@@ -14,7 +14,7 @@ define([
   Adapt.offlineStorage.initialize({
 
     save: function() {
-      Adapt.trigger('tracking:save');
+      // listens to Adapt{tracking:save} event in adapt-stateful-session  
     },
 
     serialize: SCORMSuspendData.serialize.bind(SCORMSuspendData),
