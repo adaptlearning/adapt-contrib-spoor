@@ -113,6 +113,7 @@ define([
         'app:languageChanged': this.onLanguageChanged,
         'tracking:complete': this.onTrackingComplete
       });
+      this.listenTo(Adapt.course, 'change:_isComplete', this.saveSessionState);
     },
 
     removeEventListeners: function () {
