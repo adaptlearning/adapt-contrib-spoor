@@ -84,13 +84,17 @@ define([
     },
 
     getSessionState: function() {
+      var blockCompletion = serializer.serialize();
+      var courseComplete = Adapt.course.get('_isComplete') || false;
+      var assessmentPassed = Adapt.course.get('_isAssessmentPassed') || false;
+      Adapt.log.info(`CourseComplete: ${courseComplete}, AssessmentPassed: ${assessmentPassed}, BlockCompletion: ${blockCompletion}`);
       var courseState = SCORMSuspendData.serialize([
-        Adapt.course.get("_isComplete") || false,
-        Adapt.course.get('_isAssessmentPassed') || false,
-      ].concat(serializer.serialize().split('').map(Number).map(Boolean)));
+        courseComplete,
+        assessmentPassed,
+      ].concat(blockCompletion.split('').map(Number).map(Boolean)));
       var sessionPairs = {
-        "c": courseState,
-        "q": (this._shouldStoreResponses === true ? questions.serialize() : "")
+        'c': courseState,
+        'q': (this._shouldStoreResponses === true ? questions.serialize() : '')
       };
       return sessionPairs;
     },
