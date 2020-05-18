@@ -87,7 +87,7 @@ define([
       var blockCompletion = serializer.serialize();
       var courseComplete = Adapt.course.get('_isComplete') || false;
       var assessmentPassed = Adapt.course.get('_isAssessmentPassed') || false;
-      Adapt.log.info(`CourseComplete: ${courseComplete}, AssessmentPassed: ${assessmentPassed}, BlockCompletion: ${blockCompletion}`);
+      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, BlockCompletion: ${blockCompletion}`);
       var courseState = SCORMSuspendData.serialize([
         courseComplete,
         assessmentPassed,
