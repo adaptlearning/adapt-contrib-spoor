@@ -13,6 +13,14 @@ define([
 
   Adapt.offlineStorage.initialize({
 
+    save: function() {
+      // listens to Adapt{tracking:save} event in adapt-stateful-session  
+    },
+
+    serialize: SCORMSuspendData.serialize.bind(SCORMSuspendData),
+
+    deserialize:  SCORMSuspendData.deserialize.bind(SCORMSuspendData),
+
     get: function(name) {
       if (name === undefined) {
         //If not connected return just temporary store.
