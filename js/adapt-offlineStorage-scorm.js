@@ -46,6 +46,7 @@ define([
       if (this.useTemporaryStore()) return temporaryStore[name];
 
       //Get by name
+      let courseState;
       switch (name.toLowerCase()) {
         case "location":
           return scorm.getLessonLocation();
@@ -57,6 +58,26 @@ define([
           return scorm.getStudentName();
         case "learnerinfo":
           return this.getLearnerInfo();
+        case "coursestate":
+          courseState = this.getCustomState('c');
+          const stateArray = courseState && SCORMSuspendData.deserialize(courseState) || [];
+          return {
+            _isCourseComplete: Boolean(stateArray.slice(0, 1).map(Number)[0]),
+            _isAssessmentPassed: Boolean(stateArray.slice(1, 2).map(Number)[0]),
+            completion: stateArray.slice(2).map(Number).map(String).join('') || ''
+          };
+        case "completion":
+          courseState = this.getCustomState('c');
+          return courseState && SCORMSuspendData.deserialize(courseState).slice(2).map(Number).map(String).join('') || '';
+        case "_iscoursecomplete":
+          courseState = this.getCustomState('c');
+          return Boolean(courseState && SCORMSuspendData.deserialize(courseState).slice(0, 1).map(Number)[0]);
+        case "_isassessmentpassed":
+          courseState = this.getCustomState('c');
+          return Boolean(courseState && SCORMSuspendData.deserialize(courseState).slice(1, 2).map(Number)[0]);
+        case "questions":
+          const questionsState = this.getCustomState('q');
+          return questionsState || '';
         default:
           return this.getCustomState(name);
       }
