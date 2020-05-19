@@ -91,7 +91,8 @@ define([
       var courseState = SCORMSuspendData.serialize([
         courseComplete,
         assessmentPassed,
-      ].concat(blockCompletion.split('').map(Number).map(Boolean)));
+        ...blockCompletion.split('').map(Number).map(Boolean)
+      ]);
       var sessionPairs = {
         'c': courseState,
         'q': (this._shouldStoreResponses === true ? questions.serialize() : '')
