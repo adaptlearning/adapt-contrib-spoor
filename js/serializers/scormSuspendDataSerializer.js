@@ -380,11 +380,11 @@
     for (let i = 0, l = bytesCount; i < l; i++) {
       [ charCodes[i], binary ] = shiftUnsignedIntegerFromBinary(binary, BYTE_BIT_LENGTH);
     }
-    let base64 = btoa(byteArrayToString(charCodes))
+    let base64 = btoa(byteArrayToString(charCodes));
     // Remove padding = or == as not necessary here
-    base64 = base64.replace(/=/g,'');
+    base64 = base64.replace(/=/g, '');
     // Can't handle base64 with the + sign so swap with a -
-    base64 = base64.replace(/\+/g,'-');
+    base64 = base64.replace(/\+/g, '-');
     return base64;
   }
 
@@ -395,7 +395,7 @@
    */
   function base64ToBinary(base64) {
     // base64 should have a + instead of a -
-    base64 = base64.replace(/\-/g,'+');
+    base64 = base64.replace(/-/g, '+');
     const charCodes = stringToByteArray(atob(base64));
     const bytesCount = charCodes.length;
     let binary = new Array(bytesCount);
@@ -514,7 +514,7 @@
      * @param {string} binary
      * @returns {[boolean, string]}
      */
-    shiftValueFromBinary(binary)  {
+    shiftValueFromBinary(binary) {
       const bool = (binary[0] === '1');
       binary = binary.slice(1);
       return [bool, binary];
@@ -537,8 +537,8 @@
       this.name = name;
       this.bitSizes = bitSizes;
       this.maxValues = _.flatten(this.bitSizes).map(value => (Math.pow(2, value) - 1));
-      this.maxValue = this.maxValues[this.maxValues.length-1]
-      this.sizeBinaryLength = unsignedIntegerToBinary(this.bitSizes.length-1).length;
+      this.maxValue = this.maxValues[this.maxValues.length - 1];
+      this.sizeBinaryLength = unsignedIntegerToBinary(this.bitSizes.length - 1).length;
     }
 
     /**
@@ -701,18 +701,6 @@
   class VariableSignedIntegerType extends VariableIntegerType {
 
     /**
-     * @param {Object} options
-     * @param {string} options.name Name identifying the type
-     * @param {string} options.binaryType Binary string identifying the type
-     * @param {number} options.minValue Minimum value for the integer
-     * @param {number} options.maxValue Maximum value for the integer
-     * @param {[number]} options.integerBitSizes Expressible storage bit sizes
-     */
-    constructor (options) {
-      super(options);
-    }
-
-    /**
      * Converts a signed positive or negative integer to a binary string array.
      * @param {number} integer
      * @param {boolean} [logStats] Log the type usage for output to the console
@@ -766,7 +754,7 @@
     constructor(options) {
       super(options);
       this.isFloat = true;
-      this.decimal = new LengthAndValueBinary(this, 'decimal',options.decimalBitSizes);
+      this.decimal = new LengthAndValueBinary(this, 'decimal', options.decimalBitSizes);
     }
 
     /**
@@ -804,7 +792,7 @@
       let higherInt;
       [higherInt, binary] = this.integer.shiftValueFromBinary(binary);
       let lowerInt;
-      [lowerInt, binary]= this.decimal.shiftValueFromBinary(binary);
+      [lowerInt, binary] = this.decimal.shiftValueFromBinary(binary);
       lowerInt = zeroPadLeftToLength(String(lowerInt), 2);
       let float = parseFloat(higherInt + '.' + lowerInt);
       if (isNegative) {
@@ -816,9 +804,9 @@
   }
 
   const arrayType = new VariableArrayType({
-    name:  'array',
+    name: 'array',
     binaryType: '10',
-    integerBitSizes: [4,16]
+    integerBitSizes: [4, 16]
   });
 
   const booleanType = new FixedBooleanType({
@@ -840,21 +828,21 @@
       binaryType: '110',
       minValue: 0,
       maxValue: 255,
-      integerBitSizes: [2,8]
+      integerBitSizes: [2, 8]
     }),
     new VariableIntegerType({
       name: 'vint8-',
       binaryType: '111100',
       minValue: -255,
       maxValue: 0,
-      integerBitSizes: [2,8]
+      integerBitSizes: [2, 8]
     }),
     new VariableSignedIntegerType({
       name: 'sint32',
       binaryType: '111110',
       minValue: -4294967295,
       maxValue: 4294967295,
-      integerBitSizes: [2,4,16,32]
+      integerBitSizes: [2, 4, 16, 32]
     })
   ];
 
@@ -867,16 +855,16 @@
       binaryType: '111101',
       minValue: -255.99,
       maxValue: 255.99,
-      integerBitSizes: [2,8],
-      decimalBitSizes: [0,7]
+      integerBitSizes: [2, 8],
+      decimalBitSizes: [0, 7]
     }),
     new VariableDecimalType({
       name: 'sdec39',
       binaryType: '111111',
       minValue: -4294967295.99,
       maxValue: 4294967295.99,
-      integerBitSizes: [2,4,16,32],
-      decimalBitSizes: [0,7]
+      integerBitSizes: [2, 4, 16, 32],
+      decimalBitSizes: [0, 7]
     })
   ];
 
@@ -1032,7 +1020,7 @@
           findValueTypeFromValues(value) :
           findValueTypeFromValue(value);
         return;
-      } catch(err) {
+      } catch (err) {
         return err;
       }
     }
