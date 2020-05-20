@@ -768,11 +768,11 @@
       const isNegative = (float < 0);
       float = Math.abs(float);
       const parts = String(float).split('.');
-      const higherInt = parseInt(parts[0]);
-      const lowerInt = parseInt(zeroPadRightToLength(parts[1] || 0, 2));
+      const higherInteger = parseInt(parts[0]);
+      const lowerInteger = parseInt(zeroPadRightToLength(parts[1] || 0, 2));
       const signBinary = isNegative ? '1' : '0';
-      const integerValueBinary = this.integer.valueToBinary(higherInt, logStats);
-      const decimalValueBinary = this.decimal.valueToBinary(lowerInt, logStats);
+      const integerValueBinary = this.integer.valueToBinary(higherInteger, logStats);
+      const decimalValueBinary = this.decimal.valueToBinary(lowerInteger, logStats);
       const binary = [signBinary, integerValueBinary, decimalValueBinary];
       if (logStats) {
         this.log(binary);
@@ -789,12 +789,12 @@
     shiftValueFromBinary(binary) {
       let isNegative;
       [isNegative, binary] = shiftUnsignedIntegerFromBinary(binary, 1);
-      let higherInt;
-      [higherInt, binary] = this.integer.shiftValueFromBinary(binary);
-      let lowerInt;
-      [lowerInt, binary] = this.decimal.shiftValueFromBinary(binary);
-      lowerInt = zeroPadLeftToLength(String(lowerInt), 2);
-      let float = parseFloat(higherInt + '.' + lowerInt);
+      let higherInteger;
+      [higherInteger, binary] = this.integer.shiftValueFromBinary(binary);
+      let lowerInteger;
+      [lowerInteger, binary] = this.decimal.shiftValueFromBinary(binary);
+      lowerInteger = zeroPadLeftToLength(String(lowerInteger), 2);
+      let float = parseFloat(higherInteger + '.' + lowerInteger);
       if (isNegative) {
         float = -float;
       }
