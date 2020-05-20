@@ -281,8 +281,8 @@
   }
 
   /**
-   * Shifts a positive integer from the supplied binary and binaryLength, returning the shifted integer
-   * and the truncated remaining string
+   * Shifts a positive integer from the supplied binary string and binaryLength,
+   * returning the shifted integer and the next part of the binary string
    * @param {string} binary
    * @param {number} binaryLength
    * @returns {[number, string]}
@@ -298,8 +298,8 @@
   }
 
   /**
-   * Shifts binaryLength characters from the supplied binary, returning the shifted string
-   * and the truncated remaining string.
+   * Shifts binaryLength characters from the supplied binary string, returning the
+   * shifted binary string and the next part of the binary string
    * @param {string} binary
    * @param {number} binaryLength
    * @returns {[string, string]}
@@ -450,7 +450,7 @@
     /**
      * @param {Object} options
      * @param {string} options.name Name identifying the type
-     * @param {string} options.binType Binary string identifying the type
+     * @param {string} options.binaryType Binary string identifying the type
      * @param {number} options.valueBinaryLength Bit length of the integer
      */
     constructor(options) {
@@ -464,7 +464,7 @@
     }
 
     /**
-     * Converts a fixed length positive integer to a binary string array.
+     * Converts a fixed length positive integer to an array of binary strings
      * @param {number} integer
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
@@ -493,7 +493,7 @@
   }
 
   /**
-   * Converts a boolean to and from a binary string.
+   * Converts a boolean to and from a binary string
    */
   class FixedBooleanType extends FixedIntegerType {
 
@@ -510,7 +510,7 @@
 
     /**
      * Shifts a boolean from the binary string, returning
-     * the boolean and the next part of the binary string.
+     * the boolean and the next part of the binary string
      * @param {string} binary
      * @returns {[boolean, string]}
      */
@@ -523,14 +523,14 @@
   }
 
   /**
-   * A helper for converting variable length positive integers to and from a binary string.
+   * A helper for converting variable length positive integers to and from a binary string
    */
   class LengthAndValueBinary {
 
     /**
      * @param {string} parent The parent AbstractValueType
      * @param {string} name The sub parent value part name "integer" or "decimal"
-     * @param {[number]} bitSizes An ordered array of expressible bit lengths} parent
+     * @param {[number]} bitSizes An ordered array of expressible bit lengths
      */
     constructor(parent, name, bitSizes) {
       this.parent = parent;
@@ -542,7 +542,7 @@
     }
 
     /**
-     * Converts a positive integer to a binary string array.
+     * Converts a positive integer to a binary string array
      * @param {number} integer
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
@@ -569,7 +569,7 @@
 
     /**
      * Shifts a positive integer from the binary string, returning
-     * the integer and the next part of the binary string.
+     * the integer and the next part of the binary string
      * @param {string} binary
      * @returns {[number, string]}
      */
@@ -586,7 +586,8 @@
   }
 
   /**
-   * Converts a variable length positive or negative integer to and from a binary string.
+   * Converts a variable length positive or negative integer to and from a
+   * binary string
    */
   class VariableIntegerType extends FixedIntegerType {
 
@@ -605,7 +606,7 @@
     }
 
     /**
-     * Converts a positive or negative integer to a binary string array.
+     * Converts a positive or negative integer to a array of binary strings
      * @param {number} integer
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
@@ -621,7 +622,7 @@
 
     /**
      * Shifts a positive or negative integer from the binary string, returning
-     * the integer and the next part of the binary string.
+     * the integer and the next part of the binary string
      * @param {string} binary
      * @returns {[number, string]}
      */
@@ -637,7 +638,7 @@
   }
 
   /**
-   * Converts a variable length array to and from a binary string.
+   * Converts a variable length array to and from a binary string
    */
   class VariableArrayType extends VariableIntegerType {
 
@@ -653,7 +654,7 @@
     }
 
     /**
-     * Converts an array to a binary string array.
+     * Converts an array to an array of binary strings
      * @param {Array} array
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[Array|string]}
@@ -675,7 +676,7 @@
 
     /**
      * Shifts an array from the binary string, returning
-     * the array and the next part of the binary string.
+     * the array and the next part of the binary string
      * @param {string} binary
      * @returns {[Array, string]}
      */
@@ -696,12 +697,12 @@
   }
 
   /**
-   * Converts a variable length signed integer to and from a binary string.
+   * Converts a variable length signed integer to and from a binary string
    */
   class VariableSignedIntegerType extends VariableIntegerType {
 
     /**
-     * Converts a signed positive or negative integer to a binary string array.
+     * Converts a signed positive or negative integer to a binary string array
      * @param {number} integer
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
@@ -720,7 +721,7 @@
 
     /**
      * Shifts the first signed integer value from the binary string, returning
-     * the next part of the binary string and the integer value.
+     * the integer value and the next part of the binary string
      * @param {string} binary
      * @returns {[number, string]}
      */
@@ -738,7 +739,7 @@
   }
 
   /**
-   * Converts a variable length 2 precision decimal to and from a binary string.
+   * Converts a variable length 2 precision decimal to and from a binary string
    */
   class VariableDecimalType extends VariableIntegerType {
 
@@ -758,7 +759,7 @@
     }
 
     /**
-     * Converts a signed 2 precision decimal to a binary string array.
+     * Converts a signed 2 precision decimal to an array of binary strings
      * @param {number} float
      * @param {boolean} [logStats] Log the type usage for output to the console
      * @returns {[string]}
@@ -781,8 +782,8 @@
     }
 
     /**
-     * Shifts the first signed 2 precision decimal value from the binary string, returning
-     * the decimal value and the next part of the binary string.
+     * Shifts the first signed 2 precision decimal value from the binary string,
+     * returning the decimal value and the next part of the binary string
      * @param {string} binary
      * @returns {[number, string]}
      */
@@ -868,13 +869,13 @@
     })
   ];
 
-  // Store and index all of the value types for searching by binaryType and name.
+  // Store and index all of the value types for searching by binaryType and name
   const ValueTypes = [booleanType, arrayType].concat(integerTypes).concat(decimalTypes);
   ValueTypes.nameIndex = {};
   ValueTypes.forEach(valueType => (ValueTypes.nameIndex[valueType.name] = valueType));
 
   /**
-   * Extends the native typeof keyword with array and null.
+   * Extends the native typeof keyword with array and null
    * @param {*} value
    * @returns {string} "undefined"|"null"|"boolean"|"number"|"array"|"object"
    */
@@ -889,7 +890,7 @@
   }
 
   /**
-   * Returns matching ValueType for the given name.
+   * Returns matching ValueType for the given name
    * @param {string} name
    * @returns {AbstractValueType}
    */
@@ -898,7 +899,7 @@
   }
 
   /**
-   * Returns matching ValueType for the given value.
+   * Returns matching ValueType for the given value
    * @param {number|boolean|Array} value
    * @returns {AbstractValueType}
    */
@@ -923,7 +924,7 @@
   }
 
   /**
-   * Returns a common ValueType for an array of values.
+   * Returns a common ValueType for an array of values
    * @param {Array} values
    * @returns {AbstractValueType}
    */
@@ -966,7 +967,7 @@
 
   /**
    * Shifts the first value type representation from the binary string, returning
-   * the the ValueType found and next part of the binary string.
+   * the the ValueType found and next part of the binary string
    * @param {string} binary
    * @returns {[AbstractValueType, string]}
    */
@@ -983,8 +984,8 @@
   }
 
   /**
-   * Sanitize the input throwing errors on any incorrect variable types and cloning
-   * input arrays.
+   * Sanitize the input throwing errors on any incorrect variable types whilst
+   * cloning the input arrays
    * @param {number|boolean|Array} value
    * @returns {number|boolean|Array}
    */
@@ -1053,7 +1054,7 @@
     }
 
     /**
-     * Convert the string binary representation back into an array, boolean or number.
+     * Convert the string binary representation back into an array, boolean or number
      * @param {string} binary A string binary representation of data from valueToBinary
      * @param {string} [typeName] To force an internal data type for testing
      * @returns {number|boolean|Array}
@@ -1106,7 +1107,7 @@
     }
 
     /**
-     * Convert the base64 string back into an array, boolean or number.
+     * Convert the base64 string back into an array, boolean or number
      * @param {string} base64 A string representation of data from serialize
      * @param {string} [typeName] To force an internal data type for testing
      * @returns {number|boolean|Array}
