@@ -266,7 +266,7 @@
   }
 
   /**
-   * Returns a positive integer from the supplied binary and binaryLength
+   * Returns a positive integer from the supplied binary string and binaryLength
    * @param {string} binary
    * @param {number} binaryLength
    * @returns {number}
