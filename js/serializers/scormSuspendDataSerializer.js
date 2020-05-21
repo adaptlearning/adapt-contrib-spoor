@@ -1069,7 +1069,7 @@
         [valueType, binary] = shiftValueTypeFromBinary(binary);
       }
       if (!valueType || !(valueType instanceof AbstractValueType)) {
-        throw new Error(`Could not find value type from ${hasInitialType ? 'name' : 'binary'} "${hasInitialType ? typeName : binary.slice(0, 8)}" accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave typeName empty for auto-detect.`);
+        throw new Error(`Could not find value type from ${hasInitialType ? `name "${typeName}"` : `binary "${binary.slice(0, 8)}"...`} accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave typeName empty for auto-detect.`);
       }
       const [value] = valueType.shiftValueFromBinary(binary);
       return value;
