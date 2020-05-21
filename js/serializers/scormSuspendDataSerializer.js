@@ -551,7 +551,7 @@
       const parentName = this.parent.name;
       const sizeIndex = this.maxValues.findIndex(maxValue => (integer <= maxValue));
       if (sizeIndex === -1) {
-        throw new Error('Value is too large for type: ' + parentName + ' value: ' + integer + ' max: ' + this.maxValue);
+        throw new Error(`Value is too large for type: ${parentName} value: ${integer} max: ${this.maxValue}`);
       }
       const sizeBinary = unsignedIntegerToBinary(sizeIndex, this.sizeBinaryLength);
       const valueLength = this.bitSizes[sizeIndex];
