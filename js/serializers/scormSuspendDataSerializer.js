@@ -1041,7 +1041,7 @@
         findValueTypeFromName(typeName) :
         findValueTypeFromValue(value);
       if (!valueType) {
-        throw new Error(`Could not find value type from ${hasInitialType ? `name ${typeName}` : `value ${value}` } accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave typeName empty for auto-detect.`);
+        throw new Error(`Could not find value type from ${hasInitialType ? `name ${typeName}` : `value ${value}`} accepts: ${Object.keys(ValueTypes.nameIndex)}. Leave typeName empty for auto-detect.`);
       }
       const binary = valueType.valueToBinary(value, logStats);
       if (!hasInitialType) {
