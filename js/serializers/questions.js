@@ -101,11 +101,11 @@ define([
             booleanParameters
           ];
 
-
+          var invalidError;
           if (hasUserAnswer) {
             var userAnswer = isUserAnswerArray ? component['_userAnswer'] : [component['_userAnswer']];
 
-            var invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
+            invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
 
             if (invalidError) {
               console.log("Cannot store _userAnswers from component " + component._id + " as array is invalid", invalidError);
@@ -120,7 +120,7 @@ define([
           if (shouldStoreAttempts && hasAttemptStates) {
             var attemptStates = isAttemptStatesArray ? component['_attemptStates'] : [component['_attemptStates']];
 
-            var invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
+            invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
 
             if (invalidError) {
               console.log("Cannot store _attemptStates from component " + component._id + " as array is invalid", invalidError);
