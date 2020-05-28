@@ -103,9 +103,9 @@ define([
     // Session In Progress
     setupEventListeners: function() {
       $(window).on('beforeunload unload', this._onWindowUnload);
-
+      
       if (this._shouldStoreResponses) {
-        this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
+        this.listenTo(Adapt.components, 'change:_isSubmitted', _.debounce(this.onQuestionComponentComplete.bind(this), 1));
       }
 
       if (this._shouldRecordInteractions) {
@@ -136,9 +136,7 @@ define([
       this.saveSessionState();
     },
 
-    onQuestionComponentComplete: function(component) {
-      if (!component.get("_isQuestionType")) return;
-
+    onQuestionComponentComplete: function() {
       this.saveSessionState();
     },
 
