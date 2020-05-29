@@ -105,7 +105,7 @@ define([
       $(window).on('beforeunload unload', this._onWindowUnload);
 
       if (this._shouldStoreResponses) {
-        this.listenTo(Adapt.components, 'change:_isSubmitted', _.debounce(this.onQuestionComponentComplete.bind(this), 1));
+        this.listenTo(Adapt.components, 'change:_isSubmitted', _.debounce(this.saveSessionState.bind(this), 1));
       }
 
       if (this._shouldRecordInteractions) {
@@ -133,10 +133,6 @@ define([
     },
 
     onBlockComplete: function(block) {
-      this.saveSessionState();
-    },
-
-    onQuestionComponentComplete: function() {
       this.saveSessionState();
     },
 
