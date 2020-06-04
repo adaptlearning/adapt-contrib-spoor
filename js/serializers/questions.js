@@ -123,7 +123,7 @@ define([
             invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
 
             if (invalidError) {
-              console.log("Cannot store _attemptStates from component " + component._id + " as array is invalid", invalidError);
+              console.log(`Cannot store _attemptStates from component ${component._id} as array is invalid`, invalidError);
               continue;
             }
 
