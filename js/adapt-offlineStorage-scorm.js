@@ -1,8 +1,9 @@
 define([
   'core/js/adapt',
   './scorm',
-  'core/js/offlineStorage'
-], function(Adapt, scorm) {
+  'core/js/offlineStorage',
+  './adapt-stateful-session'
+], function(Adapt, scorm, AdaptStatefulSession) {
 
   //SCORM handler for Adapt.offlineStorage interface.
 
@@ -14,7 +15,7 @@ define([
   Adapt.offlineStorage.initialize({
 
     save: function() {
-      // listens to Adapt{tracking:save} event in adapt-stateful-session  
+      AdaptStatefulSession.saveSessionState();
     },
 
     serialize: SCORMSuspendData.serialize.bind(SCORMSuspendData),

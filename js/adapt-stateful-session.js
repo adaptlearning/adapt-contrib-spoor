@@ -76,6 +76,7 @@ define([
       }
 
       // Asynchronously restore block completion data because this has been known to be a choke-point resulting in IE8 freezes
+      // @oliverfoster: this can probably be removed in any subsequent rewrite
       if (courseState) {
         serializer.deserialize(courseState.slice(2).map(Number).map(String).join(''), doSynchronousPart);
       } else {
@@ -116,8 +117,7 @@ define([
       this.listenTo(Adapt, {
         'assessment:complete': this.onAssessmentComplete,
         'app:languageChanged': this.onLanguageChanged,
-        'tracking:complete': this.onTrackingComplete,
-        'tracking:save': this.saveSessionState
+        'tracking:complete': this.onTrackingComplete
       });
       this.listenTo(Adapt.course, 'change:_isComplete', this.saveSessionState);
     },

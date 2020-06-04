@@ -3,7 +3,8 @@
         "_isEnabled": true,
         "_tracking": {
             "_shouldSubmitScore": false,
-            "_shouldStoreResponses": false,
+            "_shouldStoreResponses": true,
+            "_shouldStoreAttempts": false,
             "_shouldRecordInteractions": true
         },
         "_reporting": {

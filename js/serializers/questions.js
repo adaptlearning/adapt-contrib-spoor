@@ -6,7 +6,7 @@ define([
   //Captures the completion status and user selections of the question components
   //Returns and parses a base64 style string
   var includes = {
-    "_isQuestionType": true
+    '_isQuestionType': true
   };
 
   var serializer = {
@@ -63,26 +63,26 @@ define([
 
           var blockLocation = countInBlock[blockId];
 
-          var hasUserAnswer = (component['_userAnswer'] !== undefined);
-          var isUserAnswerArray = (component['_userAnswer'] instanceof Array);
+          var hasUserAnswer = (component._userAnswer !== undefined);
+          var isUserAnswerArray = Array.isArray(component._userAnswer);
 
-          if (hasUserAnswer && isUserAnswerArray && component['_userAnswer'].length === 0) {
+          if (hasUserAnswer && isUserAnswerArray && component._userAnswer.length === 0) {
             hasUserAnswer = false;
             isUserAnswerArray = false;
           }
 
-          var hasAttemptStates = (component['_attemptStates'] !== undefined);
-          var isAttemptStatesArray = (component['_attemptStates'] instanceof Array);
-          if (hasAttemptStates && isAttemptStatesArray && component['_attemptStates'].length === 0) {
+          var hasAttemptStates = (component._attemptStates !== undefined);
+          var isAttemptStatesArray = Array.isArray(component._attemptStates);
+          if (hasAttemptStates && isAttemptStatesArray && component._attemptStates.length === 0) {
             hasAttemptStates = false;
             isAttemptStatesArray = false;
           }
 
           var numericParameters = [
             blockLocation,
-            block['_trackingId'],
-            component['_score'] || 0,
-            component['_attemptsLeft'] || 0
+            block._trackingId,
+            component._score || 0,
+            component._attemptsLeft || 0
           ];
 
           var booleanParameters = [
@@ -90,10 +90,10 @@ define([
             isUserAnswerArray,
             hasAttemptStates,
             isAttemptStatesArray,
-            component['_isComplete'],
-            component['_isInteractionComplete'],
-            component['_isSubmitted'],
-            component['_isCorrect'] || false
+            component._isComplete,
+            component._isInteractionComplete,
+            component._isSubmitted,
+            component._isCorrect || false
           ];
 
           var dataItem = [
@@ -103,7 +103,7 @@ define([
 
           var invalidError;
           if (hasUserAnswer) {
-            var userAnswer = isUserAnswerArray ? component['_userAnswer'] : [component['_userAnswer']];
+            var userAnswer = isUserAnswerArray ? component._userAnswer : [component._userAnswer];
 
             invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
 
@@ -118,7 +118,7 @@ define([
           }
 
           if (shouldStoreAttempts && hasAttemptStates) {
-            var attemptStates = isAttemptStatesArray ? component['_attemptStates'] : [component['_attemptStates']];
+            var attemptStates = isAttemptStatesArray ? component._attemptStates : [component_attemptStates];
 
             invalidError = SCORMSuspendData.getInvalidTypeError(userAnswer);
 
