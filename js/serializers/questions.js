@@ -201,7 +201,7 @@ define([
           var attemptStates = dataItem[3];
           if (!isAttemptStatesArray) attemptStates = attemptStates[0];
 
-          component.set("_attemptStates", attemptStates);
+          component.set('_attemptStates', attemptStates);
         }
 
       }
