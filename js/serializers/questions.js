@@ -166,17 +166,17 @@ define([
 
         var blockLocation = numericParameters[0];
         var trackingId = numericParameters[1];
-        var score = numericParameters[2];
-        var attemptsLeft = numericParameters[3] || 0;
+        var _score = numericParameters[2];
+        var _attemptsLeft = numericParameters[3] || 0;
 
         var hasUserAnswer = booleanParameters[0];
         var isUserAnswerArray = booleanParameters[1];
         var hasAttemptStates = booleanParameters[2];
         var isAttemptStatesArray = booleanParameters[3];
-        var isComplete = booleanParameters[4];
-        var isInteractionComplete = booleanParameters[5];
-        var isSubmitted = booleanParameters[6];
-        var isCorrect = booleanParameters[7];
+        var _isComplete = booleanParameters[4];
+        var _isInteractionComplete = booleanParameters[5];
+        var _isSubmitted = booleanParameters[6];
+        var _isCorrect = booleanParameters[7];
 
         var block = Adapt.blocks.findWhere({_trackingId: trackingId});
         var components = block.getChildren();
@@ -187,10 +187,10 @@ define([
           _isComplete,
           _isInteractionComplete,
           _isSubmitted,
-          _score
+          _score,
+          _isCorrect,
+          _attemptsLeft
         });
-        component.set("_isCorrect", isCorrect);
-        component.set("_attemptsLeft", attemptsLeft);
 
         if (hasUserAnswer) {
           var userAnswer = dataItem[2];
