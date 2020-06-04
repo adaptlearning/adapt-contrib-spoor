@@ -183,10 +183,12 @@ define([
         components = components.where(includes);
         var component = components[blockLocation];
 
-        component.set("_isComplete", isComplete);
-        component.set("_isInteractionComplete", isInteractionComplete);
-        component.set("_isSubmitted", isSubmitted);
-        component.set("_score", score);
+        component.set({
+          _isComplete,
+          _isInteractionComplete,
+          _isSubmitted,
+          _score
+        });
         component.set("_isCorrect", isCorrect);
         component.set("_attemptsLeft", attemptsLeft);
 
