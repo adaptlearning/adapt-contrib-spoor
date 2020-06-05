@@ -48,6 +48,15 @@
                       "validators": [],
                       "help": "If enabled, the user's responses to questions will be saved and restored in each session. Note: this setting should be enabled in the majority of cases."
                     },
+                    "_shouldStoreAttempts": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Store question attempt states",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, a history of the user's responses to questions will be saved and restored in each session. Note: this setting should be disabled in the majority of cases."
+                    },
                     "_shouldRecordInteractions": {
                       "type": "boolean",
                       "required": false,

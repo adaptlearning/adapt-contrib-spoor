@@ -61,29 +61,42 @@ define([
       var sessionPairs = Adapt.offlineStorage.get();
       var hasNoPairs = _.keys(sessionPairs).length === 0;
 
+      var courseState;
       var doSynchronousPart = function() {
-        if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
-        if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
-        if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
+        if (sessionPairs.q && this._shouldStoreResponses) questions.deserialize(sessionPairs.q);
+        if (courseState) Adapt.course.set('_isComplete', courseState[0]);
+        if (courseState) Adapt.course.set('_isAssessmentPassed', courseState[1]);
         callback();
       }.bind(this);
 
       if (hasNoPairs) return callback();
 
+      if (sessionPairs.c) {
+        courseState = SCORMSuspendData.deserialize(sessionPairs.c);
+      }
+
       // Asynchronously restore block completion data because this has been known to be a choke-point resulting in IE8 freezes
-      if (sessionPairs.completion) {
-        serializer.deserialize(sessionPairs.completion, doSynchronousPart);
+      // @oliverfoster: this can probably be removed in any subsequent rewrite
+      if (courseState) {
+        serializer.deserialize(courseState.slice(2).map(Number).map(String).join(''), doSynchronousPart);
       } else {
         doSynchronousPart();
       }
     },
 
     getSessionState: function() {
+      var blockCompletion = serializer.serialize();
+      var courseComplete = Adapt.course.get('_isComplete') || false;
+      var assessmentPassed = Adapt.course.get('_isAssessmentPassed') || false;
+      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, BlockCompletion: ${blockCompletion}`);
+      var courseState = SCORMSuspendData.serialize([
+        courseComplete,
+        assessmentPassed,
+        ...blockCompletion.split('').map(Number).map(Boolean)
+      ]);
       var sessionPairs = {
-        "completion": serializer.serialize(),
-        "questions": (this._shouldStoreResponses === true ? questions.serialize() : ""),
-        "_isCourseComplete": Adapt.course.get("_isComplete") || false,
-        "_isAssessmentPassed": Adapt.course.get('_isAssessmentPassed') || false
+        'c': courseState,
+        'q': (this._shouldStoreResponses === true ? questions.serialize() : '')
       };
       return sessionPairs;
     },
@@ -93,7 +106,7 @@ define([
       $(window).on('beforeunload unload', this._onWindowUnload);
 
       if (this._shouldStoreResponses) {
-        this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
+        this.listenTo(Adapt.components, 'change:_isSubmitted', _.debounce(this.saveSessionState.bind(this), 1));
       }
 
       if (this._shouldRecordInteractions) {
@@ -106,6 +119,7 @@ define([
         'app:languageChanged': this.onLanguageChanged,
         'tracking:complete': this.onTrackingComplete
       });
+      this.listenTo(Adapt.course, 'change:_isComplete', this.saveSessionState);
     },
 
     removeEventListeners: function () {
@@ -119,12 +133,6 @@ define([
     },
 
     onBlockComplete: function(block) {
-      this.saveSessionState();
-    },
-
-    onQuestionComponentComplete: function(component) {
-      if (!component.get("_isQuestionType")) return;
-
       this.saveSessionState();
     },
 
