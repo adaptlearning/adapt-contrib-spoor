@@ -14,6 +14,10 @@ define ([
      */
     this.commitOnStatusChange = true;
     /**
+     * whether to commit each time there's a change to any value
+     */
+    this.commitOnAnyChange = false;
+    /**
      * how frequently (in minutes) to commit automatically. set to 0 to disable.
      */
     this.timedCommitFrequency = 10;
@@ -66,6 +70,7 @@ define ([
 
     this.suppressErrors = false;
 
+    this.debouncedCommit = _.debounce(this.commit.bind(this), 100);
     if (window.__debug)
         this.showDebugWindow();
 
@@ -121,13 +126,13 @@ define ([
   ScormWrapper.prototype.setIncomplete = function() {
     this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", "incomplete");
 
-    if (this.commitOnStatusChange) this.commit();
+    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   };
 
   ScormWrapper.prototype.setCompleted = function() {
     this.setValue(this.isSCORM2004() ? "cmi.completion_status" : "cmi.core.lesson_status", "completed");
 
-    if (this.commitOnStatusChange) this.commit();
+    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   };
 
   ScormWrapper.prototype.setPassed = function() {
@@ -139,7 +144,7 @@ define ([
       this.setValue("cmi.core.lesson_status", "passed");
     }
 
-    if (this.commitOnStatusChange) this.commit();
+    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   };
 
   ScormWrapper.prototype.setFailed = function() {
@@ -154,7 +159,7 @@ define ([
       this.setValue("cmi.core.lesson_status", "failed");
     }
 
-    if (this.commitOnStatusChange) this.commit();
+    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   };
 
   ScormWrapper.prototype.getStatus = function() {
@@ -418,6 +423,9 @@ define ([
           this.logger.warn("ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!");
         }
       }
+
+
+      if (this.commitOnAnyChange) this.debouncedCommit();
 
       return _success;
     }

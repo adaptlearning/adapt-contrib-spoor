@@ -124,6 +124,15 @@
                       "validators": [],
                       "help": "If enabled, a 'commit' call will be made any time the lesson_status is changed."
                     },
+                    "_commitOnAnyChange": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": true,
+                      "title": "Commit data on any change",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, a 'commit' call will be made any time a value is changed."
+                    },
                     "_timedCommitFrequency": {
                       "type": "number",
                       "required": false,

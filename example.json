@@ -18,6 +18,7 @@
             "_showDebugWindow": false,
             "_suppressErrors": false,
             "_commitOnStatusChange": true,
+            "_commitOnAnyChange": false,
             "_timedCommitFrequency": 10,
             "_maxCommitRetries": 5,
             "_commitRetryDelay": 2000,

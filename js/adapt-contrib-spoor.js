@@ -67,6 +67,10 @@ define([
           scorm.commitOnStatusChange = settings._commitOnStatusChange;
         }
 
+        if (settings._commitOnAnyChange) {
+          scorm.commitOnAnyChange = settings._commitOnAnyChange;
+        }
+
         if (_.isFinite(settings._timedCommitFrequency)) {
           scorm.timedCommitFrequency = settings._timedCommitFrequency;
         }
