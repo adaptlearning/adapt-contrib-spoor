@@ -462,7 +462,7 @@ define ([
   ScormWrapper.prototype.initTimedCommit = function() {
     this.logger.debug("ScormWrapper::initTimedCommit");
 
-    if (this.timedCommitFrequency > 0) {
+    if (!this.commitOnAnyChange && this.timedCommitFrequency > 0) {
       var delay = this.timedCommitFrequency * (60 * 1000);
       this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
     }
