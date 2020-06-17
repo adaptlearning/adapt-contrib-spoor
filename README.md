@@ -80,7 +80,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**\_commitOnStatusChange** (boolean): Determines whether a "commit" call should be made automatically every time the SCORM *lesson_status* is changed. The default is `true`.  
 
->>**\_commitOnAnyChange** (boolean): Determines whether a "commit" call should be made automatically every time any SCORM value is changed. The default is `false`.  
+>>**\_commitOnAnyChange** (boolean): Determines whether a "commit" call should be made automatically every time any SCORM value is changed. The default is `false`. Note that setting **\_commitOnAnyChange** to `true` may have a large impact on the server and should only be used if absolutely necessary. An alternative is to use a lower **\_timedCommitFrequency** value as it will have a lower to impact on the server.
 
 >>**\_timedCommitFrequency** (number): Specifies the frequency - in minutes - at which a "commit" call will be made. Set this value to `0` to disable automatic commits. The default is `10`.  
 
