@@ -3,62 +3,62 @@ define(function() {
   class Logger {
 
     constructor() {
-  this.logArr = [];
-  this.registeredViews = [];
+      this.logArr = [];
+      this.registeredViews = [];
     }
 
     static getInstance() {
       if (Logger.instance === null) {
-    Logger.instance = new Logger();
+        Logger.instance = new Logger();
       }
-  return Logger.instance;
+      return Logger.instance;
     }
 
     getEntries() {
-  return this.logArr;
+      return this.logArr;
     }
 
     getLastEntry() {
-  return this.logArr[this.logArr.length - 1];
+      return this.logArr[this.logArr.length - 1];
     }
 
     info(str) {
-  this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_INFO, time:Date.now()};
-  this.updateViews();
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_INFO, time: Date.now() };
+      this.updateViews();
     }
 
     warn(str) {
-  this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_WARN, time:Date.now()};
-  this.updateViews();
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_WARN, time: Date.now() };
+      this.updateViews();
     }
 
     error(str) {
-  this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_ERROR, time:Date.now()};
-  this.updateViews();
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_ERROR, time: Date.now() };
+      this.updateViews();
     }
 
     debug(str) {
-  this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_DEBUG, time:Date.now()};
-  this.updateViews();
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_DEBUG, time: Date.now() };
+      this.updateViews();
     }
 
     registerView(_view) {
-  this.registeredViews[this.registeredViews.length] = _view;
+      this.registeredViews[this.registeredViews.length] = _view;
     }
 
     unregisterView(_view) {
-  for (var i = 0; i < this.registeredViews.length; i++) {
+      for (var i = 0; i < this.registeredViews.length; i++) {
         if (this.registeredViews[i] !== _view) continue;
-      this.registeredViews.splice(i, 1);
-      i--;
+        this.registeredViews.splice(i, 1);
+        i--;
+      }
     }
-  }
 
     updateViews() {
-  for (var i = 0; i < this.registeredViews.length; i++) {
+      for (var i = 0; i < this.registeredViews.length; i++) {
         if (!this.registeredViews[i]) continue;
         this.registeredViews[i].update(this);
-  }
+      }
     }
 
   }

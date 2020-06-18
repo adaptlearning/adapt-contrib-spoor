@@ -77,8 +77,8 @@ define([
       this.setupLearnerInfo();
       this.restoreSessionState();
       // defer call because AdaptModel.check*Status functions are asynchronous
-        _.defer(this.setupEventListeners.bind(this));
-      }
+      _.defer(this.setupEventListeners.bind(this));
+    }
 
     setupLearnerInfo() {
       // Replace the hard-coded _learnerInfo data in _globals with the actual data
@@ -106,7 +106,7 @@ define([
       if (sessionPairs.q && this._shouldStoreResponses) {
         this._componentSerializer.deserialize(sessionPairs.q);
       }
-      }
+    }
 
     setupEventListeners() {
       this.listenTo(Adapt.blocks, 'change:_isComplete', this.saveSessionState);
@@ -236,7 +236,7 @@ define([
         }
       }
       Adapt.offlineStorage.set('status', completionStatus);
-      }
+    }
 
     endSession() {
       if (!this.scorm.finishCalled) {

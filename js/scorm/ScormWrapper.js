@@ -1,4 +1,4 @@
-define ([
+define([
   'libraries/SCORM_API_wrapper',
   './logger'
 ], function(pipwerks, Logger) {
@@ -10,62 +10,62 @@ define ([
 
     constructor() {
     /* configuration */
-    this.setCompletedWhenFailed = true;// this only applies to SCORM 2004
-    /**
+      this.setCompletedWhenFailed = true;// this only applies to SCORM 2004
+      /**
      * whether to commit each time there's a change to lesson_status or not
      */
-    this.commitOnStatusChange = true;
-    /**
+      this.commitOnStatusChange = true;
+      /**
      * how frequently (in minutes) to commit automatically. set to 0 to disable.
      */
-    this.timedCommitFrequency = 10;
-    /**
+      this.timedCommitFrequency = 10;
+      /**
      * how many times to retry if a commit fails
      */
-    this.maxCommitRetries = 5;
-    /**
+      this.maxCommitRetries = 5;
+      /**
      * time (in milliseconds) to wait between retries
      */
-    this.commitRetryDelay = 1000;
+      this.commitRetryDelay = 1000;
 
-    /**
+      /**
      * prevents commit from being called if there's already a 'commit retry' pending.
      */
-    this.commitRetryPending = false;
-    /**
+      this.commitRetryPending = false;
+      /**
      * how many times we've done a 'commit retry'
      */
-    this.commitRetries = 0;
-    /**
+      this.commitRetries = 0;
+      /**
      * not currently used - but you could include in an error message to show when data was last saved
      */
-    this.lastCommitSuccessTime = null;
-    /**
+      this.lastCommitSuccessTime = null;
+      /**
      * The exit state to use when course isn't completed yet
      */
       this.exitStateIfIncomplete = 'auto';
-    /**
+      /**
      * The exit state to use when the course has been completed/passed
      */
       this.exitStateIfComplete = 'auto';
 
-    this.timedCommitIntervalID = null;
-    this.retryCommitTimeoutID = null;
-    this.logOutputWin = null;
-    this.startTime = null;
-    this.endTime = null;
+      this.timedCommitIntervalID = null;
+      this.retryCommitTimeoutID = null;
+      this.logOutputWin = null;
+      this.startTime = null;
+      this.endTime = null;
 
-    this.lmsConnected = false;
-    this.finishCalled = false;
+      this.lmsConnected = false;
+      this.finishCalled = false;
 
-    this.logger = Logger.getInstance();
-    this.scorm = pipwerks.SCORM;
-    /**
+      this.logger = Logger.getInstance();
+      this.scorm = pipwerks.SCORM;
+      /**
      * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
      */
-    this.scorm.handleExitMode = false;
+      this.scorm.handleExitMode = false;
 
-    this.suppressErrors = false;
+      this.suppressErrors = false;
 
       if (window.__debug) {
         this.showDebugWindow();
@@ -83,34 +83,34 @@ define ([
         ScormWrapper.instance = new ScormWrapper();
       }
 
-    return ScormWrapper.instance;
+      return ScormWrapper.instance;
     }
 
     getVersion() {
-    return this.scorm.version;
+      return this.scorm.version;
     }
 
     setVersion(value) {
       this.logger.debug(`ScormWrapper::setVersion: ${value}`);
-    this.scorm.version = value;
+      this.scorm.version = value;
     }
 
     initialize() {
       this.logger.debug('ScormWrapper::initialize');
-    this.lmsConnected = this.scorm.init();
+      this.lmsConnected = this.scorm.init();
 
-    if (this.lmsConnected) {
-      this.startTime = new Date();
+      if (this.lmsConnected) {
+        this.startTime = new Date();
 
-      this.initTimedCommit();
+        this.initTimedCommit();
       } else {
         this.handleError('Course could not connect to the LMS');
+      }
+
+      return this.lmsConnected;
     }
 
-    return this.lmsConnected;
-    }
-
-  /**
+    /**
   * allows you to check if this is the user's first ever 'session' of a SCO, even after the lesson_status has been set to 'incomplete'
   */
     isFirstSession() {
@@ -120,44 +120,44 @@ define ([
     setIncomplete() {
       this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', 'incomplete');
 
-    if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange) this.commit();
     }
 
     setCompleted() {
       this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', 'completed');
 
-    if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange) this.commit();
     }
 
     setPassed() {
-    if (this.isSCORM2004()) {
+      if (this.isSCORM2004()) {
         this.setValue('cmi.completion_status', 'completed');
         this.setValue('cmi.success_status', 'passed');
       } else {
         this.setValue('cmi.core.lesson_status', 'passed');
-    }
+      }
 
-    if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange) this.commit();
     }
 
     setFailed() {
-    if (this.isSCORM2004()) {
+      if (this.isSCORM2004()) {
         this.setValue('cmi.success_status', 'failed');
 
-      if (this.setCompletedWhenFailed) {
+        if (this.setCompletedWhenFailed) {
           this.setValue('cmi.completion_status', 'completed');
-    }
+        }
       } else {
         this.setValue('cmi.core.lesson_status', 'failed');
-    }
+      }
 
-    if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange) this.commit();
     }
 
     getStatus() {
       var status = this.getValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status');
 
-    switch(status.toLowerCase()) {// workaround for some LMSes (e.g. Arena) not adhering to the all-lowercase rule
+      switch (status.toLowerCase()) { // workaround for some LMSes (e.g. Arena) not adhering to the all-lowercase rule
         case 'passed':
         case 'completed':
         case 'incomplete':
@@ -166,28 +166,28 @@ define ([
         case 'not attempted':
         case 'not_attempted': // mentioned in SCORM 2004 docs but not sure it ever gets used
         case 'unknown': // the SCORM 2004 version of not attempted
-        return status;
-      default:
+          return status;
+        default:
           this.handleError(`ScormWrapper::getStatus: invalid lesson status '${status}' received from LMS`);
-        return null;
-    }
+          return null;
+      }
     }
 
     setStatus(status) {
-    switch (status.toLowerCase()){
+      switch (status.toLowerCase()) {
         case 'incomplete':
-        this.setIncomplete();
-      break;
+          this.setIncomplete();
+          break;
         case 'completed':
-        this.setCompleted();
-      break;
+          this.setCompleted();
+          break;
         case 'passed':
-        this.setPassed();
-      break;
+          this.setPassed();
+          break;
         case 'failed':
-        this.setFailed();
-      break;
-      default:
+          this.setFailed();
+          break;
+        default:
           this.handleError(`ScormWrapper::setStatus: the status '${status}' is not supported.`);
       }
     }
@@ -197,13 +197,13 @@ define ([
     }
 
     setScore(_score, _minScore, _maxScore) {
-    if (this.isSCORM2004()) {
+      if (this.isSCORM2004()) {
         this.setValue('cmi.score.raw', _score);
         this.setValue('cmi.score.min', _minScore);
         this.setValue('cmi.score.max', _maxScore);
 
-      var range = _maxScore - _minScore;
-      var scaledScore = ((_score - _minScore) / range).toFixed(7);
+        var range = _maxScore - _minScore;
+        var scaledScore = ((_score - _minScore) / range).toFixed(7);
         this.setValue('cmi.score.scaled', scaledScore);
       } else {
         this.setValue('cmi.core.score.raw', _score);
@@ -239,9 +239,9 @@ define ([
     }
 
     setLanguage(_lang) {
-    if (this.isSCORM2004()) {
+      if (this.isSCORM2004()) {
         this.setValue('cmi.learner_preference.language', _lang);
-    } else {
+      } else {
         if (this.isSupported('cmi.student_preference.language')) {
           this.setValue('cmi.student_preference.language', _lang);
         }
@@ -251,98 +251,98 @@ define ([
     commit() {
       this.logger.debug('ScormWrapper::commit');
 
-    if (this.lmsConnected) {
-      if (this.commitRetryPending) {
+      if (this.lmsConnected) {
+        if (this.commitRetryPending) {
           this.logger.debug('ScormWrapper::commit: skipping this commit call as one is already pending.');
         } else {
-        if (this.scorm.save()) {
-          this.commitRetries = 0;
-          this.lastCommitSuccessTime = new Date();
+          if (this.scorm.save()) {
+            this.commitRetries = 0;
+            this.lastCommitSuccessTime = new Date();
           } else {
-          if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
-            this.commitRetries++;
-            this.initRetryCommit();
+            if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
+              this.commitRetries++;
+              this.initRetryCommit();
             } else {
-            var _errorCode = this.scorm.debug.getCode();
+              var _errorCode = this.scorm.debug.getCode();
 
               var _errorMsg = 'Course could not commit data to the LMS';
               _errorMsg += `\nError ${_errorCode}: ${this.scorm.debug.getInfo(_errorCode)}`;
               _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
 
-            this.handleError(_errorMsg);
+              this.handleError(_errorMsg);
+            }
           }
         }
-      }
       } else {
         this.handleError('Course is not connected to the LMS');
-    }
+      }
     }
 
     finish() {
       this.logger.debug('ScormWrapper::finish');
 
-    if (this.lmsConnected && !this.finishCalled) {
-      this.finishCalled = true;
+      if (this.lmsConnected && !this.finishCalled) {
+        this.finishCalled = true;
 
-      if (this.timedCommitIntervalID !== null) {
-        window.clearInterval(this.timedCommitIntervalID);
-      }
+        if (this.timedCommitIntervalID !== null) {
+          window.clearInterval(this.timedCommitIntervalID);
+        }
 
-      if(this.commitRetryPending) {
-        window.clearTimeout(this.retryCommitTimeoutID);
-        this.commitRetryPending = false;
-      }
+        if (this.commitRetryPending) {
+          window.clearTimeout(this.retryCommitTimeoutID);
+          this.commitRetryPending = false;
+        }
 
-      if (this.logOutputWin && !this.logOutputWin.closed) {
-        this.logOutputWin.close();
-      }
+        if (this.logOutputWin && !this.logOutputWin.closed) {
+          this.logOutputWin.close();
+        }
 
-      this.endTime = new Date();
+        this.endTime = new Date();
 
-      if (this.isSCORM2004()) {
+        if (this.isSCORM2004()) {
           this.scorm.set('cmi.session_time', this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
           this.scorm.set('cmi.exit', this.getExitState());
-      } else {
+        } else {
           this.scorm.set('cmi.core.session_time', this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
           this.scorm.set('cmi.core.exit', this.getExitState());
-      }
+        }
 
-      // api no longer available from this point
-      this.lmsConnected = false;
+        // api no longer available from this point
+        this.lmsConnected = false;
 
-      if (!this.scorm.quit()) {
+        if (!this.scorm.quit()) {
           this.handleError('Course could not finish');
-      }
+        }
       } else {
         this.handleError('Course is not connected to the LMS');
-    }
+      }
     }
 
     recordInteraction(id, response, correct, latency, type) {
       if (this.isSupported('cmi.interactions._count')) {
-      switch(type) {
+        switch (type) {
           case 'choice':
-          this.recordInteractionMultipleChoice.apply(this, arguments);
-          break;
+            this.recordInteractionMultipleChoice.apply(this, arguments);
+            break;
 
           case 'matching':
-          this.recordInteractionMatching.apply(this, arguments);
-          break;
+            this.recordInteractionMatching.apply(this, arguments);
+            break;
 
           case 'numeric':
-          this.isSCORM2004() ? this.recordInteractionScorm2004.apply(this, arguments) : this.recordInteractionScorm12.apply(this, arguments);
-          break;
+            this.isSCORM2004() ? this.recordInteractionScorm2004.apply(this, arguments) : this.recordInteractionScorm12.apply(this, arguments);
+            break;
 
           case 'fill-in':
-          this.recordInteractionFillIn.apply(this, arguments);
-          break;
+            this.recordInteractionFillIn.apply(this, arguments);
+            break;
 
-        default:
+          default:
             console.error(`ScormWrapper.recordInteraction: unknown interaction type of '${type}' encountered...`);
-      }
+        }
       } else {
         this.logger.info('ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...');
-    }
+      }
     }
 
     // ****************************** private methods ******************************
@@ -350,70 +350,70 @@ define ([
     getValue(_property) {
       this.logger.debug(`ScormWrapper::getValue: _property=${_property}`);
 
-    if (this.finishCalled) {
+      if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::getValue: ignoring request as 'finish' has been called`);
-      return;
-    }
+        return;
+      }
 
-    if (this.lmsConnected) {
-      var _value = this.scorm.get(_property);
-      var _errorCode = this.scorm.debug.getCode();
+      if (this.lmsConnected) {
+        var _value = this.scorm.get(_property);
+        var _errorCode = this.scorm.debug.getCode();
         var _errorMsg = '';
 
-      if (_errorCode !== 0) {
-        if (_errorCode === 403) {
+        if (_errorCode !== 0) {
+          if (_errorCode === 403) {
             this.logger.warn('ScormWrapper::getValue: data model element not initialized');
           } else {
             _errorMsg += `Course could not get ${_property}`;
             _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
             _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
 
-          this.handleError(_errorMsg);
+            this.handleError(_errorMsg);
+          }
         }
-      }
         this.logger.debug(`ScormWrapper::getValue: returning ${_value}`);
         return _value + '';
       } else {
         this.handleError('Course is not connected to the LMS');
-    }
+      }
     }
 
     setValue(_property, _value) {
       this.logger.debug(`ScormWrapper::setValue: _property=${_property} _value=${_value}`);
 
-    if (this.finishCalled) {
+      if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::setValue: ignoring request as 'finish' has been called`);
-      return;
-    }
+        return;
+      }
 
-    if (this.lmsConnected) {
-      var _success = this.scorm.set(_property, _value);
-      var _errorCode = this.scorm.debug.getCode();
+      if (this.lmsConnected) {
+        var _success = this.scorm.set(_property, _value);
+        var _errorCode = this.scorm.debug.getCode();
         var _errorMsg = '';
 
-      if (!_success) {
+        if (!_success) {
         /*
         * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
         * So, we should throw an error _only_ if there was a valid error code...
         */
-        if(_errorCode !== 0) {
+          if (_errorCode !== 0) {
             _errorMsg += `Course could not set ${_property} to ${_value}`;
             _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
             _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
 
-          this.handleError(_errorMsg);
+            this.handleError(_errorMsg);
           } else {
             this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
+          }
         }
-      }
 
-      return _success;
+        return _success;
       } else {
         this.handleError('Course is not connected to the LMS');
-    }
+      }
     }
 
-  /**
+    /**
   * used for checking any data field that is not 'LMS Mandatory' to see whether the LMS we're running on supports it or not.
   * Note that the way this check is being performed means it wouldn't work for any element that is
   * 'write only', but so far we've not had a requirement to check for any optional elements that are.
@@ -421,49 +421,49 @@ define ([
     isSupported(_property) {
       this.logger.debug(`ScormWrapper::isSupported: _property=${_property}`);
 
-    if (this.finishCalled) {
+      if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::isSupported: ignoring request as 'finish' has been called`);
-      return;
-    }
+        return;
+      }
 
-    if (this.lmsConnected) {
+      if (this.lmsConnected) {
         this.scorm.get(_property);
-      var _errorCode = this.scorm.debug.getCode();
+        var _errorCode = this.scorm.debug.getCode();
 
         return (_errorCode === 401);
       } else {
         this.handleError('Course is not connected to the LMS');
-      return false;
-    }
+        return false;
+      }
     }
 
     initTimedCommit() {
       this.logger.debug('ScormWrapper::initTimedCommit');
 
-    if (this.timedCommitFrequency > 0) {
-      var delay = this.timedCommitFrequency * (60 * 1000);
-      this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
-    }
+      if (this.timedCommitFrequency > 0) {
+        var delay = this.timedCommitFrequency * (60 * 1000);
+        this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
+      }
     }
 
     initRetryCommit() {
       this.logger.debug(`ScormWrapper::initRetryCommit ${this.commitRetries} out of ${this.maxCommitRetries}`);
 
-    this.commitRetryPending = true;// stop anything else from calling commit until this is done
+      this.commitRetryPending = true;// stop anything else from calling commit until this is done
 
-    this.retryCommitTimeoutID = window.setTimeout(this.doRetryCommit.bind(this), this.commitRetryDelay);
+      this.retryCommitTimeoutID = window.setTimeout(this.doRetryCommit.bind(this), this.commitRetryDelay);
     }
 
     doRetryCommit() {
       this.logger.debug('ScormWrapper::doRetryCommit');
 
-    this.commitRetryPending = false;
+      this.commitRetryPending = false;
 
-    this.commit();
+      this.commit();
     }
 
     handleError(_msg) {
-    this.logger.error(_msg);
+      this.logger.error(_msg);
 
       if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`An error has occured:\n\n${_msg}\n\nPress 'OK' to view debug information to send to technical support.`)) {
         this.showDebugWindow();
@@ -477,7 +477,7 @@ define ([
 
     recordInteractionScorm12(id, response, correct, latency, type) {
 
-    id = this.trim(id);
+      id = this.trim(id);
 
       var cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
@@ -491,7 +491,7 @@ define ([
 
     recordInteractionScorm2004(id, response, correct, latency, type) {
 
-    id = this.trim(id);
+      id = this.trim(id);
 
       var cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
@@ -505,54 +505,54 @@ define ([
 
     recordInteractionMultipleChoice(id, response, correct, latency, type) {
 
-    if (this.isSCORM2004()) {
+      if (this.isSCORM2004()) {
         response = response.replace(/,|#/g, '[,]');
-    } else {
+      } else {
         response = response.replace(/#/g, ',');
-      response = this.checkResponse(response, 'choice');
-    }
+        response = this.checkResponse(response, 'choice');
+      }
 
-    var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+      var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+      scormRecordInteraction.call(this, id, response, correct, latency, type);
     }
 
     recordInteractionMatching(id, response, correct, latency, type) {
 
       response = response.replace(/#/g, ',');
 
-    if(this.isSCORM2004()) {
+      if (this.isSCORM2004()) {
         response = response.replace(/,/g, '[,]');
         response = response.replace(/\./g, '[.]');
-    } else {
-      response = this.checkResponse(response, 'matching');
-    }
+      } else {
+        response = this.checkResponse(response, 'matching');
+      }
 
-    var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+      var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+      scormRecordInteraction.call(this, id, response, correct, latency, type);
     }
 
     recordInteractionFillIn(id, response, correct, latency, type) {
 
-    var maxLength = this.isSCORM2004() ? 250 : 255;
+      var maxLength = this.isSCORM2004() ? 250 : 255;
 
-    if(response.length > maxLength) {
-      response = response.substr(0, maxLength);
+      if (response.length > maxLength) {
+        response = response.substr(0, maxLength);
 
         this.logger.warn(`ScormWrapper::recordInteractionFillIn: response data for ${id} is longer than the maximum allowed length of ${maxLength} characters; data will be truncated to avoid an error.`);
-    }
+      }
 
-    var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+      var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+      scormRecordInteraction.call(this, id, response, correct, latency, type);
     }
 
     showDebugWindow() {
 
-    if (this.logOutputWin && !this.logOutputWin.closed) {
-      this.logOutputWin.close();
-    }
+      if (this.logOutputWin && !this.logOutputWin.closed) {
+        this.logOutputWin.close();
+      }
 
       this.logOutputWin = window.open('log_output.html', 'Log', 'width=600,height=300,status=no,scrollbars=yes,resizable=yes,menubar=yes,toolbar=yes,location=yes,top=0,left=0');
 
@@ -564,60 +564,60 @@ define ([
 
     convertToSCORM12Time(msConvert) {
 
-    var msPerSec = 1000;
-    var msPerMin = msPerSec * 60;
-    var msPerHour = msPerMin * 60;
+      var msPerSec = 1000;
+      var msPerMin = msPerSec * 60;
+      var msPerHour = msPerMin * 60;
 
-    var ms = msConvert % msPerSec;
-    msConvert = msConvert - ms;
+      var ms = msConvert % msPerSec;
+      msConvert = msConvert - ms;
 
-    var secs = msConvert % msPerMin;
-    msConvert = msConvert - secs;
-    secs = secs / msPerSec;
+      var secs = msConvert % msPerMin;
+      msConvert = msConvert - secs;
+      secs = secs / msPerSec;
 
-    var mins = msConvert % msPerHour;
-    msConvert = msConvert - mins;
-    mins = mins / msPerMin;
+      var mins = msConvert % msPerHour;
+      msConvert = msConvert - mins;
+      mins = mins / msPerMin;
 
-    var hrs = msConvert / msPerHour;
+      var hrs = msConvert / msPerHour;
 
-    if (hrs > 9999) {
+      if (hrs > 9999) {
         return '9999:99:99.99';
       } else {
         var str = [ this.padWithZeroes(hrs, 4), this.padWithZeroes(mins, 2), this.padWithZeroes(secs, 2) ].join(':');
         return (`${str}.${Math.floor(ms / 10)}`);
-    }
+      }
     }
 
-  /**
+    /**
   * Converts milliseconds into the SCORM 2004 data type 'timeinterval (second, 10,2)'
   * this will output something like 'P1DT3H5M0S' which indicates a period of time of 1 day, 3 hours and 5 minutes
   * or 'PT2M10.1S' which indicates a period of time of 2 minutes and 10.1 seconds
   */
     convertToSCORM2004Time(msConvert) {
-    var csConvert = Math.floor(msConvert / 10);
-    var csPerSec = 100;
-    var csPerMin = csPerSec * 60;
-    var csPerHour = csPerMin * 60;
-    var csPerDay = csPerHour * 24;
+      var csConvert = Math.floor(msConvert / 10);
+      var csPerSec = 100;
+      var csPerMin = csPerSec * 60;
+      var csPerHour = csPerMin * 60;
+      var csPerDay = csPerHour * 24;
 
-    var days = Math.floor(csConvert/ csPerDay);
-    csConvert -= days * csPerDay;
+      var days = Math.floor(csConvert / csPerDay);
+      csConvert -= days * csPerDay;
       days = days ? days + 'D' : '';
 
-    var hours = Math.floor(csConvert/ csPerHour);
-    csConvert -= hours * csPerHour;
+      var hours = Math.floor(csConvert / csPerHour);
+      csConvert -= hours * csPerHour;
       hours = hours ? hours + 'H' : '';
 
-    var mins = Math.floor(csConvert/ csPerMin);
-    csConvert -= mins * csPerMin;
+      var mins = Math.floor(csConvert / csPerMin);
+      csConvert -= mins * csPerMin;
       mins = mins ? mins + 'M' : '';
 
-    var secs = Math.floor(csConvert/ csPerSec);
-    csConvert -= secs * csPerSec;
+      var secs = Math.floor(csConvert / csPerSec);
+      csConvert -= secs * csPerSec;
       secs = secs || '0';
 
-    var cs = csConvert;
+      var cs = csConvert;
       cs = cs ? '.' + cs : '';
 
       var seconds = secs + cs + 'S';
@@ -629,32 +629,32 @@ define ([
 
     getCMITime() {
 
-    var date = new Date();
+      var date = new Date();
 
-    var hours = this.padWithZeroes(date.getHours(),2);
-    var min = this.padWithZeroes(date.getMinutes(),2);
-    var sec = this.padWithZeroes(date.getSeconds(),2);
+      var hours = this.padWithZeroes(date.getHours(), 2);
+      var min = this.padWithZeroes(date.getMinutes(), 2);
+      var sec = this.padWithZeroes(date.getSeconds(), 2);
 
       return [ hours, min, sec ].join(':');
     }
 
-  /**
+    /**
   * returns the current date & time in the format YYYY-MM-DDTHH:mm:ss
   */
     getISO8601Timestamp() {
-    var date = new Date().toISOString();
+      var date = new Date().toISOString();
       return date.replace(/.\d\d\dZ/, ''); // Date.toISOString returns the date in the format YYYY-MM-DDTHH:mm:ss.sssZ so we need to drop the last bit to make it SCORM 2004 conformant
     }
 
     padWithZeroes(numToPad, padBy) {
 
-    var len = padBy;
+      var len = padBy;
 
       while (--len) {
         numToPad = '0' + numToPad;
       }
 
-    return numToPad.slice(-padBy);
+      return numToPad.slice(-padBy);
     }
 
     trim(str) {
@@ -665,59 +665,59 @@ define ([
       return this.scorm.version === '2004';
     }
 
-  /*
+    /*
   * SCORM 1.2 requires that the identifiers in cmi.interactions.n.student_response for choice and matching activities be a character from [0-9a-z].
   * When numeric identifiers are used this function attempts to map identifiers 10 to 35 to [a-z]. Resolves issues/1376.
   */
     checkResponse(response, responseType) {
-    if (!response) return response;
+      if (!response) return response;
       if (responseType !== 'choice' && responseType !== 'matching') return response;
 
-    response = response.split(/,|#/);
+      response = response.split(/,|#/);
 
-    var self = this;
+      var self = this;
 
       if (responseType === 'choice') {
-      response = response.map(checkIdentifier);
-    } else {
-      response = response.map(function(r) {
-        var identifiers = r.split('.');
-        return checkIdentifier(identifiers[0]) + '.' + checkIdentifier(identifiers[1]);
-      });
-    }
-
-    function checkIdentifier(r) {
-      var i;
-
-      // if [0-9] then ok
-        if (r.length === 1 && r >= '0' && r <= '9') return r;
-
-      // if [a-z] then ok
-        if (r.length === 1 && r >= 'a' && r <= 'z') return r;
-
-      // try to map integers 10-35 to [a-z]
-      i = parseInt(r);
-
-      if (isNaN(i) || i < 10 || i > 35) {
-        self.handleError('Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2');
+        response = response.map(checkIdentifier);
+      } else {
+        response = response.map(function(r) {
+          var identifiers = r.split('.');
+          return checkIdentifier(identifiers[0]) + '.' + checkIdentifier(identifiers[1]);
+        });
       }
 
-      return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
-    }
+      function checkIdentifier(r) {
+        var i;
 
-    return response.join(',');
+        // if [0-9] then ok
+        if (r.length === 1 && r >= '0' && r <= '9') return r;
+
+        // if [a-z] then ok
+        if (r.length === 1 && r >= 'a' && r <= 'z') return r;
+
+        // try to map integers 10-35 to [a-z]
+        i = parseInt(r);
+
+        if (isNaN(i) || i < 10 || i > 35) {
+          self.handleError('Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2');
+        }
+
+        return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
+      }
+
+      return response.join(',');
     }
 
     getExitState() {
-    var completionStatus = this.scorm.data.completionStatus;
-    var isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
-    var exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
+      var completionStatus = this.scorm.data.completionStatus;
+      var isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
+      var exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
 
-    if (exitState !== 'auto') return exitState;
+      if (exitState !== 'auto') return exitState;
 
-    if (this.isSCORM2004()) return (isIncomplete ? 'suspend' : 'normal');
+      if (this.isSCORM2004()) return (isIncomplete ? 'suspend' : 'normal');
 
-    return '';
+      return '';
     }
 
   }

@@ -37,9 +37,9 @@ define([
 
     get isEnabled() {
       return (this.config && this.config._isEnabled);
-      }
-
     }
+
+  }
 
   Adapt.spoor = new Spoor();
 

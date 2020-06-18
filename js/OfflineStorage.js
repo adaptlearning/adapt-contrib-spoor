@@ -33,10 +33,10 @@ define([
 
     get(name) {
       if (name === undefined) {
-        //If not connected return just temporary store.
+        // If not connected return just temporary store.
         if (this.useTemporaryStore()) return this.temporaryStore;
 
-        //Get all values as a combined object
+        // Get all values as a combined object
         this.suspendDataStore = this.getCustomStates();
 
         const data = _.extend(_.clone(this.suspendDataStore), {
@@ -52,10 +52,10 @@ define([
         return data;
       }
 
-      //If not connected return just temporary store value.
+      // If not connected return just temporary store value.
       if (this.useTemporaryStore()) return this.temporaryStore[name];
 
-      //Get by name
+      // Get by name
       let courseState;
       switch (name.toLowerCase()) {
         case 'location':
@@ -107,7 +107,7 @@ define([
     }
 
     set(name, value) {
-      //Convert arguments to array and drop the 'name' parameter
+      // Convert arguments to array and drop the 'name' parameter
       const args = [].slice.call(arguments, 1);
       const isObject = typeof name === 'object';
 
@@ -150,15 +150,15 @@ define([
           break;
       }
 
-          if (isObject) {
+      if (isObject) {
         this.suspendDataStore = _.extend(this.suspendDataStore, value);
-          } else {
+      } else {
         this.suspendDataStore[name] = value;
-          }
+      }
 
       const dataAsString = JSON.stringify(this.suspendDataStore);
       return (this.suspendDataRestored) ? this.scorm.setSuspendData(dataAsString) : false;
-      }
+    }
 
     getCustomStates() {
       const isSuspendDataStoreEmpty = _.isEmpty(this.suspendDataStore);
@@ -203,7 +203,7 @@ define([
       let firstname = '';
       let lastname = '';
       if (name && name !== 'undefined' && name.indexOf(',') > -1) {
-        //last name first, comma separated
+        // last name first, comma separated
         const nameSplit = name.split(',');
         lastname = $.trim(nameSplit[0]);
         firstname = $.trim(nameSplit[1]);
