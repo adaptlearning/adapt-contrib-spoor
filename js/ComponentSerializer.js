@@ -24,8 +24,17 @@ define([
           model.findDescendantModels('component') :
           [model];
         components.forEach((component, index) => {
-          if (!component.getAttemptState) return;
-          const modelState = component.getAttemptState();
+          let modelState = null
+          if (!component.getAttemptState) {
+            // Legacy components without getAttemptState
+            modelState = [
+              [],
+              [component.get('_isComplete'), component.get('_isInteractionComplete')],
+              [component.get('_userAnswer')]
+            ];
+          } else {
+            modelState = component.getAttemptState();
+          }
           // correct the useranswer array as it is sometimes not an array
           // incomplete components are undefined and slider is a number
           const userAnswer = modelState[2][0];
@@ -82,8 +91,17 @@ define([
           model.findDescendantModels('component') :
           [model];
         const component = components[index];
-        const attemptObject = component.getAttemptObject(modelState);
-        component.setAttemptObject(attemptObject, false);
+        if (!component.setAttemptObject) {
+          // Legacy components without getAttemptState
+          component.set({
+            _isComplete: modelState[1][0],
+            _isInteractionComplete: modelState[1][0],
+            _userAnswer: modelState[2][0]
+          });
+        } else {
+          const attemptObject = component.getAttemptObject(modelState);
+          component.setAttemptObject(attemptObject, false);
+        }
       });
     }
 
