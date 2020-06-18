@@ -1,4 +1,6 @@
-(function() {
+define([
+  'underscore'
+], function(_) {
   /**
    * 2020/05/06 SCORMSuspendData
    *
@@ -1120,5 +1122,5 @@
 
   }
 
-  window.SCORMSuspendData = new Converter();
-})();
+  return (window.SCORMSuspendData = new Converter());
+});

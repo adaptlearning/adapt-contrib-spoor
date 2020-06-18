@@ -1,68 +1,74 @@
-Logger = function() {
+define(function() {
+
+  class Logger {
+
+    constructor() {
   this.logArr = [];
   this.registeredViews = [];
-};
+    }
 
-// static
-Logger.instance = null;
-Logger.LOG_TYPE_INFO = 0;
-Logger.LOG_TYPE_WARN = 1;
-Logger.LOG_TYPE_ERROR = 2;
-Logger.LOG_TYPE_DEBUG = 3;
-
-Logger.getInstance = function() {
-  if (Logger.instance == null)
+    static getInstance() {
+      if (Logger.instance === null) {
     Logger.instance = new Logger();
+      }
   return Logger.instance;
-};
+    }
 
-Logger.prototype.getEntries = function() {
+    getEntries() {
   return this.logArr;
-};
+    }
 
-Logger.prototype.getLastEntry = function() {
+    getLastEntry() {
   return this.logArr[this.logArr.length - 1];
-};
+    }
 
-Logger.prototype.info = function(str) {
+    info(str) {
   this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_INFO, time:Date.now()};
   this.updateViews();
-};
+    }
 
-Logger.prototype.warn = function(str) {
+    warn(str) {
   this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_WARN, time:Date.now()};
   this.updateViews();
-};
+    }
 
-Logger.prototype.error = function(str) {
+    error(str) {
   this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_ERROR, time:Date.now()};
   this.updateViews();
-};
+    }
 
-Logger.prototype.debug = function(str) {
+    debug(str) {
   this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_DEBUG, time:Date.now()};
   this.updateViews();
-};
+    }
 
-//register a view
-Logger.prototype.registerView = function(_view) {
+    registerView(_view) {
   this.registeredViews[this.registeredViews.length] = _view;
-};
+    }
 
-//unregister a view
-Logger.prototype.unregisterView = function(_view) {
+    unregisterView(_view) {
   for (var i = 0; i < this.registeredViews.length; i++) {
-    if (this.registeredViews[i] == _view) {
+        if (this.registeredViews[i] !== _view) continue;
       this.registeredViews.splice(i, 1);
       i--;
     }
   }
-};
 
-// update all views
-Logger.prototype.updateViews = function() {
+    updateViews() {
   for (var i = 0; i < this.registeredViews.length; i++) {
-    if (this.registeredViews[i])
+        if (!this.registeredViews[i]) continue;
         this.registeredViews[i].update(this);
   }
-};
+    }
+
+  }
+
+  Logger.instance = null;
+  Logger.LOG_TYPE_INFO = 0;
+  Logger.LOG_TYPE_WARN = 1;
+  Logger.LOG_TYPE_ERROR = 2;
+  Logger.LOG_TYPE_DEBUG = 3;
+
+  return Logger;
+
+});

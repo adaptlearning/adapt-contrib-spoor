@@ -1,148 +1,48 @@
 define([
   'core/js/adapt',
-  './scorm',
-  './adapt-stateful-session',
-  './adapt-offlineStorage-scorm'
-], function(Adapt, scorm, adaptStatefulSession) {
+  './scorm/ScormWrapper',
+  './StatefulSession',
+  './OfflineStorage'
+], function(Adapt, ScormWrapper, StatefulSession, OfflineStorage) {
 
-  // SCORM session manager
+  class Spoor extends Backbone.Controller {
 
-  var Spoor = _.extend({
+    initialize() {
+      this.config = null;
+      this.scorm = ScormWrapper.getInstance();
+      this.listenToOnce(Adapt, 'offlineStorage:prepare', this._prepare);
+    }
 
-    _config: null,
-
-  // Session Begin
-
-    initialize: function() {
-      this.listenToOnce(Adapt, {
-        'offlineStorage:prepare': this.onPrepareOfflineStorage,
-        'app:dataReady': function() {
-          Adapt.wait.for(adaptStatefulSession.initialize.bind(adaptStatefulSession));
-        }
-      });
-    },
-
-    onPrepareOfflineStorage: function() {
-      if (!this.checkConfig()) {
+    _prepare() {
+      this.config = Adapt.config.get('_spoor');
+      if (!this.isEnabled) {
         Adapt.offlineStorage.setReadyStatus();
         return;
       }
-
-      this.configureAdvancedSettings();
-
-      scorm.initialize();
-
-      /*
-      force offlineStorage-scorm to initialise suspendDataStore - this allows us to do things like store the user's
-      chosen language before the rest of the course data loads
-      */
+      this.statefulSession = new StatefulSession();
+      this.offlineStorage = new OfflineStorage(this.statefulSession);
+      // force offlineStorage-scorm to initialise suspendDataStore - this allows
+      // us to do things like store the user's chosen language before the rest
+      // of the course data loads
       Adapt.offlineStorage.get();
-
       Adapt.offlineStorage.setReadyStatus();
-
-      this.setupEventListeners();
-    },
-
-    checkConfig: function() {
-      this._config = Adapt.config.get('_spoor') || false;
-
-      if (this._config && this._config._isEnabled !== false) return true;
-
-      return false;
-    },
-
-    configureAdvancedSettings: function() {
-      if (this._config._advancedSettings) {
-        var settings = this._config._advancedSettings;
-
-        if (settings._showDebugWindow) scorm.showDebugWindow();
-
-        scorm.setVersion(settings._scormVersion || "1.2");
-
-        if (settings._suppressErrors) {
-          scorm.suppressErrors = settings._suppressErrors;
-        }
-
-        if (settings._commitOnStatusChange) {
-          scorm.commitOnStatusChange = settings._commitOnStatusChange;
-        }
-
-        if (_.isFinite(settings._timedCommitFrequency)) {
-          scorm.timedCommitFrequency = settings._timedCommitFrequency;
-        }
-
-        if (_.isFinite(settings._maxCommitRetries)) {
-          scorm.maxCommitRetries = settings._maxCommitRetries;
-        }
-
-        if (_.isFinite(settings._commitRetryDelay)) {
-          scorm.commitRetryDelay = settings._commitRetryDelay;
-        }
-
-        if ("_exitStateIfIncomplete" in settings) {
-          scorm.exitStateIfIncomplete = settings._exitStateIfIncomplete;
-        }
-
-        if ("_exitStateIfComplete" in settings) {
-          scorm.exitStateIfComplete = settings._exitStateIfComplete;
-        }
-      } else {
-        /**
-        * force use of SCORM 1.2 by default - some LMSes (SABA/Kallidus for instance) present both APIs to the SCO and, if given the choice,
-        * the pipwerks code will automatically select the SCORM 2004 API - which can lead to unexpected behaviour.
-        */
-        scorm.setVersion("1.2");
-      }
-
-      /**
-      * suppress SCORM errors if 'nolmserrors' is found in the querystring
-      */
-      if(window.location.search.indexOf('nolmserrors') != -1) scorm.suppressErrors = true;
-    },
-
-    setupEventListeners: function() {
-      var advancedSettings = this._config._advancedSettings;
-      var shouldCommitOnVisibilityChange = (!advancedSettings ||
-          advancedSettings._commitOnVisibilityChangeHidden !== false) &&
-          document.addEventListener;
-
-      this._onWindowUnload = this.onWindowUnload.bind(this);
-      $(window).on('beforeunload unload', this._onWindowUnload);
-
-      if (shouldCommitOnVisibilityChange) {
-        document.addEventListener("visibilitychange", this.onVisibilityChange);
-      }
-
+      // setup debug window keyboard shortcut
       require(['libraries/jquery.keycombo'], function() {
         // listen for user holding 'd', 'e', 'v' keys together
         $.onKeyCombo([68, 69, 86], function() {
-          scorm.showDebugWindow();
+          Adapt.spoor.scorm.showDebugWindow();
         });
       });
-    },
-
-    removeEventListeners: function() {
-      $(window).off('beforeunload unload', this._onWindowUnload);
-
-      document.removeEventListener("visibilitychange", this.onVisibilityChange);
-    },
-
-    onVisibilityChange: function() {
-      if (document.visibilityState === "hidden") scorm.commit();
-    },
-
-  // Session End
-
-    onWindowUnload: function() {
-      this.removeEventListeners();
-
-      if (!scorm.finishCalled){
-        scorm.finish();
-      }
     }
 
-  }, Backbone.Events);
+    get isEnabled() {
+      return (this.config && this.config._isEnabled);
+      }
 
-  Spoor.initialize();
+    }
+
+  Adapt.spoor = new Spoor();
+
+  return Spoor;
 
 });
