@@ -155,7 +155,7 @@ define([
     }
 
     getStatus() {
-      var status = this.getValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status');
+      const status = this.getValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status');
 
       switch (status.toLowerCase()) { // workaround for some LMSes (e.g. Arena) not adhering to the all-lowercase rule
         case 'passed':
@@ -202,8 +202,8 @@ define([
         this.setValue('cmi.score.min', _minScore);
         this.setValue('cmi.score.max', _maxScore);
 
-        var range = _maxScore - _minScore;
-        var scaledScore = ((_score - _minScore) / range).toFixed(7);
+        const range = _maxScore - _minScore;
+        const scaledScore = ((_score - _minScore) / range).toFixed(7);
         this.setValue('cmi.score.scaled', scaledScore);
       } else {
         this.setValue('cmi.core.score.raw', _score);
@@ -263,9 +263,9 @@ define([
               this.commitRetries++;
               this.initRetryCommit();
             } else {
-              var _errorCode = this.scorm.debug.getCode();
+              const _errorCode = this.scorm.debug.getCode();
 
-              var _errorMsg = 'Course could not commit data to the LMS';
+              let _errorMsg = 'Course could not commit data to the LMS';
               _errorMsg += `\nError ${_errorCode}: ${this.scorm.debug.getInfo(_errorCode)}`;
               _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
 
@@ -356,9 +356,9 @@ define([
       }
 
       if (this.lmsConnected) {
-        var _value = this.scorm.get(_property);
-        var _errorCode = this.scorm.debug.getCode();
-        var _errorMsg = '';
+        const _value = this.scorm.get(_property);
+        const _errorCode = this.scorm.debug.getCode();
+        let _errorMsg = '';
 
         if (_errorCode !== 0) {
           if (_errorCode === 403) {
@@ -387,9 +387,9 @@ define([
       }
 
       if (this.lmsConnected) {
-        var _success = this.scorm.set(_property, _value);
-        var _errorCode = this.scorm.debug.getCode();
-        var _errorMsg = '';
+        const _success = this.scorm.set(_property, _value);
+        const _errorCode = this.scorm.debug.getCode();
+        let _errorMsg = '';
 
         if (!_success) {
         /*
@@ -428,7 +428,7 @@ define([
 
       if (this.lmsConnected) {
         this.scorm.get(_property);
-        var _errorCode = this.scorm.debug.getCode();
+        const _errorCode = this.scorm.debug.getCode();
 
         return (_errorCode === 401);
       } else {
@@ -441,7 +441,7 @@ define([
       this.logger.debug('ScormWrapper::initTimedCommit');
 
       if (this.timedCommitFrequency > 0) {
-        var delay = this.timedCommitFrequency * (60 * 1000);
+        const delay = this.timedCommitFrequency * (60 * 1000);
         this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
       }
     }
@@ -471,7 +471,7 @@ define([
     }
 
     getInteractionCount() {
-      var count = this.getValue('cmi.interactions._count');
+      const count = this.getValue('cmi.interactions._count');
       return count === '' ? 0 : count;
     }
 
@@ -479,7 +479,7 @@ define([
 
       id = this.trim(id);
 
-      var cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
+      const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
       this.setValue(`${cmiPrefix}.id`, id);
       this.setValue(`${cmiPrefix}.type`, type);
@@ -493,7 +493,7 @@ define([
 
       id = this.trim(id);
 
-      var cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
+      const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
       this.setValue(`${cmiPrefix}.id`, id);
       this.setValue(`${cmiPrefix}.type`, type);
@@ -512,7 +512,7 @@ define([
         response = this.checkResponse(response, 'choice');
       }
 
-      var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+      const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
       scormRecordInteraction.call(this, id, response, correct, latency, type);
     }
@@ -528,14 +528,14 @@ define([
         response = this.checkResponse(response, 'matching');
       }
 
-      var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+      const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
       scormRecordInteraction.call(this, id, response, correct, latency, type);
     }
 
     recordInteractionFillIn(id, response, correct, latency, type) {
 
-      var maxLength = this.isSCORM2004() ? 250 : 255;
+      const maxLength = this.isSCORM2004() ? 250 : 255;
 
       if (response.length > maxLength) {
         response = response.substr(0, maxLength);
@@ -543,7 +543,7 @@ define([
         this.logger.warn(`ScormWrapper::recordInteractionFillIn: response data for ${id} is longer than the maximum allowed length of ${maxLength} characters; data will be truncated to avoid an error.`);
       }
 
-      var scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+      const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
       scormRecordInteraction.call(this, id, response, correct, latency, type);
     }
@@ -564,27 +564,27 @@ define([
 
     convertToSCORM12Time(msConvert) {
 
-      var msPerSec = 1000;
-      var msPerMin = msPerSec * 60;
-      var msPerHour = msPerMin * 60;
+      const msPerSec = 1000;
+      const msPerMin = msPerSec * 60;
+      const msPerHour = msPerMin * 60;
 
-      var ms = msConvert % msPerSec;
+      const ms = msConvert % msPerSec;
       msConvert = msConvert - ms;
 
-      var secs = msConvert % msPerMin;
+      let secs = msConvert % msPerMin;
       msConvert = msConvert - secs;
       secs = secs / msPerSec;
 
-      var mins = msConvert % msPerHour;
+      let mins = msConvert % msPerHour;
       msConvert = msConvert - mins;
       mins = mins / msPerMin;
 
-      var hrs = msConvert / msPerHour;
+      const hrs = msConvert / msPerHour;
 
       if (hrs > 9999) {
         return '9999:99:99.99';
       } else {
-        var str = [ this.padWithZeroes(hrs, 4), this.padWithZeroes(mins, 2), this.padWithZeroes(secs, 2) ].join(':');
+        const str = [ this.padWithZeroes(hrs, 4), this.padWithZeroes(mins, 2), this.padWithZeroes(secs, 2) ].join(':');
         return (`${str}.${Math.floor(ms / 10)}`);
       }
     }
@@ -595,45 +595,45 @@ define([
   * or 'PT2M10.1S' which indicates a period of time of 2 minutes and 10.1 seconds
   */
     convertToSCORM2004Time(msConvert) {
-      var csConvert = Math.floor(msConvert / 10);
-      var csPerSec = 100;
-      var csPerMin = csPerSec * 60;
-      var csPerHour = csPerMin * 60;
-      var csPerDay = csPerHour * 24;
+      let csConvert = Math.floor(msConvert / 10);
+      const csPerSec = 100;
+      const csPerMin = csPerSec * 60;
+      const csPerHour = csPerMin * 60;
+      const csPerDay = csPerHour * 24;
 
-      var days = Math.floor(csConvert / csPerDay);
+      let days = Math.floor(csConvert / csPerDay);
       csConvert -= days * csPerDay;
       days = days ? days + 'D' : '';
 
-      var hours = Math.floor(csConvert / csPerHour);
+      let hours = Math.floor(csConvert / csPerHour);
       csConvert -= hours * csPerHour;
       hours = hours ? hours + 'H' : '';
 
-      var mins = Math.floor(csConvert / csPerMin);
+      let mins = Math.floor(csConvert / csPerMin);
       csConvert -= mins * csPerMin;
       mins = mins ? mins + 'M' : '';
 
-      var secs = Math.floor(csConvert / csPerSec);
+      let secs = Math.floor(csConvert / csPerSec);
       csConvert -= secs * csPerSec;
       secs = secs || '0';
 
-      var cs = csConvert;
+      let cs = csConvert;
       cs = cs ? '.' + cs : '';
 
-      var seconds = secs + cs + 'S';
+      const seconds = secs + cs + 'S';
 
-      var hms = [ hours, mins, seconds ].join('');
+      const hms = [ hours, mins, seconds ].join('');
 
       return 'P' + days + 'T' + hms;
     }
 
     getCMITime() {
 
-      var date = new Date();
+      const date = new Date();
 
-      var hours = this.padWithZeroes(date.getHours(), 2);
-      var min = this.padWithZeroes(date.getMinutes(), 2);
-      var sec = this.padWithZeroes(date.getSeconds(), 2);
+      const hours = this.padWithZeroes(date.getHours(), 2);
+      const min = this.padWithZeroes(date.getMinutes(), 2);
+      const sec = this.padWithZeroes(date.getSeconds(), 2);
 
       return [ hours, min, sec ].join(':');
     }
@@ -642,13 +642,13 @@ define([
   * returns the current date & time in the format YYYY-MM-DDTHH:mm:ss
   */
     getISO8601Timestamp() {
-      var date = new Date().toISOString();
+      const date = new Date().toISOString();
       return date.replace(/.\d\d\dZ/, ''); // Date.toISOString returns the date in the format YYYY-MM-DDTHH:mm:ss.sssZ so we need to drop the last bit to make it SCORM 2004 conformant
     }
 
     padWithZeroes(numToPad, padBy) {
 
-      var len = padBy;
+      let len = padBy;
 
       while (--len) {
         numToPad = '0' + numToPad;
@@ -675,19 +675,19 @@ define([
 
       response = response.split(/,|#/);
 
-      var self = this;
+      const self = this;
 
       if (responseType === 'choice') {
         response = response.map(checkIdentifier);
       } else {
         response = response.map(function(r) {
-          var identifiers = r.split('.');
+          const identifiers = r.split('.');
           return checkIdentifier(identifiers[0]) + '.' + checkIdentifier(identifiers[1]);
         });
       }
 
       function checkIdentifier(r) {
-        var i;
+        let i;
 
         // if [0-9] then ok
         if (r.length === 1 && r >= '0' && r <= '9') return r;
@@ -709,9 +709,9 @@ define([
     }
 
     getExitState() {
-      var completionStatus = this.scorm.data.completionStatus;
-      var isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
-      var exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
+      const completionStatus = this.scorm.data.completionStatus;
+      const isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
+      const exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
 
       if (exitState !== 'auto') return exitState;
 
