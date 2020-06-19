@@ -24,7 +24,7 @@ define([
           model.findDescendantModels('component') :
           [model];
         components.forEach((component, index) => {
-          let modelState = null
+          let modelState = null;
           if (!component.getAttemptState) {
             // Legacy components without getAttemptState
             modelState = [
