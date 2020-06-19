@@ -1,6 +1,6 @@
 define([
   'core/js/adapt',
-  './scorm/ScormWrapper',
+  './scorm/wrapper',
   'core/js/enums/completionStateEnum',
   './serializers/ComponentSerializer',
   './serializers/SCORMSuspendData'

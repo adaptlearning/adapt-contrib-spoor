@@ -1,6 +1,6 @@
 define([
   'core/js/adapt',
-  './scorm/ScormWrapper',
+  './scorm/wrapper',
   './serializers/SCORMSuspendData',
   'core/js/offlineStorage'
 ], function(Adapt, ScormWrapper, SCORMSuspendData) {

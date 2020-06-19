@@ -1,8 +1,8 @@
 define([
   'core/js/adapt',
-  './scorm/ScormWrapper',
-  './StatefulSession',
-  './OfflineStorage'
+  './scorm/wrapper',
+  './adapt-stateful-session',
+  './adapt-offlineStorage-scorm'
 ], function(Adapt, ScormWrapper, StatefulSession, OfflineStorage) {
 
   class Spoor extends Backbone.Controller {
