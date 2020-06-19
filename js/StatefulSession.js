@@ -1,10 +1,10 @@
 define([
   'core/js/adapt',
   './scorm/ScormWrapper',
-  './ComponentSerializer',
   'core/js/enums/completionStateEnum',
-  'libraries/SCORMSuspendData'
-], function(Adapt, ScormWrapper, ComponentSerializer, COMPLETION_STATE, SCORMSuspendData) {
+  './serializers/ComponentSerializer',
+  './serializers/SCORMSuspendData'
+], function(Adapt, ScormWrapper, COMPLETION_STATE, ComponentSerializer, SCORMSuspendData) {
 
   class StatefulSession extends Backbone.Controller {
 

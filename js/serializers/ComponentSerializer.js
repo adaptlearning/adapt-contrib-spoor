@@ -1,6 +1,6 @@
 define([
   'core/js/adapt',
-  'libraries/SCORMSuspendData'
+  './SCORMSuspendData'
 ], function (Adapt, SCORMSuspendData) {
 
   class ComponentSerializer extends Backbone.Controller {
