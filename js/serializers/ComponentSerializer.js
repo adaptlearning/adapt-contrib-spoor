@@ -27,11 +27,32 @@ define([
           let modelState = null;
           if (!component.getAttemptState) {
             // Legacy components without getAttemptState
-            modelState = [
-              [],
-              [component.get('_isComplete'), component.get('_isInteractionComplete')],
-              [component.get('_userAnswer')]
-            ];
+            modelState = component.get('_isQuestionType') ?
+              [
+                [
+                  component.get('_score') || 0,
+                  component.get('_attemptsLeft') || 0
+                ],
+                [
+                  component.get('_isComplete') || false,
+                  component.get('_isInteractionComplete') || false,
+                  component.get('_isSubmitted') || false,
+                  component.get('_isCorrect') || false
+                ],
+                [
+                  component.get('_userAnswer')
+                ]
+              ] :
+              [
+                [],
+                [
+                  component.get('_isComplete') || false,
+                  component.get('_isInteractionComplete') || false
+                ],
+                [
+                  component.get('_userAnswer')
+                ]
+              ];
           } else {
             modelState = component.getAttemptState();
           }
@@ -93,11 +114,21 @@ define([
         const component = components[index];
         if (!component.setAttemptObject) {
           // Legacy components without getAttemptState
-          component.set({
-            _isComplete: modelState[1][0],
-            _isInteractionComplete: modelState[1][0],
-            _userAnswer: modelState[2][0]
-          });
+          component.get('_isQuestionType') ?
+            component.set({
+              _score: modelState[0][0],
+              _attemptsLeft: modelState[0][1],
+              _isComplete: modelState[1][0],
+              _isInteractionComplete: modelState[1][1],
+              _isSubmitted: modelState[1][2],
+              _isCorrect: modelState[1][3],
+              _userAnswer: modelState[2][0]
+            }) :
+            component.set({
+              _isComplete: modelState[1][0],
+              _isInteractionComplete: modelState[1][0],
+              _userAnswer: modelState[2][0]
+            });
         } else {
           const attemptObject = component.getAttemptObject(modelState);
           component.setAttemptObject(attemptObject, false);

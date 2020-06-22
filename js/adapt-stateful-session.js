@@ -21,7 +21,7 @@ define([
     beginSession() {
       this.listenTo(Adapt, 'app:dataReady', this.restoreSession);
       const config = Adapt.spoor.config;
-      this._trackingIdType = Adapt.build.get('trackingIdType');
+      this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
       this._componentSerializer = new ComponentSerializer(this._trackingIdType);
       this._shouldStoreResponses = (config &&
         config._tracking &&
@@ -153,12 +153,20 @@ define([
     printCompletionInformation() {
       const courseComplete = Adapt.course.get('_isComplete') || false;
       const assessmentPassed = Adapt.course.get('_isAssessmentPassed') || false;
-      const completion = Adapt.data
+      const trackingIdModels = Adapt.data
         .toArray()
-        .filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'))
-        .sort((a, b) => a.get('_trackingId') - b.get('_trackingId'))
-        .map(model => model.get('_isComplete') ? '1' : '0')
-        .join('');
+        .filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'));
+      const trackingIds = trackingIdModels.map(model => model.get('_trackingId'));
+      if (!trackingIds.length) {
+        Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType}Completion: no tracking ids found`);
+        return;
+      }
+      const max = _.max(trackingIds);
+      const completion = trackingIdModels.reduce((completion, model) => {
+        const trackingId = model.get('_trackingId');
+        completion[trackingId] = model.get('_isComplete') ? '1' : '0';
+        return completion;
+      }, (new Array(max + 1)).join('-').split('')).join('');
       Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType}Completion: ${completion}`);
     }
 
