@@ -126,7 +126,7 @@ define([
             }) :
             component.set({
               _isComplete: modelState[1][0],
-              _isInteractionComplete: modelState[1][0],
+              _isInteractionComplete: modelState[1][1],
               _userAnswer: modelState[2][0]
             });
         } else {
