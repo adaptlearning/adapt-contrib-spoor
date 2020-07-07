@@ -15,8 +15,6 @@ define ([
     this.commitOnStatusChange = true;
     /**
      * whether to commit each time there's a change to any value
-     * note that enabling commitOnAnyChange may have a large impact on the server and should only be used if absolutely necessary
-     * an alternative is to use a lower timedCommitFrequency value as it will have a lower to impact on the server
      */
     this.commitOnAnyChange = false;
     /**
