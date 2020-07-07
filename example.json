@@ -18,7 +18,6 @@
             "_showDebugWindow": false,
             "_suppressErrors": false,
             "_commitOnStatusChange": true,
-            "_comment": "Note that enabling _commitOnAnyChange may have a large impact on the server and should only be used if absolutely necessary. An alternative is to use a lower _timedCommitFrequency value as it will have a lower to impact on the server.",
             "_commitOnAnyChange": false,
             "_timedCommitFrequency": 10,
             "_maxCommitRetries": 5,
