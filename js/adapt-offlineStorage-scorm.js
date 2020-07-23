@@ -39,7 +39,7 @@ define([
         // Get all values as a combined object
         this.suspendDataStore = this.getCustomStates();
 
-        const data = _.extend(_.clone(this.suspendDataStore), {
+        const data = Object.assign(_.clone(this.suspendDataStore), {
           location: this.scorm.getLessonLocation(),
           score: this.scorm.getScore(),
           status: this.scorm.getStatus(),
@@ -108,7 +108,7 @@ define([
 
     set(name, value) {
       // Convert arguments to array and drop the 'name' parameter
-      const args = [].slice.call(arguments, 1);
+      const args = [...arguments].slice(1);
       const isObject = typeof name === 'object';
 
       if (isObject) {
@@ -118,7 +118,7 @@ define([
 
       if (this.useTemporaryStore()) {
         if (isObject) {
-          this.temporaryStore = _.extend(this.temporaryStore, value);
+          this.temporaryStore = Object.assign(this.temporaryStore, value);
         } else {
           this.temporaryStore[name] = value;
         }
@@ -151,7 +151,7 @@ define([
       }
 
       if (isObject) {
-        this.suspendDataStore = _.extend(this.suspendDataStore, value);
+        this.suspendDataStore = Object.assign(this.suspendDataStore, value);
       } else {
         this.suspendDataStore[name] = value;
       }
@@ -173,7 +173,7 @@ define([
 
       let dataAsJSON = JSON.parse(dataAsString);
       if (!isSuspendDataStoreEmpty && !this.suspendDataRestored) {
-        dataAsJSON = _.extend(dataAsJSON, this.suspendDataStore);
+        dataAsJSON = Object.assign(dataAsJSON, this.suspendDataStore);
       }
       return dataAsJSON;
     }

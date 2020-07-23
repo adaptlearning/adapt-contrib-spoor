@@ -386,31 +386,32 @@ define([
         return;
       }
 
-      if (this.lmsConnected) {
-        const _success = this.scorm.set(_property, _value);
-        const _errorCode = this.scorm.debug.getCode();
-        let _errorMsg = '';
-
-        if (!_success) {
-        /*
-        * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
-        * So, we should throw an error _only_ if there was a valid error code...
-        */
-          if (_errorCode !== 0) {
-            _errorMsg += `Course could not set ${_property} to ${_value}`;
-            _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
-            _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
-
-            this.handleError(_errorMsg);
-          } else {
-            this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
-          }
-        }
-
-        return _success;
-      } else {
+      if (!this.lmsConnected) {
         this.handleError('Course is not connected to the LMS');
+        return;
       }
+
+      const _success = this.scorm.set(_property, _value);
+      const _errorCode = this.scorm.debug.getCode();
+      let _errorMsg = '';
+
+      if (!_success) {
+      /*
+      * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
+      * So, we should throw an error _only_ if there was a valid error code...
+      */
+        if (_errorCode !== 0) {
+          _errorMsg += `Course could not set ${_property} to ${_value}`;
+          _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
+          _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
+
+          this.handleError(_errorMsg);
+        } else {
+          this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
+        }
+      }
+
+      return _success;
     }
 
     /**
@@ -426,15 +427,14 @@ define([
         return;
       }
 
-      if (this.lmsConnected) {
-        this.scorm.get(_property);
-        const _errorCode = this.scorm.debug.getCode();
-
-        return (_errorCode === 401);
-      } else {
+      if (!this.lmsConnected) {
         this.handleError('Course is not connected to the LMS');
         return false;
       }
+
+      this.scorm.get(_property);
+
+      return (this.scorm.debug.getCode() === 401);
     }
 
     initTimedCommit() {
@@ -583,10 +583,10 @@ define([
 
       if (hrs > 9999) {
         return '9999:99:99.99';
-      } else {
-        const str = [ this.padWithZeroes(hrs, 4), this.padWithZeroes(mins, 2), this.padWithZeroes(secs, 2) ].join(':');
-        return (`${str}.${Math.floor(ms / 10)}`);
       }
+
+      const str = [ this.padWithZeroes(hrs, 4), this.padWithZeroes(mins, 2), this.padWithZeroes(secs, 2) ].join(':');
+      return (`${str}.${Math.floor(ms / 10)}`);
     }
 
     /**
@@ -680,7 +680,7 @@ define([
       if (responseType === 'choice') {
         response = response.map(checkIdentifier);
       } else {
-        response = response.map(function(r) {
+        response = response.map(r => {
           const identifiers = r.split('.');
           return checkIdentifier(identifiers[0]) + '.' + checkIdentifier(identifiers[1]);
         });
