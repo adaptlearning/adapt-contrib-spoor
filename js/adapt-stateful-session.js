@@ -113,7 +113,7 @@ define([
       this.listenTo(Adapt.course, 'change:_isComplete', this.saveSessionState);
       if (this._shouldStoreResponses) {
         const debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
-        this.listenTo(Adapt.components, 'change:_isSubmitted', debouncedSaveSession);
+        this.listenTo(Adapt.components, 'change:_isSubmitted change:_userAnswer', debouncedSaveSession);
       }
       this.listenTo(Adapt, {
         'app:languageChanged': this.onLanguageChanged,
