@@ -21,21 +21,21 @@ define([
     beginSession() {
       this.listenTo(Adapt, 'app:dataReady', this.restoreSession);
       const config = Adapt.spoor.config;
+      const tracking = config && config._tracking;
       this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
       this._componentSerializer = new ComponentSerializer(this._trackingIdType);
-      this._shouldStoreResponses = (config &&
-        config._tracking &&
-        config._tracking._shouldStoreResponses);
+      this._shouldStoreResponses = (tracking && config._tracking._shouldStoreResponses);
       // Default should be to record interactions, so only avoid doing that if
       // _shouldRecordInteractions is set to false
-      if (config && config._tracking && config._tracking._shouldRecordInteractions === false) {
+      if (tracking && config._tracking._shouldRecordInteractions === false) {
         this._shouldRecordInteractions = false;
       }
       // suppress SCORM errors if 'nolmserrors' is found in the querystring
       if (window.location.search.indexOf('nolmserrors') !== -1) {
         this.scorm.suppressErrors = true;
       }
-      if (!config._advancedSettings) {
+      const settings = config._advancedSettings;
+      if (!settings) {
         // force use of SCORM 1.2 by default - some LMSes (SABA/Kallidus for instance)
         // present both APIs to the SCO and, if given the choice, the pipwerks
         // code will automatically select the SCORM 2004 API - which can lead to
@@ -44,7 +44,6 @@ define([
         this.scorm.initialize();
         return;
       }
-      const settings = config._advancedSettings;
       if (settings._showDebugWindow) {
         this.scorm.showDebugWindow();
       }
@@ -94,7 +93,7 @@ define([
 
     restoreSessionState() {
       const sessionPairs = Adapt.offlineStorage.get();
-      const hasNoPairs = _.keys(sessionPairs).length === 0;
+      const hasNoPairs = !Object.keys(sessionPairs).length;
       if (hasNoPairs) return;
       if (sessionPairs.c) {
         const [ _isComplete, _isAssessmentPassed ] = SCORMSuspendData.deserialize(sessionPairs.c);
@@ -109,11 +108,10 @@ define([
     }
 
     setupEventListeners() {
-      this.listenTo(Adapt.blocks, 'change:_isComplete', this.saveSessionState);
-      this.listenTo(Adapt.course, 'change:_isComplete', this.saveSessionState);
+      const debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
+      this.listenTo(Adapt.data, 'change:_isComplete', debouncedSaveSession);
       if (this._shouldStoreResponses) {
-        const debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
-        this.listenTo(Adapt.components, 'change:_isSubmitted change:_userAnswer', debouncedSaveSession);
+        this.listenTo(Adapt.data, 'change:_isSubmitted change:_userAnswer', debouncedSaveSession);
       }
       this.listenTo(Adapt, {
         'app:languageChanged': this.onLanguageChanged,
@@ -133,11 +131,9 @@ define([
     }
 
     saveSessionState() {
-      const courseComplete = Adapt.course.get('_isComplete') || false;
-      const assessmentPassed = Adapt.course.get('_isAssessmentPassed') || false;
       const courseState = SCORMSuspendData.serialize([
-        courseComplete,
-        assessmentPassed
+        Boolean(Adapt.course.get('_isComplete')),
+        Boolean(Adapt.course.get('_isAssessmentPassed'))
       ]);
       const componentStates = (this._shouldStoreResponses === true) ?
         this._componentSerializer.serialize() :
@@ -151,14 +147,12 @@ define([
     }
 
     printCompletionInformation() {
-      const courseComplete = Adapt.course.get('_isComplete') || false;
-      const assessmentPassed = Adapt.course.get('_isAssessmentPassed') || false;
-      const trackingIdModels = Adapt.data
-        .toArray()
-        .filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'));
+      const courseComplete = Boolean(Adapt.course.get('_isComplete'));
+      const assessmentPassed = Boolean(Adapt.course.get('_isAssessmentPassed'));
+      const trackingIdModels = Adapt.data.filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'));
       const trackingIds = trackingIdModels.map(model => model.get('_trackingId'));
       if (!trackingIds.length) {
-        Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType}Completion: no tracking ids found`);
+        Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: no tracking ids found`);
         return;
       }
       const max = _.max(trackingIds);
@@ -167,7 +161,7 @@ define([
         completion[trackingId] = model.get('_isComplete') ? '1' : '0';
         return completion;
       }, (new Array(max + 1)).join('-').split('')).join('');
-      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType}Completion: ${completion}`);
+      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completion}`);
     }
 
     onLanguageChanged() {
@@ -209,14 +203,12 @@ define([
       const config = Adapt.spoor.config;
       Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
       this.saveSessionState();
-      const shouldSubmitScore = (config && config._tracking._shouldSubmitScore);
-      const isPercentageBased = stateModel.isPercentageBased;
-      if (shouldSubmitScore && isPercentageBased) {
-        Adapt.offlineStorage.set('score', stateModel.scoreAsPercent, 0, 100);
-      }
-      if (shouldSubmitScore && !isPercentageBased) {
-        Adapt.offlineStorage.set('score', stateModel.score, 0, stateModel.maxScore);
-      }
+      const shouldSubmitScore = (config && config._tracking && config._tracking._shouldSubmitScore);
+      if (!shouldSubmitScore) return;
+      const scoreArgs = stateModel.isPercentageBased ?
+        [ stateModel.scoreAsPercent, 0, 100 ] :
+        [ stateModel.score, 0, stateModel.maxScore ];
+      Adapt.offlineStorage.set('score', ...scoreArgs);
     }
 
     onTrackingComplete(completionData) {
