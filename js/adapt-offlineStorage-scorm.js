@@ -194,7 +194,9 @@ define([
      * Returns an object with the properties:
      * - id (cmi.core.student_id)
      * - name (cmi.core.student_name - which is usually in the format
-     *   'Lastname, Firstname' - but sometimes doesn't have the space after the comma)
+     *    'Lastname, Firstname' or 'Firstname Lastname' - but it sometimes doesn't
+     *    have the space after the comma
+     *   )
      * - firstname
      * - lastname
      */
