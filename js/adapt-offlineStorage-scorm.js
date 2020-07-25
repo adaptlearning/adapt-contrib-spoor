@@ -216,12 +216,7 @@ define([
 
       if (!hasName) {
         console.log(`SPOOR: LMS learner_name not in 'lastname, firstname' or 'firstname lastname' format`);
-        return {
-          id,
-          name,
-          firstname,
-          lastname
-        };
+        return { id, name, firstname, lastname };
       }
 
       const separator = isNameCommaSeparated ? ',' : ' ';
@@ -232,13 +227,7 @@ define([
       }
       [ firstname, lastname ] = nameParts.map(part => part.trim());
       name = `${firstname} ${lastname}`;
-
-      return {
-        id,
-        name,
-        firstname,
-        lastname
-      };
+      return { id, name, firstname, lastname };
     }
 
   }
