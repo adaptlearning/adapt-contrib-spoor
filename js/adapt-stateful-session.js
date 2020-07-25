@@ -20,19 +20,16 @@ define([
 
     beginSession() {
       this.listenTo(Adapt, 'app:dataReady', this.restoreSession);
-      const config = Adapt.spoor.config;
-      const tracking = config && config._tracking;
       this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
       this._componentSerializer = new ComponentSerializer(this._trackingIdType);
+      const config = Adapt.spoor.config;
+      if (!config) return;
+      const tracking = config._tracking;
       this._shouldStoreResponses = (tracking && config._tracking._shouldStoreResponses);
       // Default should be to record interactions, so only avoid doing that if
       // _shouldRecordInteractions is set to false
       if (tracking && config._tracking._shouldRecordInteractions === false) {
         this._shouldRecordInteractions = false;
-      }
-      // suppress SCORM errors if 'nolmserrors' is found in the querystring
-      if (window.location.search.indexOf('nolmserrors') !== -1) {
-        this.scorm.suppressErrors = true;
       }
       const settings = config._advancedSettings;
       if (!settings) {
@@ -50,6 +47,10 @@ define([
       this.scorm.setVersion(settings._scormVersion || '1.2');
       if (settings._suppressErrors) {
         this.scorm.suppressErrors = settings._suppressErrors;
+      }
+      // suppress SCORM errors if 'nolmserrors' is found in the querystring
+      if (window.location.search.indexOf('nolmserrors') !== -1) {
+        this.scorm.suppressErrors = true;
       }
       if (settings._commitOnStatusChange) {
         this.scorm.commitOnStatusChange = settings._commitOnStatusChange;
