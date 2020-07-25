@@ -190,32 +190,52 @@ define([
       return false;
     }
 
-    getLearnerInfo() {
     /**
      * Returns an object with the properties:
      * - id (cmi.core.student_id)
-       * - name (cmi.core.student_name - which is usually in the format
-       *   'Lastname, Firstname' - but sometimes doesn't have the space after the comma)
+     * - name (cmi.core.student_name - which is usually in the format
+     *   'Lastname, Firstname' - but sometimes doesn't have the space after the comma)
      * - firstname
      * - lastname
      */
+    getLearnerInfo() {
+      const id = this.scorm.getStudentId();
+
       let name = this.scorm.getStudentName();
       let firstname = '';
       let lastname = '';
-      if (name && name !== 'undefined' && name.indexOf(',') > -1) {
-        // last name first, comma separated
-        const nameSplit = name.split(',');
-        lastname = $.trim(nameSplit[0]);
-        firstname = $.trim(nameSplit[1]);
-        name = `${firstname} ${lastname}`;
-      } else {
-        console.log(`SPOOR: LMS learner_name not in 'lastname, firstname' format`);
+
+      let hasName = (name && name !== 'undefined');
+      const isNameCommaSeparated = hasName && name.includes(',');
+      const isNameSpaceSeparated = hasName && name.includes(' ');
+
+      // Name must have either a comma or a space
+      hasName = hasName && (isNameCommaSeparated || isNameSpaceSeparated);
+
+      if (!hasName) {
+        console.log(`SPOOR: LMS learner_name not in 'lastname, firstname' or 'firstname lastname' format`);
+        return {
+          id,
+          name,
+          firstname,
+          lastname
+        };
       }
+
+      const separator = isNameCommaSeparated ? ',' : ' ';
+      const nameParts = name.split(separator);
+      if (isNameCommaSeparated) {
+        // Assume lastname appears before the comma
+        nameParts.reverse();
+      }
+      [ firstname, lastname ] = nameParts.map(part => part.trim());
+      name = `${firstname} ${lastname}`;
+
       return {
-        name: name,
-        lastname: lastname,
-        firstname: firstname,
-        id: this.scorm.getStudentId()
+        id,
+        name,
+        firstname,
+        lastname
       };
     }
 
