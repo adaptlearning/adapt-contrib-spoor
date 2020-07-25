@@ -47,7 +47,7 @@ define(function() {
     }
 
     unregisterView(_view) {
-      for (let i = 0; i < this.registeredViews.length; i++) {
+      for (let i = 0, l = this.registeredViews.length; i < l; i++) {
         if (this.registeredViews[i] !== _view) continue;
         this.registeredViews.splice(i, 1);
         i--;
@@ -55,7 +55,7 @@ define(function() {
     }
 
     updateViews() {
-      for (let i = 0; i < this.registeredViews.length; i++) {
+      for (let i = 0, l = this.registeredViews.length; i < l; i++) {
         if (!this.registeredViews[i]) continue;
         this.registeredViews[i].update(this);
       }

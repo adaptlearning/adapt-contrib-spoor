@@ -205,13 +205,12 @@ define([
         const range = _maxScore - _minScore;
         const scaledScore = ((_score - _minScore) / range).toFixed(7);
         this.setValue('cmi.score.scaled', scaledScore);
-      } else {
-        this.setValue('cmi.core.score.raw', _score);
-
-        if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', _minScore);
-
-        if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', _maxScore);
+        return;
       }
+      // SCORM 1.2
+      this.setValue('cmi.core.score.raw', _score);
+      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', _minScore);
+      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', _maxScore);
     }
 
     getLessonLocation() {
@@ -241,107 +240,110 @@ define([
     setLanguage(_lang) {
       if (this.isSCORM2004()) {
         this.setValue('cmi.learner_preference.language', _lang);
-      } else {
-        if (this.isSupported('cmi.student_preference.language')) {
-          this.setValue('cmi.student_preference.language', _lang);
-        }
+        return;
+      }
+      if (this.isSupported('cmi.student_preference.language')) {
+        this.setValue('cmi.student_preference.language', _lang);
       }
     }
 
     commit() {
       this.logger.debug('ScormWrapper::commit');
 
-      if (this.lmsConnected) {
-        if (this.commitRetryPending) {
-          this.logger.debug('ScormWrapper::commit: skipping this commit call as one is already pending.');
+      if (!this.lmsConnected) {
+        this.handleError('Course is not connected to the LMS');
+        return;
+      }
+
+      if (this.commitRetryPending) {
+        this.logger.debug('ScormWrapper::commit: skipping this commit call as one is already pending.');
+      } else {
+        if (this.scorm.save()) {
+          this.commitRetries = 0;
+          this.lastCommitSuccessTime = new Date();
         } else {
-          if (this.scorm.save()) {
-            this.commitRetries = 0;
-            this.lastCommitSuccessTime = new Date();
+          if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
+            this.commitRetries++;
+            this.initRetryCommit();
           } else {
-            if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
-              this.commitRetries++;
-              this.initRetryCommit();
-            } else {
-              const _errorCode = this.scorm.debug.getCode();
+            const _errorCode = this.scorm.debug.getCode();
 
-              let _errorMsg = 'Course could not commit data to the LMS';
-              _errorMsg += `\nError ${_errorCode}: ${this.scorm.debug.getInfo(_errorCode)}`;
-              _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
+            let _errorMsg = 'Course could not commit data to the LMS';
+            _errorMsg += `\nError ${_errorCode}: ${this.scorm.debug.getInfo(_errorCode)}`;
+            _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
 
-              this.handleError(_errorMsg);
-            }
+            this.handleError(_errorMsg);
           }
         }
-      } else {
-        this.handleError('Course is not connected to the LMS');
       }
     }
 
     finish() {
       this.logger.debug('ScormWrapper::finish');
 
-      if (this.lmsConnected && !this.finishCalled) {
-        this.finishCalled = true;
-
-        if (this.timedCommitIntervalID !== null) {
-          window.clearInterval(this.timedCommitIntervalID);
-        }
-
-        if (this.commitRetryPending) {
-          window.clearTimeout(this.retryCommitTimeoutID);
-          this.commitRetryPending = false;
-        }
-
-        if (this.logOutputWin && !this.logOutputWin.closed) {
-          this.logOutputWin.close();
-        }
-
-        this.endTime = new Date();
-
-        if (this.isSCORM2004()) {
-          this.scorm.set('cmi.session_time', this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
-          this.scorm.set('cmi.exit', this.getExitState());
-        } else {
-          this.scorm.set('cmi.core.session_time', this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
-          this.scorm.set('cmi.core.exit', this.getExitState());
-        }
-
-        // api no longer available from this point
-        this.lmsConnected = false;
-
-        if (!this.scorm.quit()) {
-          this.handleError('Course could not finish');
-        }
-      } else {
+      if (!this.lmsConnected || this.finishCalled) {
         this.handleError('Course is not connected to the LMS');
+        return;
+      }
+
+      this.finishCalled = true;
+
+      if (this.timedCommitIntervalID !== null) {
+        window.clearInterval(this.timedCommitIntervalID);
+      }
+
+      if (this.commitRetryPending) {
+        window.clearTimeout(this.retryCommitTimeoutID);
+        this.commitRetryPending = false;
+      }
+
+      if (this.logOutputWin && !this.logOutputWin.closed) {
+        this.logOutputWin.close();
+      }
+
+      this.endTime = new Date();
+
+      if (this.isSCORM2004()) {
+        this.scorm.set('cmi.session_time', this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
+        this.scorm.set('cmi.exit', this.getExitState());
+      } else {
+        this.scorm.set('cmi.core.session_time', this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
+        this.scorm.set('cmi.core.exit', this.getExitState());
+      }
+
+      // api no longer available from this point
+      this.lmsConnected = false;
+
+      if (!this.scorm.quit()) {
+        this.handleError('Course could not finish');
       }
     }
 
     recordInteraction(id, response, correct, latency, type) {
-      if (this.isSupported('cmi.interactions._count')) {
-        switch (type) {
-          case 'choice':
-            this.recordInteractionMultipleChoice.apply(this, arguments);
-            break;
-
-          case 'matching':
-            this.recordInteractionMatching.apply(this, arguments);
-            break;
-
-          case 'numeric':
-            this.isSCORM2004() ? this.recordInteractionScorm2004.apply(this, arguments) : this.recordInteractionScorm12.apply(this, arguments);
-            break;
-
-          case 'fill-in':
-            this.recordInteractionFillIn.apply(this, arguments);
-            break;
-
-          default:
-            console.error(`ScormWrapper.recordInteraction: unknown interaction type of '${type}' encountered...`);
-        }
-      } else {
+      if (!this.isSupported('cmi.interactions._count')) {
         this.logger.info('ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...');
+        return;
+      }
+
+      switch (type) {
+        case 'choice':
+          this.recordInteractionMultipleChoice.apply(this, arguments);
+          break;
+
+        case 'matching':
+          this.recordInteractionMatching.apply(this, arguments);
+          break;
+
+        case 'numeric':
+          this.isSCORM2004() ? this.recordInteractionScorm2004.apply(this, arguments) : this.recordInteractionScorm12.apply(this, arguments);
+          break;
+
+        case 'fill-in':
+          this.recordInteractionFillIn.apply(this, arguments);
+          break;
+
+        default:
+          console.error(`ScormWrapper.recordInteraction: unknown interaction type of '${type}' encountered...`);
       }
     }
 
@@ -355,27 +357,28 @@ define([
         return;
       }
 
-      if (this.lmsConnected) {
-        const _value = this.scorm.get(_property);
-        const _errorCode = this.scorm.debug.getCode();
-        let _errorMsg = '';
-
-        if (_errorCode !== 0) {
-          if (_errorCode === 403) {
-            this.logger.warn('ScormWrapper::getValue: data model element not initialized');
-          } else {
-            _errorMsg += `Course could not get ${_property}`;
-            _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
-            _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
-
-            this.handleError(_errorMsg);
-          }
-        }
-        this.logger.debug(`ScormWrapper::getValue: returning ${_value}`);
-        return _value + '';
-      } else {
+      if (!this.lmsConnected) {
         this.handleError('Course is not connected to the LMS');
+        return;
       }
+
+      const _value = this.scorm.get(_property);
+      const _errorCode = this.scorm.debug.getCode();
+      let _errorMsg = '';
+
+      if (_errorCode !== 0) {
+        if (_errorCode === 403) {
+          this.logger.warn('ScormWrapper::getValue: data model element not initialized');
+        } else {
+          _errorMsg += `Course could not get ${_property}`;
+          _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
+          _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
+
+          this.handleError(_errorMsg);
+        }
+      }
+      this.logger.debug(`ScormWrapper::getValue: returning ${_value}`);
+      return _value + '';
     }
 
     setValue(_property, _value) {
