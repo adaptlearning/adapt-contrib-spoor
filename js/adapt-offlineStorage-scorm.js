@@ -118,7 +118,7 @@ define([
 
       if (this.useTemporaryStore()) {
         if (isObject) {
-          this.temporaryStore = Object.assign(this.temporaryStore, value);
+          Object.assign(this.temporaryStore, value);
         } else {
           this.temporaryStore[name] = value;
         }
@@ -151,7 +151,7 @@ define([
       }
 
       if (isObject) {
-        this.suspendDataStore = Object.assign(this.suspendDataStore, value);
+        Object.assign(this.suspendDataStore, value);
       } else {
         this.suspendDataStore[name] = value;
       }
@@ -173,7 +173,7 @@ define([
 
       let dataAsJSON = JSON.parse(dataAsString);
       if (!isSuspendDataStoreEmpty && !this.suspendDataRestored) {
-        dataAsJSON = Object.assign(dataAsJSON, this.suspendDataStore);
+        Object.assign(dataAsJSON, this.suspendDataStore);
       }
       return dataAsJSON;
     }
