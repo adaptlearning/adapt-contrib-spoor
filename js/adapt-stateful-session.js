@@ -50,7 +50,7 @@ define([
       }
       this.scorm.setVersion(settings._scormVersion || '1.2');
       if (settings._suppressErrors) {
-        this.scorm.suppressErrors = this.scorm.suppressErrors || settings._suppressErrors;
+        this.scorm.suppressErrors = settings._suppressErrors;
       }
       if (settings._commitOnStatusChange) {
         this.scorm.commitOnStatusChange = settings._commitOnStatusChange;
