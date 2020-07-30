@@ -22,6 +22,10 @@ define([
       this.listenTo(Adapt, 'app:dataReady', this.restoreSession);
       this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
       this._componentSerializer = new ComponentSerializer(this._trackingIdType);
+      // suppress SCORM errors if 'nolmserrors' is found in the querystring
+      if (window.location.search.indexOf('nolmserrors') !== -1) {
+        this.scorm.suppressErrors = true;
+      }
       const config = Adapt.spoor.config;
       if (!config) return;
       const tracking = config._tracking;
@@ -46,11 +50,7 @@ define([
       }
       this.scorm.setVersion(settings._scormVersion || '1.2');
       if (settings._suppressErrors) {
-        this.scorm.suppressErrors = settings._suppressErrors;
-      }
-      // suppress SCORM errors if 'nolmserrors' is found in the querystring
-      if (window.location.search.indexOf('nolmserrors') !== -1) {
-        this.scorm.suppressErrors = true;
+        this.scorm.suppressErrors = this.scorm.suppressErrors || settings._suppressErrors;
       }
       if (settings._commitOnStatusChange) {
         this.scorm.commitOnStatusChange = settings._commitOnStatusChange;
