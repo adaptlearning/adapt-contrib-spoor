@@ -112,27 +112,27 @@ define([
           model.findDescendantModels('component') :
           [model];
         const component = components[index];
-        if (!component.setAttemptObject) {
-          // Legacy components without getAttemptState
-          component.get('_isQuestionType') ?
-            component.set({
-              _score: modelState[0][0],
-              _attemptsLeft: modelState[0][1],
-              _isComplete: modelState[1][0],
-              _isInteractionComplete: modelState[1][1],
-              _isSubmitted: modelState[1][2],
-              _isCorrect: modelState[1][3],
-              _userAnswer: modelState[2][0]
-            }) :
-            component.set({
-              _isComplete: modelState[1][0],
-              _isInteractionComplete: modelState[1][1],
-              _userAnswer: modelState[2][0]
-            });
-        } else {
+        if (component.setAttemptObject) {
           const attemptObject = component.getAttemptObject(modelState);
           component.setAttemptObject(attemptObject, false);
+          return;
         }
+        // Legacy components without getAttemptState
+        component.get('_isQuestionType') ?
+          component.set({
+            _score: modelState[0][0],
+            _attemptsLeft: modelState[0][1],
+            _isComplete: modelState[1][0],
+            _isInteractionComplete: modelState[1][1],
+            _isSubmitted: modelState[1][2],
+            _isCorrect: modelState[1][3],
+            _userAnswer: modelState[2][0]
+          }) :
+          component.set({
+            _isComplete: modelState[1][0],
+            _isInteractionComplete: modelState[1][1],
+            _userAnswer: modelState[2][0]
+          });
       });
     }
 
