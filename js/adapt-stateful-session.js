@@ -156,7 +156,7 @@ define([
         Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: no tracking ids found`);
         return;
       }
-      const max = _.max(trackingIds);
+      const max = Math.max(...trackingIds);
       const completion = trackingIdModels.reduce((completion, model) => {
         const trackingId = model.get('_trackingId');
         completion[trackingId] = model.get('_isComplete') ? '1' : '0';
