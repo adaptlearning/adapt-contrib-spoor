@@ -29,7 +29,7 @@ define([
       const config = Adapt.spoor.config;
       if (!config) return;
       const tracking = config._tracking;
-      this._shouldStoreResponses = (tracking && config._tracking._shouldStoreResponses);
+      this._shouldStoreResponses = (tracking && tracking._shouldStoreResponses);
       // Default should be to record interactions, so only avoid doing that if
       // _shouldRecordInteractions is set to false
       if (tracking && tracking._shouldRecordInteractions === false) {
@@ -178,7 +178,7 @@ define([
       this.removeEventListeners();
       this.setupEventListeners();
       this.saveSessionState();
-      if (config._reporting && config._reporting._resetStatusOnLanguageChange === true) {
+      if (config && config._reporting && config._reporting._resetStatusOnLanguageChange === true) {
         Adapt.offlineStorage.set('status', 'incomplete');
       }
     }
@@ -220,7 +220,7 @@ define([
       switch (completionData.status) {
         case COMPLETION_STATE.COMPLETED:
         case COMPLETION_STATE.PASSED: {
-          if (!config._reporting._onTrackingCriteriaMet) {
+          if (!config || !config._reporting || !config._reporting._onTrackingCriteriaMet) {
             Adapt.log.warn(`No value defined for '_onTrackingCriteriaMet', so defaulting to '${completionStatus}'`);
           } else {
             completionStatus = config._reporting._onTrackingCriteriaMet;
@@ -229,7 +229,7 @@ define([
           break;
         }
         case COMPLETION_STATE.FAILED: {
-          if (!config._reporting._onAssessmentFailure) {
+          if (!config || !config._reporting || !config._reporting._onAssessmentFailure) {
             Adapt.log.warn(`No value defined for '_onAssessmentFailure', so defaulting to '${completionStatus}'`);
           } else {
             completionStatus = config._reporting._onAssessmentFailure;
