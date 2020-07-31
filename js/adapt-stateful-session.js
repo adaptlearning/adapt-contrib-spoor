@@ -32,7 +32,7 @@ define([
       this._shouldStoreResponses = (tracking && config._tracking._shouldStoreResponses);
       // Default should be to record interactions, so only avoid doing that if
       // _shouldRecordInteractions is set to false
-      if (tracking && config._tracking._shouldRecordInteractions === false) {
+      if (tracking && tracking._shouldRecordInteractions === false) {
         this._shouldRecordInteractions = false;
       }
       const settings = config._advancedSettings;
