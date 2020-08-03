@@ -1,161 +1,237 @@
 define([
   'core/js/adapt',
-  './scorm',
+  './scorm/wrapper',
+  './serializers/SCORMSuspendData',
   'core/js/offlineStorage'
-], function(Adapt, scorm) {
+], function(Adapt, ScormWrapper, SCORMSuspendData) {
 
-  //SCORM handler for Adapt.offlineStorage interface.
+  /**
+   * SCORM handler for Adapt.offlineStorage interface.
+   */
+  class OfflineStorage extends Backbone.Controller {
 
-  //Stores to help handle posting and offline uniformity
-  var temporaryStore = {};
-  var suspendDataStore = {};
-  var suspendDataRestored = false;
+    initialize(statefulSession) {
+      this.scorm = ScormWrapper.getInstance();
+      this.statefulSession = statefulSession;
+      this.temporaryStore = {};
+      this.suspendDataStore = {};
+      this.suspendDataRestored = false;
+      Adapt.offlineStorage.initialize(this);
+    }
 
-  Adapt.offlineStorage.initialize({
+    save() {
+      this.statefulSession.saveSessionState();
+    }
 
-    get: function(name) {
+    serialize(...args) {
+      return SCORMSuspendData.serialize(...args);
+    }
+
+    deserialize(...args) {
+      return SCORMSuspendData.deserialize(...args);
+    }
+
+    get(name) {
       if (name === undefined) {
-        //If not connected return just temporary store.
-        if (this.useTemporaryStore()) return temporaryStore;
+        // If not connected return just temporary store.
+        if (this.useTemporaryStore()) return this.temporaryStore;
 
-        //Get all values as a combined object
-        suspendDataStore = this.getCustomStates();
+        // Get all values as a combined object
+        this.suspendDataStore = this.getCustomStates();
 
-        var data = _.extend(_.clone(suspendDataStore), {
-          location: scorm.getLessonLocation(),
-          score: scorm.getScore(),
-          status: scorm.getStatus(),
-          student: scorm.getStudentName(),
+        const data = Object.assign(_.clone(this.suspendDataStore), {
+          location: this.scorm.getLessonLocation(),
+          score: this.scorm.getScore(),
+          status: this.scorm.getStatus(),
+          student: this.scorm.getStudentName(),
           learnerInfo: this.getLearnerInfo()
         });
 
-        suspendDataRestored = true;
+        this.suspendDataRestored = true;
 
         return data;
       }
 
-      //If not connected return just temporary store value.
-      if (this.useTemporaryStore()) return temporaryStore[name];
+      // If not connected return just temporary store value.
+      if (this.useTemporaryStore()) return this.temporaryStore[name];
 
-      //Get by name
+      // Get by name
+      let courseState;
       switch (name.toLowerCase()) {
-        case "location":
-          return scorm.getLessonLocation();
-        case "score":
-          return scorm.getScore();
-        case "status":
-          return scorm.getStatus();
-        case "student":// for backwards-compatibility. learnerInfo is preferred now and will give you more information
-          return scorm.getStudentName();
-        case "learnerinfo":
+        case 'location':
+          return this.scorm.getLessonLocation();
+        case 'score':
+          return this.scorm.getScore();
+        case 'status':
+          return this.scorm.getStatus();
+        case 'student':
+          // for backwards-compatibility. learnerInfo is preferred now and will
+          // give you more information
+          return this.scorm.getStudentName();
+        case 'learnerinfo':
           return this.getLearnerInfo();
+        case 'coursestate':
+          courseState = this.getCustomState('c');
+          const stateArray = (courseState && SCORMSuspendData.deserialize(courseState)) || [];
+          return {
+            _isCourseComplete: Boolean(stateArray.slice(0, 1).map(Number)[0]),
+            _isAssessmentPassed: Boolean(stateArray.slice(1, 2).map(Number)[0]),
+            completion: stateArray.slice(2).map(Number).map(String).join('') || ''
+          };
+        case 'completion':
+          courseState = this.getCustomState('c');
+          return (courseState && SCORMSuspendData
+            .deserialize(courseState)
+            .slice(2)
+            .map(Number)
+            .map(String)
+            .join('')) || '';
+        case '_iscoursecomplete':
+          courseState = this.getCustomState('c');
+          return Boolean(courseState && SCORMSuspendData
+            .deserialize(courseState)
+            .slice(0, 1)
+            .map(Number)[0]);
+        case '_isassessmentpassed':
+          courseState = this.getCustomState('c');
+          return Boolean(courseState && SCORMSuspendData
+            .deserialize(courseState)
+            .slice(1, 2)
+            .map(Number)[0]);
+        case 'questions':
+          const questionsState = this.getCustomState('q');
+          return questionsState || '';
         default:
           return this.getCustomState(name);
       }
-    },
+    }
 
-    set: function(name, value) {
-      //Convert arguments to array and drop the 'name' parameter
-      var args = [].slice.call(arguments, 1);
-      var isObject = typeof name == "object";
+    set(name, value) {
+      // Convert arguments to array and drop the 'name' parameter
+      const args = [...arguments].slice(1);
+      const isObject = typeof name === 'object';
 
       if (isObject) {
         value = name;
-        name = "suspendData";
+        name = 'suspendData';
       }
 
       if (this.useTemporaryStore()) {
         if (isObject) {
-          temporaryStore = _.extend(temporaryStore, value);
+          Object.assign(this.temporaryStore, value);
         } else {
-          temporaryStore[name] = value;
+          this.temporaryStore[name] = value;
         }
 
         return true;
       }
 
       switch (name.toLowerCase()) {
-        case "interaction":
-          return scorm.recordInteraction.apply(scorm, args);
-        case "location":
-          return scorm.setLessonLocation.apply(scorm, args);
-        case "score":
-          return scorm.setScore.apply(scorm, args);
-        case "status":
-          return scorm.setStatus.apply(scorm, args);
-        case "student":
-        case "learnerinfo":
+        case 'interaction':
+          return this.scorm.recordInteraction(...args);
+        case 'location':
+          return this.scorm.setLessonLocation(...args);
+        case 'score':
+          return this.scorm.setScore(...args);
+        case 'status':
+          return this.scorm.setStatus(...args);
+        case 'student':
+        case 'learnerinfo':
           return false;// these properties are read-only
-        case "lang":
-          scorm.setLanguage(value);
+        case 'lang':
+          this.scorm.setLanguage(value);
           // fall-through so that lang gets stored in suspend_data as well:
-          // because in SCORM 1.2 cmi.student_preference.language is an optional data element
-          // so we can't rely on the LMS having support for it.
-          // If it does support it we may as well save the user's choice there purely for reporting purposes
-        case "suspenddata":
-        default:
-          if (isObject) {
-            suspendDataStore = _.extend(suspendDataStore, value);
-          } else {
-            suspendDataStore[name] = value;
-          }
-
-          var dataAsString = JSON.stringify(suspendDataStore);
-          return (suspendDataRestored) ? scorm.setSuspendData(dataAsString) : false;
+          // because in SCORM 1.2 cmi.student_preference.language is an optional
+          // data element so we can't rely on the LMS having support for it.
+          // If it does support it we may as well save the user's choice there
+          // purely for reporting purposes
+          break;
+        case 'suspenddata':
+          break;
       }
-    },
 
-    getCustomStates: function() {
-      var isSuspendDataStoreEmpty = _.isEmpty(suspendDataStore);
-      if (!isSuspendDataStoreEmpty && suspendDataRestored) return _.clone(suspendDataStore);
+      if (isObject) {
+        Object.assign(this.suspendDataStore, value);
+      } else {
+        this.suspendDataStore[name] = value;
+      }
 
-      var dataAsString = scorm.getSuspendData();
-      if (dataAsString === "" || dataAsString === " " || dataAsString === undefined) return {};
+      const dataAsString = JSON.stringify(this.suspendDataStore);
+      return (this.suspendDataRestored) ? this.scorm.setSuspendData(dataAsString) : false;
+    }
 
-      var dataAsJSON = JSON.parse(dataAsString);
-      if (!isSuspendDataStoreEmpty && !suspendDataRestored) dataAsJSON = _.extend(dataAsJSON, suspendDataStore);
+    getCustomStates() {
+      const isSuspendDataStoreEmpty = _.isEmpty(this.suspendDataStore);
+      if (!isSuspendDataStoreEmpty && this.suspendDataRestored) {
+        return _.clone(this.suspendDataStore);
+      }
+
+      const dataAsString = this.scorm.getSuspendData();
+      if (dataAsString === '' || dataAsString === ' ' || dataAsString === undefined) {
+        return {};
+      }
+
+      let dataAsJSON = JSON.parse(dataAsString);
+      if (!isSuspendDataStoreEmpty && !this.suspendDataRestored) {
+        Object.assign(dataAsJSON, this.suspendDataStore);
+      }
       return dataAsJSON;
-    },
+    }
 
-    getCustomState: function(name) {
-      var dataAsJSON = this.getCustomStates();
+    getCustomState(name) {
+      const dataAsJSON = this.getCustomStates();
       return dataAsJSON[name];
-    },
+    }
 
-    useTemporaryStore: function() {
-      var cfg = Adapt.config.get('_spoor');
+    useTemporaryStore() {
+      const cfg = Adapt.config.get('_spoor');
 
-      if (!scorm.lmsConnected || (cfg && cfg._isEnabled === false)) return true;
+      if (!this.scorm.lmsConnected || (cfg && cfg._isEnabled === false)) return true;
       return false;
-    },
+    }
 
     /**
      * Returns an object with the properties:
      * - id (cmi.core.student_id)
-     * - name (cmi.core.student_name - which is usually in the format "Lastname, Firstname" - but sometimes doesn't have the space after the comma)
+     * - name (cmi.core.student_name - which is usually in the format
+     *    'Lastname, Firstname' or 'Firstname Lastname' - but it sometimes doesn't
+     *    have the space after the comma
+     *   )
      * - firstname
      * - lastname
      */
-    getLearnerInfo: function() {
-      var name = scorm.getStudentName();
-      var firstname = "", lastname = "";
-      if (name && name !== 'undefined' && name.indexOf(",") > -1) {
-        //last name first, comma separated
-        var nameSplit = name.split(",");
-        lastname = $.trim(nameSplit[0]);
-        firstname = $.trim(nameSplit[1]);
-        name = firstname + " " + lastname;
-      } else {
-        console.log("SPOOR: LMS learner_name not in 'lastname, firstname' format");
+    getLearnerInfo() {
+      const id = this.scorm.getStudentId();
+
+      let name = this.scorm.getStudentName();
+      let firstname = '';
+      let lastname = '';
+
+      let hasName = (name && name !== 'undefined');
+      const isNameCommaSeparated = hasName && name.includes(',');
+      const isNameSpaceSeparated = hasName && name.includes(' ');
+
+      // Name must have either a comma or a space
+      hasName = hasName && (isNameCommaSeparated || isNameSpaceSeparated);
+
+      if (!hasName) {
+        console.log(`SPOOR: LMS learner_name not in 'lastname, firstname' or 'firstname lastname' format`);
+        return { id, name, firstname, lastname };
       }
-      return {
-        name: name,
-        lastname: lastname,
-        firstname: firstname,
-        id: scorm.getStudentId()
-      };
+
+      const separator = isNameCommaSeparated ? ',' : ' ';
+      const nameParts = name.split(separator);
+      if (isNameCommaSeparated) {
+        // Assume lastname appears before the comma
+        nameParts.reverse();
+      }
+      [ firstname, lastname ] = nameParts.map(part => part.trim());
+      name = `${firstname} ${lastname}`;
+      return { id, name, firstname, lastname };
     }
 
-  });
+  }
+
+  return OfflineStorage;
 
 });
