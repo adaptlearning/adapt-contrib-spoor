@@ -123,8 +123,7 @@ define([
       const config = Adapt.spoor.config;
       const advancedSettings = config._advancedSettings;
       const shouldCommitOnVisibilityChange = (!advancedSettings ||
-          advancedSettings._commitOnVisibilityChangeHidden !== false) &&
-          document.addEventListener;
+          advancedSettings._commitOnVisibilityChangeHidden !== false);
       if (shouldCommitOnVisibilityChange) {
         document.addEventListener('visibilitychange', this.onVisibilityChange);
       }
