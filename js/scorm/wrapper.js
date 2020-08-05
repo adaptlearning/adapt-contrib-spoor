@@ -486,8 +486,8 @@ define([
       }
 
       const config = Adapt.course.get('_spoor');
-      const errorMessages = Object.assign({}, ScormError.defaultMessages, config && config._errorMessages);
-      const message = Handlebars.compile(errorMessages[error.name])(error.data);
+      const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
+      const message = Handlebars.compile(messages[error.name])(error.data);
 
       switch (error.name) {
         case CLIENT_COULD_NOT_CONNECT:

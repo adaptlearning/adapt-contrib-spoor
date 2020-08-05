@@ -30,7 +30,7 @@
 
     // to be added to course/en/course.json
     "_spoor": {
-        "_errorMessages": {
+        "_messages": {
           "title": "WARNING",
           "CLIENT_COULD_NOT_CONNECT": "Course could not connect to the LMS",
           "SERVER_STATUS_UNSUPPORTED": "ScormWrapper::getStatus: invalid lesson status '{{status}}' received from LMS",
