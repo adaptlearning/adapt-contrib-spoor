@@ -136,7 +136,7 @@
                     "_commitOnAnyChange": {
                       "type": "boolean",
                       "required": false,
-                      "default": true,
+                      "default": false,
                       "title": "Commit data on any change",
                       "inputType": "Checkbox",
                       "validators": [],
