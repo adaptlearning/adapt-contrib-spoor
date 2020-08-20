@@ -82,6 +82,8 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 >>**\_commitOnStatusChange** (boolean): Determines whether a "commit" call should be made automatically every time the SCORM *lesson_status* is changed. The default is `true`.  
 
+>>**\_commitOnAnyChange** (boolean): Determines whether a "commit" call should be made automatically _every time_ any SCORM value is changed. The default is `false`. Setting **\_commitOnAnyChange** to `true` will disable 'timed commits'. **Note:** enabling this setting will make the course generate a lot more client-server traffic so you should only enable it if you are sure it is needed and, as it may have a detrimental impact on server performance, after careful load-testing. An alternative might be to first try setting a lower value for **\_timedCommitFrequency**.
+
 >>**\_timedCommitFrequency** (number): Specifies the frequency - in minutes - at which a "commit" call will be made. Set this value to `0` to disable automatic commits. The default is `10`.  
 
 >>**\_maxCommitRetries** (number): If a "commit" call fails, this setting specifies how many more times the "commit" call will be attempted before giving up and throwing an error. The default is `5`.  

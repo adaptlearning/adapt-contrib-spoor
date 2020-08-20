@@ -5,48 +5,52 @@ define([
 
   /**
    * IMPORTANT: This wrapper uses the Pipwerks SCORM wrapper and should therefore support both SCORM 1.2 and 2004. Ensure any changes support both versions.
-  */
+   */
   class ScormWrapper {
 
     constructor() {
-    /* configuration */
+      /* configuration */
       this.setCompletedWhenFailed = true;// this only applies to SCORM 2004
       /**
-     * whether to commit each time there's a change to lesson_status or not
-     */
+       * whether to commit each time there's a change to lesson_status or not
+       */
       this.commitOnStatusChange = true;
       /**
-     * how frequently (in minutes) to commit automatically. set to 0 to disable.
-     */
+       * whether to commit each time there's a change to any value
+       */
+      this.commitOnAnyChange = false;
+      /**
+       * how frequently (in minutes) to commit automatically. set to 0 to disable.
+       */
       this.timedCommitFrequency = 10;
       /**
-     * how many times to retry if a commit fails
-     */
+       * how many times to retry if a commit fails
+       */
       this.maxCommitRetries = 5;
       /**
-     * time (in milliseconds) to wait between retries
-     */
+       * time (in milliseconds) to wait between retries
+       */
       this.commitRetryDelay = 1000;
 
       /**
-     * prevents commit from being called if there's already a 'commit retry' pending.
-     */
+       * prevents commit from being called if there's already a 'commit retry' pending.
+       */
       this.commitRetryPending = false;
       /**
-     * how many times we've done a 'commit retry'
-     */
+       * how many times we've done a 'commit retry'
+       */
       this.commitRetries = 0;
       /**
-     * not currently used - but you could include in an error message to show when data was last saved
-     */
+       * not currently used - but you could include in an error message to show when data was last saved
+       */
       this.lastCommitSuccessTime = null;
       /**
-     * The exit state to use when course isn't completed yet
-     */
+       * The exit state to use when course isn't completed yet
+       */
       this.exitStateIfIncomplete = 'auto';
       /**
-     * The exit state to use when the course has been completed/passed
-     */
+       * The exit state to use when the course has been completed/passed
+       */
       this.exitStateIfComplete = 'auto';
 
       this.timedCommitIntervalID = null;
@@ -66,7 +70,7 @@ define([
       this.scorm.handleExitMode = false;
 
       this.suppressErrors = false;
-
+      this.debouncedCommit = _.debounce(this.commit.bind(this), 100);
       if (window.__debug) {
         this.showDebugWindow();
       }
@@ -111,8 +115,8 @@ define([
     }
 
     /**
-  * allows you to check if this is the user's first ever 'session' of a SCO, even after the lesson_status has been set to 'incomplete'
-  */
+     * allows you to check if this is the user's first ever 'session' of a SCO, even after the lesson_status has been set to 'incomplete'
+     */
     isFirstSession() {
       return (this.getValue(this.isSCORM2004() ? 'cmi.entry' : 'cmi.core.entry') === 'ab-initio');
     }
@@ -120,13 +124,13 @@ define([
     setIncomplete() {
       this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', 'incomplete');
 
-      if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
     }
 
     setCompleted() {
       this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', 'completed');
 
-      if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
     }
 
     setPassed() {
@@ -137,7 +141,7 @@ define([
         this.setValue('cmi.core.lesson_status', 'passed');
       }
 
-      if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
     }
 
     setFailed() {
@@ -151,7 +155,7 @@ define([
         this.setValue('cmi.core.lesson_status', 'failed');
       }
 
-      if (this.commitOnStatusChange) this.commit();
+      if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
     }
 
     getStatus() {
@@ -399,10 +403,10 @@ define([
       let _errorMsg = '';
 
       if (!_success) {
-      /*
-      * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
-      * So, we should throw an error _only_ if there was a valid error code...
-      */
+      /**
+       * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
+       * So, we should throw an error _only_ if there was a valid error code...
+       */
         if (_errorCode !== 0) {
           _errorMsg += `Course could not set ${_property} to ${_value}`;
           _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
@@ -414,14 +418,17 @@ define([
         }
       }
 
+
+      if (this.commitOnAnyChange) this.debouncedCommit();
+
       return _success;
     }
 
     /**
-  * used for checking any data field that is not 'LMS Mandatory' to see whether the LMS we're running on supports it or not.
-  * Note that the way this check is being performed means it wouldn't work for any element that is
-  * 'write only', but so far we've not had a requirement to check for any optional elements that are.
-  */
+     * used for checking any data field that is not 'LMS Mandatory' to see whether the LMS we're running on supports it or not.
+     * Note that the way this check is being performed means it wouldn't work for any element that is
+     * 'write only', but so far we've not had a requirement to check for any optional elements that are.
+     */
     isSupported(_property) {
       this.logger.debug(`ScormWrapper::isSupported: _property=${_property}`);
 
@@ -443,7 +450,7 @@ define([
     initTimedCommit() {
       this.logger.debug('ScormWrapper::initTimedCommit');
 
-      if (this.timedCommitFrequency > 0) {
+      if (!this.commitOnAnyChange && this.timedCommitFrequency > 0) {
         const delay = this.timedCommitFrequency * (60 * 1000);
         this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
       }
@@ -593,10 +600,10 @@ define([
     }
 
     /**
-  * Converts milliseconds into the SCORM 2004 data type 'timeinterval (second, 10,2)'
-  * this will output something like 'P1DT3H5M0S' which indicates a period of time of 1 day, 3 hours and 5 minutes
-  * or 'PT2M10.1S' which indicates a period of time of 2 minutes and 10.1 seconds
-  */
+     * Converts milliseconds into the SCORM 2004 data type 'timeinterval (second, 10,2)'
+     * this will output something like 'P1DT3H5M0S' which indicates a period of time of 1 day, 3 hours and 5 minutes
+     * or 'PT2M10.1S' which indicates a period of time of 2 minutes and 10.1 seconds
+     */
     convertToSCORM2004Time(msConvert) {
       let csConvert = Math.floor(msConvert / 10);
       const csPerSec = 100;
@@ -642,8 +649,8 @@ define([
     }
 
     /**
-  * returns the current date & time in the format YYYY-MM-DDTHH:mm:ss
-  */
+     * returns the current date & time in the format YYYY-MM-DDTHH:mm:ss
+     */
     getISO8601Timestamp() {
       const date = new Date().toISOString();
       return date.replace(/.\d\d\dZ/, ''); // Date.toISOString returns the date in the format YYYY-MM-DDTHH:mm:ss.sssZ so we need to drop the last bit to make it SCORM 2004 conformant
@@ -668,10 +675,10 @@ define([
       return this.scorm.version === '2004';
     }
 
-    /*
-  * SCORM 1.2 requires that the identifiers in cmi.interactions.n.student_response for choice and matching activities be a character from [0-9a-z].
-  * When numeric identifiers are used this function attempts to map identifiers 10 to 35 to [a-z]. Resolves issues/1376.
-  */
+    /**
+     * SCORM 1.2 requires that the identifiers in cmi.interactions.n.student_response for choice and matching activities be a character from [0-9a-z].
+     * When numeric identifiers are used this function attempts to map identifiers 10 to 35 to [a-z]. Resolves issues/1376.
+     */
     checkResponse(response, responseType) {
       if (!response) return response;
       if (responseType !== 'choice' && responseType !== 'matching') return response;

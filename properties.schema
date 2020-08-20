@@ -133,6 +133,15 @@
                       "validators": [],
                       "help": "If enabled, a 'commit' call will be made any time the lesson_status is changed."
                     },
+                    "_commitOnAnyChange": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Commit data on any change",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, a 'commit' (save all data) call will be made any time a value is changed. Note that enabling this setting may have a detrimental impact on the server and should only be used if absolutely necessary and only after careful load testing. Consider trying a lower value for 'Frequency of automatic commits' before changing this setting."
+                    },
                     "_timedCommitFrequency": {
                       "type": "number",
                       "required": false,
