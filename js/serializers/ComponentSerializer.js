@@ -67,10 +67,12 @@ define([
             modelState[2][0] = [modelState[2][0]];
           }
           // attemptstates is empty if not a question or not attempted
-          const attemptStates = modelState[2][0];
-          const hasAttemptStates = !Array.isArray(attemptStates);
+          const attemptStates = component.get('_attemptStates');
+          const hasAttemptStates = Array.isArray(attemptStates);
           if (!hasAttemptStates) {
             modelState[2][1] = [];
+          } else {
+            modelState[2][1] = attemptStates;
           }
           // create the restoration state object
           const state = [
@@ -113,6 +115,7 @@ define([
           [model];
         const component = components[index];
         if (component.setAttemptObject) {
+          component.set('_attemptStates', modelState[2][1]);
           const attemptObject = component.getAttemptObject(modelState);
           component.setAttemptObject(attemptObject, false);
           return;
@@ -126,12 +129,14 @@ define([
             _isInteractionComplete: modelState[1][1],
             _isSubmitted: modelState[1][2],
             _isCorrect: modelState[1][3],
-            _userAnswer: modelState[2][0]
+            _userAnswer: modelState[2][0],
+            _attemptStates: modelState[2][1]
           }) :
           component.set({
             _isComplete: modelState[1][0],
             _isInteractionComplete: modelState[1][1],
-            _userAnswer: modelState[2][0]
+            _userAnswer: modelState[2][0],
+            _attemptStates: modelState[2][1]
           });
       });
     }
