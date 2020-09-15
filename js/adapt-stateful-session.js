@@ -106,8 +106,8 @@ define([
           _isAssessmentPassed
         });
       }
-      if (sessionPairs.q && this._shouldStoreResponses) {
-        this._componentSerializer.deserialize(sessionPairs.q);
+      if (sessionPairs.q) {
+        this._componentSerializer.deserialize(sessionPairs.q, this._shouldStoreResponses);
       }
     }
 
@@ -138,9 +138,7 @@ define([
         Boolean(Adapt.course.get('_isComplete')),
         Boolean(Adapt.course.get('_isAssessmentPassed'))
       ]);
-      const componentStates = (this._shouldStoreResponses === true) ?
-        this._componentSerializer.serialize() :
-        '';
+      const componentStates = this._componentSerializer.serialize(this._shouldStoreResponses);
       const sessionPairs = {
         'c': courseState,
         'q': componentStates

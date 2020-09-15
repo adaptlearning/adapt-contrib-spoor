@@ -9,7 +9,7 @@ define([
       this.trackingIdType = trackingIdType;
     }
 
-    serialize() {
+    serialize(shouldStoreResponses) {
       const states = [];
       Adapt.data.each(model => {
         if (model.get('_type') !== this.trackingIdType) {
@@ -24,6 +24,15 @@ define([
           model.findDescendantModels('component') :
           [model];
         components.forEach((component, index) => {
+          if (!shouldStoreResponses) {
+            // Store only component completion
+            const state = [
+              [ trackingId, index ],
+              [ component.get('_isComplete') ]
+            ];
+            states.push(state);
+            return;
+          }
           let modelState = null;
           if (!component.getAttemptState) {
             // Legacy components without getAttemptState
@@ -86,7 +95,7 @@ define([
       return SCORMSuspendData.serialize(states);
     }
 
-    deserialize(binary) {
+    deserialize(binary, shouldStoreResponses) {
       const trackingIdMap = Adapt.data.toArray().reduce((trackingIdMap, model) => {
         const trackingId = model.get('_trackingId');
         if (typeof trackingId === 'undefined') return trackingIdMap;
@@ -96,6 +105,18 @@ define([
       const states = SCORMSuspendData.deserialize(binary);
       states.forEach(state => {
         const [ trackingId, index ] = state[0];
+        const model = trackingIdMap[trackingId];
+        const isContainer = model.hasManagedChildren;
+        const components = isContainer ?
+          model.findDescendantModels('component') :
+          [model];
+        const component = components[index];
+        if (!shouldStoreResponses) {
+          // Restore only component completion
+          const isComplete = state[1][0];
+          component.set('_isComplete', isComplete);
+          return;
+        }
         const [ hasUserAnswer, isUserAnswerArray, hasAttemptStates ] = state[1];
         const modelState = state[2];
         // correct useranswer
@@ -108,12 +129,6 @@ define([
         if (!hasAttemptStates) {
           modelState[2][1] = null;
         }
-        const model = trackingIdMap[trackingId];
-        const isContainer = model.hasManagedChildren;
-        const components = isContainer ?
-          model.findDescendantModels('component') :
-          [model];
-        const component = components[index];
         if (component.setAttemptObject) {
           component.set('_attemptStates', modelState[2][1]);
           const attemptObject = component.getAttemptObject(modelState);
