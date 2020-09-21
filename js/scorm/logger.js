@@ -69,6 +69,7 @@ define(function() {
   Logger.LOG_TYPE_ERROR = 2;
   Logger.LOG_TYPE_DEBUG = 3;
 
-  return Logger;
+  // Assign global reference for debug window
+  return (window.Logger = Logger);
 
 });
