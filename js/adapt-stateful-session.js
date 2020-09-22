@@ -14,6 +14,7 @@ define([
       this._trackingIdType = 'block';
       this._componentSerializer = null;
       this._shouldStoreResponses = true;
+      this._shouldStoreAttempts = false;
       this._shouldRecordInteractions = true;
       this.beginSession();
     }
@@ -30,6 +31,7 @@ define([
       if (!config) return;
       const tracking = config._tracking;
       this._shouldStoreResponses = (tracking && tracking._shouldStoreResponses);
+      this._shouldStoreAttempts = (tracking && tracking._shouldStoreAttempts);
       // Default should be to record interactions, so only avoid doing that if
       // _shouldRecordInteractions is set to false
       if (tracking && tracking._shouldRecordInteractions === false) {
@@ -107,7 +109,7 @@ define([
         });
       }
       if (sessionPairs.q) {
-        this._componentSerializer.deserialize(sessionPairs.q, this._shouldStoreResponses);
+        this._componentSerializer.deserialize(sessionPairs.q);
       }
     }
 
@@ -138,7 +140,7 @@ define([
         Boolean(Adapt.course.get('_isComplete')),
         Boolean(Adapt.course.get('_isAssessmentPassed'))
       ]);
-      const componentStates = this._componentSerializer.serialize(this._shouldStoreResponses);
+      const componentStates = this._componentSerializer.serialize(this._shouldStoreResponses, this._shouldStoreAttempts);
       const sessionPairs = {
         'c': courseState,
         'q': componentStates
