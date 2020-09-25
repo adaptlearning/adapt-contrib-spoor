@@ -200,7 +200,7 @@ define([
       return this.getValue(this.isSCORM2004() ? 'cmi.score.raw' : 'cmi.core.score.raw');
     }
 
-    setScore(_score, _minScore, _maxScore) {
+    setScore(_score, _minScore = 0, _maxScore = 100) {
       if (this.isSCORM2004()) {
         this.setValue('cmi.score.raw', _score);
         this.setValue('cmi.score.min', _minScore);
