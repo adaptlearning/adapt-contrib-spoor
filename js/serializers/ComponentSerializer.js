@@ -10,7 +10,7 @@ define([
     }
 
     serialize(shouldStoreResponses, shouldStoreAttempts) {
-      if (shouldStoreAttempts || !shouldStoreResponses) {
+      if (shouldStoreAttempts && !shouldStoreResponses) {
         Adapt.log.warnOnce(`SPOOR configuration error, cannot use '_shouldStoreAttempts' without '_shouldStoreResponses'`);
       }
       const states = [];
