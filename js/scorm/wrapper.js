@@ -1,7 +1,21 @@
 define([
+  'core/js/adapt',
   'libraries/SCORM_API_wrapper',
-  './logger'
-], function(pipwerks, Logger) {
+  './logger',
+  './error'
+], function(Adapt, pipwerks, Logger, ScormError) {
+
+  const {
+    CLIENT_COULD_NOT_CONNECT,
+    SERVER_STATUS_UNSUPPORTED,
+    CLIENT_STATUS_UNSUPPORTED,
+    CLIENT_COULD_NOT_COMMIT,
+    CLIENT_NOT_CONNECTED,
+    CLIENT_COULD_NOT_FINISH,
+    CLIENT_COULD_NOT_GET_PROPERTY,
+    CLIENT_COULD_NOT_SET_PROPERTY,
+    CLIENT_INVALID_CHOICE_VALUE
+  } = ScormError;
 
   /**
    * IMPORTANT: This wrapper uses the Pipwerks SCORM wrapper and should therefore support both SCORM 1.2 and 2004. Ensure any changes support both versions.
@@ -108,7 +122,7 @@ define([
 
         this.initTimedCommit();
       } else {
-        this.handleError('Course could not connect to the LMS');
+        this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT));
       }
 
       return this.lmsConnected;
@@ -172,7 +186,7 @@ define([
         case 'unknown': // the SCORM 2004 version of not attempted
           return status;
         default:
-          this.handleError(`ScormWrapper::getStatus: invalid lesson status '${status}' received from LMS`);
+          this.handleError(new ScormError(SERVER_STATUS_UNSUPPORTED, { status }));
           return null;
       }
     }
@@ -192,7 +206,7 @@ define([
           this.setFailed();
           break;
         default:
-          this.handleError(`ScormWrapper::setStatus: the status '${status}' is not supported.`);
+          this.handleError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { status }));
       }
     }
 
@@ -255,7 +269,7 @@ define([
       this.logger.debug('ScormWrapper::commit');
 
       if (!this.lmsConnected) {
-        this.handleError('Course is not connected to the LMS');
+        this.handleError(new ScormError(ScormError.CLIENT_COULD_NOT_CONNECT));
         return;
       }
 
@@ -270,13 +284,11 @@ define([
             this.commitRetries++;
             this.initRetryCommit();
           } else {
-            const _errorCode = this.scorm.debug.getCode();
-
-            let _errorMsg = 'Course could not commit data to the LMS';
-            _errorMsg += `\nError ${_errorCode}: ${this.scorm.debug.getInfo(_errorCode)}`;
-            _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
-
-            this.handleError(_errorMsg);
+            this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
+              code: this.scorm.debug.getCode(),
+              info: this.scorm.debug.getInfo(_errorCode),
+              diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
+            }));
           }
         }
       }
@@ -286,7 +298,7 @@ define([
       this.logger.debug('ScormWrapper::finish');
 
       if (!this.lmsConnected || this.finishCalled) {
-        this.handleError('Course is not connected to the LMS');
+        this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
         return;
       }
 
@@ -319,7 +331,7 @@ define([
       this.lmsConnected = false;
 
       if (!this.scorm.quit()) {
-        this.handleError('Course could not finish');
+        this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH));
       }
     }
 
@@ -362,7 +374,7 @@ define([
       }
 
       if (!this.lmsConnected) {
-        this.handleError('Course is not connected to the LMS');
+        this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
         return;
       }
 
@@ -374,11 +386,11 @@ define([
         if (_errorCode === 403) {
           this.logger.warn('ScormWrapper::getValue: data model element not initialized');
         } else {
-          _errorMsg += `Course could not get ${_property}`;
-          _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
-          _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
-
-          this.handleError(_errorMsg);
+          this.handleError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
+            property: _property,
+            info: this.scorm.debug.getInfo(_errorCode),
+            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
+          }));
         }
       }
       this.logger.debug(`ScormWrapper::getValue: returning ${_value}`);
@@ -394,7 +406,7 @@ define([
       }
 
       if (!this.lmsConnected) {
-        this.handleError('Course is not connected to the LMS');
+        this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
         return;
       }
 
@@ -408,11 +420,12 @@ define([
        * So, we should throw an error _only_ if there was a valid error code...
        */
         if (_errorCode !== 0) {
-          _errorMsg += `Course could not set ${_property} to ${_value}`;
-          _errorMsg += `\nError Info: ${this.scorm.debug.getInfo(_errorCode)}`;
-          _errorMsg += `\nLMS Error Info: ${this.scorm.debug.getDiagnosticInfo(_errorCode)}`;
-
-          this.handleError(_errorMsg);
+          this.handleError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
+            property: _property,
+            value: _value,
+            info: this.scorm.debug.getInfo(_errorCode),
+            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
+          }));
         } else {
           this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
         }
@@ -438,7 +451,7 @@ define([
       }
 
       if (!this.lmsConnected) {
-        this.handleError('Course is not connected to the LMS');
+        this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
         return false;
       }
 
@@ -472,12 +485,33 @@ define([
       this.commit();
     }
 
-    handleError(_msg) {
-      this.logger.error(_msg);
+    handleError(error) {
 
-      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`An error has occured:\n\n${_msg}\n\nPress 'OK' to view debug information to send to technical support.`)) {
+      if (!Adapt.get('_isStarted')) {
+        Adapt.once('contentObjectView:ready', this.handleError.bind(this, error));
+        return;
+      }
+
+      const config = Adapt.course.get('_spoor');
+      const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
+      const message = Handlebars.compile(messages[error.name])(error.data);
+
+      switch (error.name) {
+        case CLIENT_COULD_NOT_CONNECT:
+          Adapt.notify.popup({
+            _isCancellable: false,
+            title: errorMessages['title'],
+            body: message
+          });
+          return;
+      }
+
+      this.logger.error(message);
+
+      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`An error has occured:\n\n${message}\n\nPress 'OK' to view debug information to send to technical support.`)) {
         this.showDebugWindow();
       }
+
     }
 
     getInteractionCount() {
@@ -709,7 +743,7 @@ define([
         i = parseInt(r);
 
         if (isNaN(i) || i < 10 || i > 35) {
-          self.handleError('Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2');
+          self.handleError(new ScormError(CLIENT_INVALID_CHOICE_VALUE, { value }));
         }
 
         return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
