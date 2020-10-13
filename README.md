@@ -58,7 +58,7 @@ Supports SCORM 1.2, but in AICC mode only the following fields from the specific
 ----------------------------
 <a href="https://community.adaptlearning.org/" target="_blank"><img alt="@e-LfH" class="TableObject-item avatar" height="100" itemprop="image" src="https://avatars2.githubusercontent.com/u/30687181?v=4&amp;s=200" align="right"/></a> 
 **Version number:**  see bower.json  
-**Framework versions:** 3.0.0+
+**Framework versions:** 5.0.0+
 **Author / maintainer:** e-Learning For Healthcare with [contributors](https://github.com/e-LfH/adapt-elfh-spoor/graphs/contributors) 
 **Accessibility support:** n/a
 **RTL support:** n/a
