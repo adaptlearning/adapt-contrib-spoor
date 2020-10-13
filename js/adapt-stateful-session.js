@@ -1,219 +1,261 @@
 define([
-    'core/js/adapt',
-    './serializers/default',
-    './serializers/questions',
-    'core/js/enums/completionStateEnum'
-], function(Adapt, serializer, questions, COMPLETION_STATE) {
+  'core/js/adapt',
+  './scorm/wrapper',
+  'core/js/enums/completionStateEnum',
+  './serializers/ComponentSerializer',
+  './serializers/SCORMSuspendData'
+], function(Adapt, ScormWrapper, COMPLETION_STATE, ComponentSerializer, SCORMSuspendData) {
 
-    // Implements Adapt session statefulness
+  class StatefulSession extends Backbone.Controller {
 
-    var AdaptStatefulSession = _.extend({
+    initialize() {
+      _.bindAll(this, 'beginSession', 'onVisibilityChange', 'endSession');
+      this.scorm = ScormWrapper.getInstance();
+      this._trackingIdType = 'block';
+      this._componentSerializer = null;
+      this._shouldStoreResponses = true;
+      this._shouldStoreAttempts = false;
+      this._shouldRecordInteractions = true;
+      this.beginSession();
+    }
 
-        _config: null,
-        _shouldStoreResponses: true,
-        _shouldRecordInteractions: true,
+    beginSession() {
+      this.listenTo(Adapt, 'app:dataReady', this.restoreSession);
+      this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
+      this._componentSerializer = new ComponentSerializer(this._trackingIdType);
+      // suppress SCORM errors if 'nolmserrors' is found in the querystring
+      if (window.location.search.indexOf('nolmserrors') !== -1) {
+        this.scorm.suppressErrors = true;
+      }
+      const config = Adapt.spoor.config;
+      if (!config) return;
+      const tracking = config._tracking;
+      this._shouldStoreResponses = (tracking && tracking._shouldStoreResponses);
+      this._shouldStoreAttempts = (tracking && tracking._shouldStoreAttempts);
+      // Default should be to record interactions, so only avoid doing that if
+      // _shouldRecordInteractions is set to false
+      if (tracking && tracking._shouldRecordInteractions === false) {
+        this._shouldRecordInteractions = false;
+      }
+      const settings = config._advancedSettings;
+      if (!settings) {
+        // force use of SCORM 1.2 by default - some LMSes (SABA/Kallidus for instance)
+        // present both APIs to the SCO and, if given the choice, the pipwerks
+        // code will automatically select the SCORM 2004 API - which can lead to
+        // unexpected behaviour.
+        this.scorm.setVersion('1.2');
+        this.scorm.initialize();
+        return;
+      }
+      if (settings._showDebugWindow) {
+        this.scorm.showDebugWindow();
+      }
+      this.scorm.setVersion(settings._scormVersion || '1.2');
+      if (settings._suppressErrors) {
+        this.scorm.suppressErrors = settings._suppressErrors;
+      }
+      if (settings._commitOnStatusChange) {
+        this.scorm.commitOnStatusChange = settings._commitOnStatusChange;
+      }
+      if (settings._commitOnAnyChange) {
+        this.scorm.commitOnAnyChange = settings._commitOnAnyChange;
+      }
+      if (_.isFinite(settings._timedCommitFrequency)) {
+        this.scorm.timedCommitFrequency = settings._timedCommitFrequency;
+      }
+      if (_.isFinite(settings._maxCommitRetries)) {
+        this.scorm.maxCommitRetries = settings._maxCommitRetries;
+      }
+      if (_.isFinite(settings._commitRetryDelay)) {
+        this.scorm.commitRetryDelay = settings._commitRetryDelay;
+      }
+      if ('_exitStateIfIncomplete' in settings) {
+        this.scorm.exitStateIfIncomplete = settings._exitStateIfIncomplete;
+      }
+      if ('_exitStateIfComplete' in settings) {
+        this.scorm.exitStateIfComplete = settings._exitStateIfComplete;
+      }
+      this.scorm.initialize();
+    }
 
-        // Session Begin
-        initialize: function(callback) {
-            this._onWindowUnload = this.onWindowUnload.bind(this);
+    restoreSession() {
+      this.setupLearnerInfo();
+      this.restoreSessionState();
+      // defer call because AdaptModel.check*Status functions are asynchronous
+      _.defer(this.setupEventListeners.bind(this));
+    }
 
-            this.getConfig();
+    setupLearnerInfo() {
+      // Replace the hard-coded _learnerInfo data in _globals with the actual data
+      // from the LMS
+      // If the course has been published from the AT, the _learnerInfo object
+      // won't exist so we'll need to create it
+      const globals = Adapt.course.get('_globals');
+      if (!globals._learnerInfo) {
+        globals._learnerInfo = {};
+      }
+      Object.assign(globals._learnerInfo, Adapt.offlineStorage.get('learnerinfo'));
+    }
 
-            this.getLearnerInfo();
+    restoreSessionState() {
+      const sessionPairs = Adapt.offlineStorage.get();
+      const hasNoPairs = !Object.keys(sessionPairs).length;
+      if (hasNoPairs) return;
+      if (sessionPairs.c) {
+        const [ _isComplete, _isAssessmentPassed ] = SCORMSuspendData.deserialize(sessionPairs.c);
+        Adapt.course.set({
+          _isComplete,
+          _isAssessmentPassed
+        });
+      }
+      if (sessionPairs.q) {
+        this._componentSerializer.deserialize(sessionPairs.q);
+      }
+    }
 
-            // Restore state asynchronously to prevent IE8 freezes
-            this.restoreSessionState(function() {
-                // still need to defer call because AdaptModel.check*Status functions are asynchronous
-                _.defer(this.setupEventListeners.bind(this));
-                callback();
-            }.bind(this));
-        },
+    setupEventListeners() {
+      const debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
+      this.listenTo(Adapt.data, 'change:_isComplete', debouncedSaveSession);
+      if (this._shouldStoreResponses) {
+        this.listenTo(Adapt.data, 'change:_isSubmitted change:_userAnswer', debouncedSaveSession);
+      }
+      this.listenTo(Adapt, {
+        'app:languageChanged': this.onLanguageChanged,
+        'questionView:recordInteraction': this.onQuestionRecordInteraction,
+        'assessment:complete': this.onAssessmentComplete,
+        'tracking:complete': this.onTrackingComplete
+      });
+      const config = Adapt.spoor.config;
+      const advancedSettings = config._advancedSettings;
+      const shouldCommitOnVisibilityChange = (!advancedSettings ||
+          advancedSettings._commitOnVisibilityChangeHidden !== false);
+      if (shouldCommitOnVisibilityChange) {
+        document.addEventListener('visibilitychange', this.onVisibilityChange);
+      }
+      $(window).on('beforeunload unload', this.endSession);
+    }
 
-        getConfig: function() {
-            this._config = Adapt.config.has('_elfh_spoor') ? Adapt.config.get('_elfh_spoor') : false;
+    saveSessionState() {
+      const courseState = SCORMSuspendData.serialize([
+        Boolean(Adapt.course.get('_isComplete')),
+        Boolean(Adapt.course.get('_isAssessmentPassed'))
+      ]);
+      const componentStates = this._componentSerializer.serialize(this._shouldStoreResponses, this._shouldStoreAttempts);
+      const sessionPairs = {
+        'c': courseState,
+        'q': componentStates
+      };
+      this.printCompletionInformation();
+      Adapt.offlineStorage.set(sessionPairs);
+    }
 
-            this._shouldStoreResponses = (this._config && this._config._tracking && this._config._tracking._shouldStoreResponses);
+    printCompletionInformation() {
+      const courseComplete = Boolean(Adapt.course.get('_isComplete'));
+      const assessmentPassed = Boolean(Adapt.course.get('_isAssessmentPassed'));
+      const trackingIdModels = Adapt.data.filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'));
+      const trackingIds = trackingIdModels.map(model => model.get('_trackingId'));
+      if (!trackingIds.length) {
+        Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: no tracking ids found`);
+        return;
+      }
+      const max = Math.max(...trackingIds);
+      const completion = trackingIdModels.reduce((completion, model) => {
+        const trackingId = model.get('_trackingId');
+        completion[trackingId] = model.get('_isComplete') ? '1' : '0';
+        return completion;
+      }, (new Array(max + 1)).join('-').split('')).join('');
+      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completion}`);
+    }
 
-            // Default should be to record interactions, so only avoid doing that if _shouldRecordInteractions is set to false
-            if (this._config && this._config._tracking && this._config._tracking._shouldRecordInteractions === false) {
-                this._shouldRecordInteractions = false;
-            }
-        },
+    onLanguageChanged() {
+      // when the user switches language, we need to:
+      // - reattach the event listeners as the language change triggers a reload of
+      //   the json, which will create brand new collections
+      // - get and save a fresh copy of the session state. as the json has been reloaded,
+      //   the blocks completion data will be reset (the user is warned that this will
+      //   happen by the language picker extension)
+      // - check to see if the config requires that the lesson_status be reset to
+      //   'incomplete'
+      const config = Adapt.spoor.config;
+      this.removeEventListeners();
+      this.setupEventListeners();
+      this.saveSessionState();
+      if (config && config._reporting && config._reporting._resetStatusOnLanguageChange === true) {
+        Adapt.offlineStorage.set('status', 'incomplete');
+      }
+    }
 
-        /**
-         * Replace the hard-coded _learnerInfo data in _globals with the actual data from the LMS
-         * If the course has been published from the AT, the _learnerInfo object won't exist so we'll need to create it
-         */
-        getLearnerInfo: function() {
-            var globals = Adapt.course.get('_globals');
-            if (!globals._learnerInfo) {
-                globals._learnerInfo = {};
-            }
-            _.extend(globals._learnerInfo, Adapt.offlineStorage.get("learnerinfo"));
-        },
+    onVisibilityChange() {
+      if (document.visibilityState === 'hidden') this.scorm.commit();
+    }
 
-        saveSessionState: function() {
-            var sessionPairs = this.getSessionState();
-            Adapt.offlineStorage.set(sessionPairs);
-        },
+    onQuestionRecordInteraction(questionView) {
+      if (!this._shouldRecordInteractions) return;
+      const responseType = questionView.getResponseType();
+      // If responseType doesn't contain any data, assume that the question
+      // component hasn't been set up for cmi.interaction tracking
+      if (_.isEmpty(responseType)) return;
+      const id = questionView.model.get('_id');
+      const response = questionView.getResponse();
+      const result = questionView.isCorrect();
+      const latency = questionView.getLatency();
+      Adapt.offlineStorage.set('interaction', id, response, result, latency, responseType);
+    }
 
-        restoreSessionState: function(callback) {
-            var sessionPairs = Adapt.offlineStorage.get();
-            var hasNoPairs = _.keys(sessionPairs).length === 0;
+    onAssessmentComplete(stateModel) {
+      const config = Adapt.spoor.config;
+      Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
+      this.saveSessionState();
+      const shouldSubmitScore = (config && config._tracking && config._tracking._shouldSubmitScore);
+      if (!shouldSubmitScore) return;
+      const scoreArgs = stateModel.isPercentageBased ?
+        [ stateModel.scoreAsPercent, 0, 100 ] :
+        [ stateModel.score, 0, stateModel.maxScore ];
+      Adapt.offlineStorage.set('score', ...scoreArgs);
+    }
 
-            var doSynchronousPart = function() {
-                if (sessionPairs.questions && this._shouldStoreResponses) questions.deserialize(sessionPairs.questions);
-                if (sessionPairs._isCourseComplete) Adapt.course.set('_isComplete', sessionPairs._isCourseComplete);
-                if (sessionPairs._isAssessmentPassed) Adapt.course.set('_isAssessmentPassed', sessionPairs._isAssessmentPassed);
-                callback();
-            }.bind(this);
+    onTrackingComplete(completionData) {
+      const config = Adapt.spoor.config;
+      this.saveSessionState();
+      let completionStatus = completionData.status.asLowerCase;
+      // The config allows the user to override the completion state.
+      switch (completionData.status) {
+        case COMPLETION_STATE.COMPLETED:
+        case COMPLETION_STATE.PASSED: {
+          if (!config || !config._reporting || !config._reporting._onTrackingCriteriaMet) {
+            Adapt.log.warn(`No value defined for '_onTrackingCriteriaMet', so defaulting to '${completionStatus}'`);
+          } else {
+            completionStatus = config._reporting._onTrackingCriteriaMet;
+          }
 
-            if (hasNoPairs) return callback();
-
-            // Asynchronously restore block completion data because this has been known to be a choke-point resulting in IE8 freezes
-            if (sessionPairs.completion) {
-                serializer.deserialize(sessionPairs.completion, doSynchronousPart);
-            } else {
-                doSynchronousPart();
-            }
-        },
-
-        getSessionState: function() {
-            var sessionPairs = {
-                "completion": serializer.serialize(),
-                "questions": (this._shouldStoreResponses === true ? questions.serialize() : ""),
-                "_isCourseComplete": Adapt.course.get("_isComplete") || false,
-                "_isAssessmentPassed": Adapt.course.get('_isAssessmentPassed') || false
-            };
-            return sessionPairs;
-        },
-
-        // Session In Progress
-        setupEventListeners: function() {
-            $(window).on('beforeunload unload', this._onWindowUnload);
-
-            if (this._shouldStoreResponses) {
-                this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
-            }
-
-            if (this._shouldRecordInteractions) {
-                this.listenTo(Adapt, 'questionView:recordInteraction', this.onQuestionRecordInteraction);
-            }
-
-            this.listenTo(Adapt.blocks, 'change:_isComplete', this.onBlockComplete);
-            this.listenTo(Adapt, {
-                'assessment:complete': this.onAssessmentComplete,
-                'app:languageChanged': this.onLanguageChanged,
-                'tracking:complete': this.onTrackingComplete
-            });
-        },
-
-        removeEventListeners: function () {
-            $(window).off('beforeunload unload', this._onWindowUnload);
-            this.stopListening();
-        },
-
-        reattachEventListeners: function() {
-            this.removeEventListeners();
-            this.setupEventListeners();
-        },
-
-        onBlockComplete: function(block) {
-            this.saveSessionState();
-        },
-
-        onQuestionComponentComplete: function(component) {
-            if (!component.get("_isQuestionType")) return;
-
-            this.saveSessionState();
-        },
-
-        onTrackingComplete: function(completionData) {
-            this.saveSessionState();
-
-            var completionStatus = completionData.status.asLowerCase;
-
-            // The config allows the user to override the completion state.
-            switch (completionData.status) {
-                case COMPLETION_STATE.COMPLETED:
-                case COMPLETION_STATE.PASSED: {
-                    if (!this._config._reporting._onTrackingCriteriaMet) {
-                        Adapt.log.warn("No value defined for '_onTrackingCriteriaMet', so defaulting to '" + completionStatus + "'");
-                    } else {
-                        completionStatus = this._config._reporting._onTrackingCriteriaMet;
-                    }
-
-                    break;
-                }
-
-                case COMPLETION_STATE.FAILED: {
-                    if (!this._config._reporting._onAssessmentFailure) {
-                        Adapt.log.warn("No value defined for '_onAssessmentFailure', so defaulting to '" + completionStatus + "'");
-                    } else {
-                        completionStatus = this._config._reporting._onAssessmentFailure;
-                    }
-                }
-            }
-
-            Adapt.offlineStorage.set("status", completionStatus);
-        },
-
-        onAssessmentComplete: function(stateModel) {
-            Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
-
-            this.saveSessionState();
-
-            this.submitScore(stateModel);
-        },
-
-        onQuestionRecordInteraction:function(questionView) {
-            var responseType = questionView.getResponseType();
-
-            // If responseType doesn't contain any data, assume that the question
-            // component hasn't been set up for cmi.interaction tracking
-            if(_.isEmpty(responseType)) return;
-
-            var id = questionView.model.get('_id');
-            var response = questionView.getResponse();
-            var result = questionView.isCorrect();
-            var latency = questionView.getLatency();
-
-            Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
-        },
-
-        /**
-         * when the user switches language, we need to:
-         * - reattach the event listeners as the language change triggers a reload of the json, which will create brand new collections
-         * - get and save a fresh copy of the session state. as the json has been reloaded, the blocks completion data will be reset (the user is warned that this will happen by the language picker extension)
-         * - check to see if the config requires that the lesson_status be reset to 'incomplete'
-         */
-        onLanguageChanged: function () {
-            this.reattachEventListeners();
-
-            this.saveSessionState();
-
-            if (this._config._reporting && this._config._reporting._resetStatusOnLanguageChange === true) {
-                Adapt.offlineStorage.set("status", "incomplete");
-            }
-        },
-
-        submitScore: function(stateModel) {
-            if (this._config && !this._config._tracking._shouldSubmitScore) return;
-
-            if (stateModel.isPercentageBased) {
-                Adapt.offlineStorage.set("score", stateModel.scoreAsPercent, 0, 100);
-            } else {
-                Adapt.offlineStorage.set("score", stateModel.score, 0, stateModel.maxScore);
-            }
-        },
-
-        // Session End
-        onWindowUnload: function() {
-            this.removeEventListeners();
+          break;
         }
+        case COMPLETION_STATE.FAILED: {
+          if (!config || !config._reporting || !config._reporting._onAssessmentFailure) {
+            Adapt.log.warn(`No value defined for '_onAssessmentFailure', so defaulting to '${completionStatus}'`);
+          } else {
+            completionStatus = config._reporting._onAssessmentFailure;
+          }
+        }
+      }
+      Adapt.offlineStorage.set('status', completionStatus);
+    }
 
-    }, Backbone.Events);
+    endSession() {
+      if (!this.scorm.finishCalled) {
+        this.scorm.finish();
+      }
+      this.removeEventListeners();
+    }
 
-    return AdaptStatefulSession;
+    removeEventListeners() {
+      $(window).off('beforeunload unload', this.endSession);
+      document.removeEventListener('visibilitychange', this.onVisibilityChange);
+      this.stopListening();
+    }
+
+  }
+
+  return StatefulSession;
 
 });

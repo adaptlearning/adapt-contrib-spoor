@@ -48,6 +48,15 @@
                       "validators": [],
                       "help": "If enabled, the user's responses to questions will be saved and restored in each session. Note: this setting should be enabled in the majority of cases."
                     },
+                    "_shouldStoreAttempts": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Store question attempt states",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, a history of the user's responses to questions will be saved and restored in each session. Note: this setting should be disabled in the majority of cases."
+                    },
                     "_shouldRecordInteractions": {
                       "type": "boolean",
                       "required": false,
@@ -60,10 +69,10 @@
                   }
                 },
                 "_reporting": {
-                  "type":"object",
-                  "required":true,
+                  "type": "object",
+                  "required": true,
                   "title": "Reporting",
-                  "properties":{
+                  "properties": {
                     "_onTrackingCriteriaMet": {
                       "type":"string",
                       "required":true,
@@ -124,6 +133,15 @@
                       "validators": [],
                       "help": "If enabled, a 'commit' call will be made any time the lesson_status is changed."
                     },
+                    "_commitOnAnyChange": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Commit data on any change",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, a 'commit' (save all data) call will be made any time a value is changed. Note that enabling this setting may have a detrimental impact on the server and should only be used if absolutely necessary and only after careful load testing. Consider trying a lower value for 'Frequency of automatic commits' before changing this setting."
+                    },
                     "_timedCommitFrequency": {
                       "type": "number",
                       "required": false,
@@ -167,6 +185,57 @@
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, a 'commit' call will be made whenever the course window is hidden/minimised. Requires a browser that supports the 'visibilitychange' event."
+                    },
+                    "_manifestIdentifier": {
+                      "type": "string",
+                      "required": true,
+                      "default": "adapt_manifest",
+                      "title": "Manifest identifier",
+                      "inputType": "Text",
+                      "validators": ["required"],
+                      "help": "Sets the 'identifier' attribute in the imsmanifest.xml"
+                    },
+                    "_exitStateIfIncomplete": {
+                      "type": "string",
+                      "required": false,
+                      "default": "auto",
+                      "title": "Exit state if incomplete",
+                      "enum": ["auto", "suspend", "normal", ""],
+                      "inputType": {
+                        "type": "Select",
+                        "options": [
+                          "auto",
+                          "suspend",
+                          "normal",
+                          {
+                            "val": "",
+                            "label": "'' (empty string)"
+                          }
+                        ]
+                      },
+                      "validators": [],
+                      "help": "What exit status to use if the course is incomplete."
+                    },
+                    "_exitStateIfComplete": {
+                      "type": "string",
+                      "required": false,
+                      "default": "auto",
+                      "title": "Exit state if complete",
+                      "enum": ["auto", "suspend", "normal", ""],
+                      "inputType": {
+                        "type": "Select",
+                        "options": [
+                          "auto",
+                          "suspend",
+                          "normal",
+                          {
+                            "val": "",
+                            "label": "'' (empty string)"
+                          }
+                        ]
+                      },
+                      "validators": [],
+                      "help": "What exit status to use if the course is complete."
                     }
                   }
                 }

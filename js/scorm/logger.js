@@ -1,68 +1,75 @@
-Logger = function() {
-    this.logArr = [];
-    this.registeredViews = [];
-};
+define(function() {
 
-// static
-Logger.instance = null;
-Logger.LOG_TYPE_INFO = 0;
-Logger.LOG_TYPE_WARN = 1;
-Logger.LOG_TYPE_ERROR = 2;
-Logger.LOG_TYPE_DEBUG = 3;
+  class Logger {
 
-Logger.getInstance = function() {
-    if (Logger.instance == null)
+    constructor() {
+      this.logArr = [];
+      this.registeredViews = [];
+    }
+
+    static getInstance() {
+      if (Logger.instance === null) {
         Logger.instance = new Logger();
-    return Logger.instance;
-};
-
-Logger.prototype.getEntries = function() {
-    return this.logArr;
-};
-
-Logger.prototype.getLastEntry = function() {
-    return this.logArr[this.logArr.length - 1];
-};
-
-Logger.prototype.info = function(str) {
-    this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_INFO, time:Date.now()};
-    this.updateViews();
-};
-
-Logger.prototype.warn = function(str) {
-    this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_WARN, time:Date.now()};
-    this.updateViews();
-};
-
-Logger.prototype.error = function(str) {
-    this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_ERROR, time:Date.now()};
-    this.updateViews();
-};
-
-Logger.prototype.debug = function(str) {
-    this.logArr[this.logArr.length] = {str:str, type:Logger.LOG_TYPE_DEBUG, time:Date.now()};
-    this.updateViews();
-};
-
-//register a view
-Logger.prototype.registerView = function(_view) {
-    this.registeredViews[this.registeredViews.length] = _view;
-};
-
-//unregister a view
-Logger.prototype.unregisterView = function(_view) {
-    for (var i = 0; i < this.registeredViews.length; i++) {
-        if (this.registeredViews[i] == _view) {
-            this.registeredViews.splice(i, 1);
-            i--;
-        }
+      }
+      return Logger.instance;
     }
-};
 
-// update all views
-Logger.prototype.updateViews = function() {
-    for (var i = 0; i < this.registeredViews.length; i++) {
-        if (this.registeredViews[i])
-            this.registeredViews[i].update(this);
+    getEntries() {
+      return this.logArr;
     }
-};
+
+    getLastEntry() {
+      return this.logArr[this.logArr.length - 1];
+    }
+
+    info(str) {
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_INFO, time: Date.now() };
+      this.updateViews();
+    }
+
+    warn(str) {
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_WARN, time: Date.now() };
+      this.updateViews();
+    }
+
+    error(str) {
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_ERROR, time: Date.now() };
+      this.updateViews();
+    }
+
+    debug(str) {
+      this.logArr[this.logArr.length] = { str: str, type: Logger.LOG_TYPE_DEBUG, time: Date.now() };
+      this.updateViews();
+    }
+
+    registerView(_view) {
+      this.registeredViews[this.registeredViews.length] = _view;
+    }
+
+    unregisterView(_view) {
+      for (let i = 0, l = this.registeredViews.length; i < l; i++) {
+        if (this.registeredViews[i] !== _view) continue;
+        this.registeredViews.splice(i, 1);
+        i--;
+      }
+    }
+
+    updateViews() {
+      for (let i = 0, l = this.registeredViews.length; i < l; i++) {
+        if (!this.registeredViews[i]) continue;
+        this.registeredViews[i].update(this);
+      }
+    }
+
+  }
+
+  Logger.instance = null;
+  Logger.LOG_TYPE_INFO = 0;
+  Logger.LOG_TYPE_WARN = 1;
+  Logger.LOG_TYPE_ERROR = 2;
+  Logger.LOG_TYPE_DEBUG = 3;
+
+  // Assign global reference for debug window
+  return (window.Logger = Logger);
+
+});

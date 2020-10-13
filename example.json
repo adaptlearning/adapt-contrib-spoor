@@ -1,10 +1,10 @@
-// to be added to course/config.json
-{
+    // to be added to course/config.json
 	"_elfh_spoor": {
 		"_isEnabled": true,
 		"_tracking": {
 			"_shouldSubmitScore": false,
-			"_shouldStoreResponses": false,
+            "_shouldStoreResponses": true,
+            "_shouldStoreAttempts": false,
 			"_shouldRecordInteractions": true
 		},
 		"_reporting": {
@@ -19,10 +19,28 @@
 			"_showDebugWindow": false,
 			"_suppressErrors": false,
 			"_commitOnStatusChange": true,
+            "_commitOnAnyChange": false,
 			"_timedCommitFrequency": 10,
 			"_maxCommitRetries": 5,
 			"_commitRetryDelay": 2000,
-			"_commitOnVisibilityChangeHidden": true
+            "_commitOnVisibilityChangeHidden": true,
+            "_exitStateIfIncomplete": "auto",
+            "_exitStateIfComplete": "auto"
 		}
 	}
-}
+
+    // to be added to course/en/course.json
+    "_spoor": {
+        "_messages": {
+          "title": "WARNING",
+          "CLIENT_COULD_NOT_CONNECT": "Course could not connect to the LMS",
+          "SERVER_STATUS_UNSUPPORTED": "ScormWrapper::getStatus: invalid lesson status '{{status}}' received from LMS",
+          "CLIENT_STATUS_UNSUPPORTED": "ScormWrapper::setStatus: the status '{{status}}' is not supported.",
+          "CLIENT_COULD_NOT_COMMIT": "Course could not commit data to the LMS\nError {{code}}: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
+          "CLIENT_NOT_CONNECTED": "Course is not connected to the LMS",
+          "CLIENT_COULD_NOT_FINISH": "Course could not finish",
+          "CLIENT_COULD_NOT_GET_PROPERTY": "Course could not get {{property}}\nError Info: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
+          "CLIENT_COULD_NOT_SET_PROPERTY": "Course could not set {{property}} to {{value}}\nError Info: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
+          "CLIENT_INVALID_CHOICE_VALUE": "Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2: {{value}}"
+        }
+      }
