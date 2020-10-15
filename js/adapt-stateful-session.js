@@ -54,7 +54,7 @@ define([
       if (settings._suppressErrors) {
         this.scorm.suppressErrors = settings._suppressErrors;
       }
-      if (settings._commitOnStatusChange) {
+      if (settings._commitOnStatusChange === false) {
         this.scorm.commitOnStatusChange = settings._commitOnStatusChange;
       }
       if (settings._commitOnAnyChange) {
