@@ -500,7 +500,7 @@ define([
         case CLIENT_COULD_NOT_CONNECT:
           Adapt.notify.popup({
             _isCancellable: false,
-            title: errorMessages['title'],
+            title: messages.title,
             body: message
           });
           return;
