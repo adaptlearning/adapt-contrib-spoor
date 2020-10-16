@@ -521,7 +521,7 @@ define([
 
     recordInteractionScorm12(id, response, correct, latency, type) {
 
-      id = this.trim(id);
+      id = id.trim();
 
       const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
@@ -535,7 +535,7 @@ define([
 
     recordInteractionScorm2004(id, response, correct, latency, type) {
 
-      id = this.trim(id);
+      id = id.trim();
 
       const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
@@ -699,10 +699,6 @@ define([
       }
 
       return numToPad.slice(-padBy);
-    }
-
-    trim(str) {
-      return str.replace(/^\s*|\s*$/g, '');
     }
 
     isSCORM2004() {
