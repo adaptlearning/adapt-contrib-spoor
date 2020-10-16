@@ -427,11 +427,10 @@ define([
             errorInfo: this.scorm.debug.getInfo(errorCode),
             diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
-        } else {
-          this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
+          return success;
         }
+        this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
       }
-
 
       if (this.commitOnAnyChange) this.debouncedCommit();
 
