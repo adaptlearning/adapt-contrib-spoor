@@ -41,6 +41,6 @@
           "CLIENT_COULD_NOT_FINISH": "Course could not finish",
           "CLIENT_COULD_NOT_GET_PROPERTY": "Course could not get {{property}}\nError Info: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
           "CLIENT_COULD_NOT_SET_PROPERTY": "Course could not set {{property}} to {{value}}\nError Info: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
-          "CLIENT_INVALID_CHOICE_VALUE": "Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2: {{value}}"
+          "CLIENT_INVALID_CHOICE_VALUE": "Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2"
         }
       }
