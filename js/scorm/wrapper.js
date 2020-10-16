@@ -492,6 +492,13 @@ define([
         return;
       }
 
+      if ('value' in error.data) {
+        // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
+        if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
+        // if the value being set is an empty string, ensure it displays in the error as ''
+        if (error.data.value === '') error.data.value = `''`;
+      }
+
       const config = Adapt.course.get('_spoor');
       const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
       const message = Handlebars.compile(messages[error.name])(error.data);
