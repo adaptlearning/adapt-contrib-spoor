@@ -390,8 +390,8 @@ define([
           this.logger.warn('ScormWrapper::getValue: data model element not initialized');
         } else {
           this.handleError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
-            property: property,
-            code: errorCode,
+            property,
+            errorCode,
             errorInfo: this.scorm.debug.getInfo(errorCode),
             diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
