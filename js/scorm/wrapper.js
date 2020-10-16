@@ -292,8 +292,8 @@ define([
 
       const errorCode = this.scorm.debug.getCode();
       this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
-        code: errorCode,
-        info: this.scorm.debug.getInfo(errorCode),
+        errorCode,
+        errorInfo: this.scorm.debug.getInfo(errorCode),
         diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
       }));
     }
@@ -391,7 +391,8 @@ define([
         } else {
           this.handleError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
             property: property,
-            info: this.scorm.debug.getInfo(errorCode),
+            code: errorCode,
+            errorInfo: this.scorm.debug.getInfo(errorCode),
             diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
         }
@@ -414,18 +415,16 @@ define([
       }
 
       const success = this.scorm.set(property, value);
-      const errorCode = this.scorm.debug.getCode();
-
       if (!success) {
-      /**
-       * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
-       * So, we should throw an error _only_ if there was a valid error code...
-       */
+        // Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
+        // So we should only throw an error if there was a valid error code...
+        const errorCode = this.scorm.debug.getCode();
         if (errorCode !== 0) {
           this.handleError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
-            property: property,
-            value: value,
-            info: this.scorm.debug.getInfo(errorCode),
+            property,
+            value,
+            errorCode,
+            errorInfo: this.scorm.debug.getInfo(errorCode),
             diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
         } else {
