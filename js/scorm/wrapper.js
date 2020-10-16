@@ -508,7 +508,7 @@ define([
 
       this.logger.error(message);
 
-      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`An error has occured:\n\n${message}\n\nPress 'OK' to view debug information to send to technical support.`)) {
+      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
         this.showDebugWindow();
       }
 

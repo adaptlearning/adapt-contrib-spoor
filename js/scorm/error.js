@@ -20,7 +20,8 @@ define(function() {
   ScormError.CLIENT_INVALID_CHOICE_VALUE = 'CLIENT_INVALID_CHOICE_VALUE'; // value
 
   ScormError.defaultMessages = {
-    title: 'WARNING',
+    title: 'An error has occurred',
+    pressOk: `Press 'OK' to view detailed debug information to send to technical support.`,
     CLIENT_COULD_NOT_CONNECT: 'Course could not connect to the LMS',
     SERVER_STATUS_UNSUPPORTED: `ScormWrapper::getStatus: invalid lesson status '{{status}}' received from LMS`,
     CLIENT_STATUS_UNSUPPORTED: `ScormWrapper::setStatus: the status '{{status}}' is not supported.`,
