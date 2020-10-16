@@ -79,8 +79,8 @@ define([
       this.logger = Logger.getInstance();
       this.scorm = pipwerks.SCORM;
       /**
-     * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
-     */
+       * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
+       */
       this.scorm.handleExitMode = false;
 
       this.suppressErrors = false;
@@ -117,13 +117,13 @@ define([
       this.logger.debug('ScormWrapper::initialize');
       this.lmsConnected = this.scorm.init();
 
-      if (this.lmsConnected) {
-        this.startTime = new Date();
-
-        this.initTimedCommit();
-      } else {
+      if (!this.lmsConnected) {
         this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT));
+        return this.lmsConnected;
       }
+
+      this.startTime = new Date();
+      this.initTimedCommit();
 
       return this.lmsConnected;
     }
@@ -275,23 +275,27 @@ define([
 
       if (this.commitRetryPending) {
         this.logger.debug('ScormWrapper::commit: skipping this commit call as one is already pending.');
-      } else {
-        if (this.scorm.save()) {
-          this.commitRetries = 0;
-          this.lastCommitSuccessTime = new Date();
-        } else {
-          if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
-            this.commitRetries++;
-            this.initRetryCommit();
-          } else {
-            this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
-              code: this.scorm.debug.getCode(),
-              info: this.scorm.debug.getInfo(_errorCode),
-              diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
-            }));
-          }
-        }
+        return;
       }
+
+      if (this.scorm.save()) {
+        this.commitRetries = 0;
+        this.lastCommitSuccessTime = new Date();
+        return;
+      }
+
+      if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
+        this.commitRetries++;
+        this.initRetryCommit();
+        return;
+      }
+
+      const errorCode = this.scorm.debug.getCode();
+      this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
+        code: errorCode,
+        info: this.scorm.debug.getInfo(errorCode),
+        diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
+      }));
     }
 
     finish() {
@@ -380,7 +384,6 @@ define([
 
       const _value = this.scorm.get(_property);
       const _errorCode = this.scorm.debug.getCode();
-      let _errorMsg = '';
 
       if (_errorCode !== 0) {
         if (_errorCode === 403) {
