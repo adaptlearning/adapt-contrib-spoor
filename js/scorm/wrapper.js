@@ -739,7 +739,7 @@ define([
         i = parseInt(r);
 
         if (isNaN(i) || i < 10 || i > 35) {
-          self.handleError(new ScormError(CLIENT_INVALID_CHOICE_VALUE, { value }));
+          self.handleError(new ScormError(CLIENT_INVALID_CHOICE_VALUE));
         }
 
         return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'
