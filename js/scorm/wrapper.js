@@ -214,37 +214,37 @@ define([
       return this.getValue(this.isSCORM2004() ? 'cmi.score.raw' : 'cmi.core.score.raw');
     }
 
-    setScore(_score, _minScore = 0, _maxScore = 100) {
+    setScore(score, minScore = 0, maxScore = 100) {
       if (this.isSCORM2004()) {
-        this.setValue('cmi.score.raw', _score);
-        this.setValue('cmi.score.min', _minScore);
-        this.setValue('cmi.score.max', _maxScore);
+        this.setValue('cmi.score.raw', score);
+        this.setValue('cmi.score.min', minScore);
+        this.setValue('cmi.score.max', maxScore);
 
-        const range = _maxScore - _minScore;
-        const scaledScore = ((_score - _minScore) / range).toFixed(7);
+        const range = maxScore - minScore;
+        const scaledScore = ((score - minScore) / range).toFixed(7);
         this.setValue('cmi.score.scaled', scaledScore);
         return;
       }
       // SCORM 1.2
-      this.setValue('cmi.core.score.raw', _score);
-      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', _minScore);
-      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', _maxScore);
+      this.setValue('cmi.core.score.raw', score);
+      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', minScore);
+      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', maxScore);
     }
 
     getLessonLocation() {
       return this.getValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location');
     }
 
-    setLessonLocation(_location) {
-      this.setValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location', _location);
+    setLessonLocation(location) {
+      this.setValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location', location);
     }
 
     getSuspendData() {
       return this.getValue('cmi.suspend_data');
     }
 
-    setSuspendData(_data) {
-      this.setValue('cmi.suspend_data', _data);
+    setSuspendData(data) {
+      this.setValue('cmi.suspend_data', data);
     }
 
     getStudentName() {
@@ -255,13 +255,13 @@ define([
       return this.getValue(this.isSCORM2004() ? 'cmi.learner_id' : 'cmi.core.student_id');
     }
 
-    setLanguage(_lang) {
+    setLanguage(lang) {
       if (this.isSCORM2004()) {
-        this.setValue('cmi.learner_preference.language', _lang);
+        this.setValue('cmi.learner_preference.language', lang);
         return;
       }
       if (this.isSupported('cmi.student_preference.language')) {
-        this.setValue('cmi.student_preference.language', _lang);
+        this.setValue('cmi.student_preference.language', lang);
       }
     }
 
@@ -369,8 +369,8 @@ define([
 
     // ****************************** private methods ******************************
 
-    getValue(_property) {
-      this.logger.debug(`ScormWrapper::getValue: _property=${_property}`);
+    getValue(property) {
+      this.logger.debug(`ScormWrapper::getValue: _property=${property}`);
 
       if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::getValue: ignoring request as 'finish' has been called`);
@@ -382,26 +382,26 @@ define([
         return;
       }
 
-      const _value = this.scorm.get(_property);
-      const _errorCode = this.scorm.debug.getCode();
+      const value = this.scorm.get(property);
+      const errorCode = this.scorm.debug.getCode();
 
-      if (_errorCode !== 0) {
-        if (_errorCode === 403) {
+      if (errorCode !== 0) {
+        if (errorCode === 403) {
           this.logger.warn('ScormWrapper::getValue: data model element not initialized');
         } else {
           this.handleError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
-            property: _property,
-            info: this.scorm.debug.getInfo(_errorCode),
-            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
+            property: property,
+            info: this.scorm.debug.getInfo(errorCode),
+            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
         }
       }
-      this.logger.debug(`ScormWrapper::getValue: returning ${_value}`);
-      return _value + '';
+      this.logger.debug(`ScormWrapper::getValue: returning ${value}`);
+      return value + '';
     }
 
-    setValue(_property, _value) {
-      this.logger.debug(`ScormWrapper::setValue: _property=${_property} _value=${_value}`);
+    setValue(property, value) {
+      this.logger.debug(`ScormWrapper::setValue: _property=${property} _value=${value}`);
 
       if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::setValue: ignoring request as 'finish' has been called`);
@@ -413,21 +413,20 @@ define([
         return;
       }
 
-      const _success = this.scorm.set(_property, _value);
-      const _errorCode = this.scorm.debug.getCode();
-      let _errorMsg = '';
+      const success = this.scorm.set(property, value);
+      const errorCode = this.scorm.debug.getCode();
 
-      if (!_success) {
+      if (!success) {
       /**
        * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
        * So, we should throw an error _only_ if there was a valid error code...
        */
-        if (_errorCode !== 0) {
+        if (errorCode !== 0) {
           this.handleError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
-            property: _property,
-            value: _value,
-            info: this.scorm.debug.getInfo(_errorCode),
-            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
+            property: property,
+            value: value,
+            info: this.scorm.debug.getInfo(errorCode),
+            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
         } else {
           this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
@@ -437,7 +436,7 @@ define([
 
       if (this.commitOnAnyChange) this.debouncedCommit();
 
-      return _success;
+      return success;
     }
 
     /**
@@ -445,8 +444,8 @@ define([
      * Note that the way this check is being performed means it wouldn't work for any element that is
      * 'write only', but so far we've not had a requirement to check for any optional elements that are.
      */
-    isSupported(_property) {
-      this.logger.debug(`ScormWrapper::isSupported: _property=${_property}`);
+    isSupported(property) {
+      this.logger.debug(`ScormWrapper::isSupported: _property=${property}`);
 
       if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::isSupported: ignoring request as 'finish' has been called`);
@@ -458,7 +457,7 @@ define([
         return false;
       }
 
-      this.scorm.get(_property);
+      this.scorm.get(property);
 
       return (this.scorm.debug.getCode() === 401);
     }
