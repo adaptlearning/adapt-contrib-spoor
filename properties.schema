@@ -14,7 +14,7 @@
             "_spoor": {
               "type": "object",
               "required": false,
-              "legend": "Spoor",
+              "legend": "Spoor (SCORM)",
               "properties": {
                 "_isEnabled": {
                   "type": "boolean",
