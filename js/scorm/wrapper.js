@@ -80,7 +80,8 @@ define([
 
             this.logger = Logger.getInstance();
             this.scorm = pipwerks.SCORM;
-            this.aicc = elfh.AICC;
+            this.aicc = aiccAPI.AICC; //this.aicc = elfh.AICC;
+
 
             /**
              * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
