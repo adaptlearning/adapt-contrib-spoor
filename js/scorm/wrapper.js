@@ -332,7 +332,7 @@ define([
                 return;
             }
 
-            this.finishCalled = true;
+
 
             if (this.timedCommitIntervalID !== null) {
                 window.clearInterval(this.timedCommitIntervalID);
@@ -371,6 +371,7 @@ define([
 
             // api no longer available from this point
             this.lmsConnected = false;
+            this.finishCalled = true;
 
             if (!this.scorm.quit()) {
                 this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH));
