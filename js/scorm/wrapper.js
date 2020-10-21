@@ -389,6 +389,8 @@ define([
         case 0:
           break;
         case 403:
+          // 403 errors are common (and normal) when targetting SCORM 2004 - they are triggered on any
+          // attempt to get the value of a data model element that hasn't yet been assigned a value.
           this.logger.warn('ScormWrapper::getValue: data model element not initialized');
           break;
         default:
