@@ -110,12 +110,23 @@ When **Spoor** is installed, *scorm_test_harness.html* can be used instead of *i
 
 Note that due to the data storage limitations of browser cookies, there is less storage space available than an LMS would provide. In particular having `_shouldRecordInteractions` enabled can cause a lot of data to be written to the cookie, using up the available storage more quickly - it is advised that you disable this setting when testing via *scorm_test_harness.html*. As of v2.1.1, a browser alert will be displayed if the code detects that the cookie storage limit has been exceeded.
 
+### SCORM Error Messages  
+As of v3.6.0 it's possible to amend and/or translate the error messages that are shown by this extension whenever an LMS error is encountered. See [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json) for the data that needs to be added to course/_lang_/course.json
+
+Note that you only need to include those you want to amend/translate. 
+
+These error messages can also be amended via the Adapt Authoring Tool - but must be supplied in JSON format. For example, if you wanted to translate the 'could not connect to LMS' error into French, you would added the following into the 'Error messages' field under Project settings > Extensions > Spoor (SCORM):
+```json
+"title": "Une erreur s'est produite",
+"CLIENT_COULD_NOT_CONNECT": "La connexion avec la plate-forme de formation n'a pas pu être établie."
+```
+
 ## Limitations
  
 Currently (officially) only supports SCORM 1.2  
 
 ----------------------------
-**Version number:**  3.5.0   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a>  
+**Version number:**  3.6.0   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a>  
 **Framework versions:** 5.5+  
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors)  
 **Accessibility support:** n/a  

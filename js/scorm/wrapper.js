@@ -79,8 +79,8 @@ define([
       this.logger = Logger.getInstance();
       this.scorm = pipwerks.SCORM;
       /**
-     * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
-     */
+       * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
+       */
       this.scorm.handleExitMode = false;
 
       this.suppressErrors = false;
@@ -117,13 +117,13 @@ define([
       this.logger.debug('ScormWrapper::initialize');
       this.lmsConnected = this.scorm.init();
 
-      if (this.lmsConnected) {
-        this.startTime = new Date();
-
-        this.initTimedCommit();
-      } else {
+      if (!this.lmsConnected) {
         this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT));
+        return this.lmsConnected;
       }
+
+      this.startTime = new Date();
+      this.initTimedCommit();
 
       return this.lmsConnected;
     }
@@ -214,37 +214,37 @@ define([
       return this.getValue(this.isSCORM2004() ? 'cmi.score.raw' : 'cmi.core.score.raw');
     }
 
-    setScore(_score, _minScore = 0, _maxScore = 100) {
+    setScore(score, minScore = 0, maxScore = 100) {
       if (this.isSCORM2004()) {
-        this.setValue('cmi.score.raw', _score);
-        this.setValue('cmi.score.min', _minScore);
-        this.setValue('cmi.score.max', _maxScore);
+        this.setValue('cmi.score.raw', score);
+        this.setValue('cmi.score.min', minScore);
+        this.setValue('cmi.score.max', maxScore);
 
-        const range = _maxScore - _minScore;
-        const scaledScore = ((_score - _minScore) / range).toFixed(7);
+        const range = maxScore - minScore;
+        const scaledScore = ((score - minScore) / range).toFixed(7);
         this.setValue('cmi.score.scaled', scaledScore);
         return;
       }
       // SCORM 1.2
-      this.setValue('cmi.core.score.raw', _score);
-      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', _minScore);
-      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', _maxScore);
+      this.setValue('cmi.core.score.raw', score);
+      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', minScore);
+      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', maxScore);
     }
 
     getLessonLocation() {
       return this.getValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location');
     }
 
-    setLessonLocation(_location) {
-      this.setValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location', _location);
+    setLessonLocation(location) {
+      this.setValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location', location);
     }
 
     getSuspendData() {
       return this.getValue('cmi.suspend_data');
     }
 
-    setSuspendData(_data) {
-      this.setValue('cmi.suspend_data', _data);
+    setSuspendData(data) {
+      this.setValue('cmi.suspend_data', data);
     }
 
     getStudentName() {
@@ -255,13 +255,13 @@ define([
       return this.getValue(this.isSCORM2004() ? 'cmi.learner_id' : 'cmi.core.student_id');
     }
 
-    setLanguage(_lang) {
+    setLanguage(lang) {
       if (this.isSCORM2004()) {
-        this.setValue('cmi.learner_preference.language', _lang);
+        this.setValue('cmi.learner_preference.language', lang);
         return;
       }
       if (this.isSupported('cmi.student_preference.language')) {
-        this.setValue('cmi.student_preference.language', _lang);
+        this.setValue('cmi.student_preference.language', lang);
       }
     }
 
@@ -275,23 +275,27 @@ define([
 
       if (this.commitRetryPending) {
         this.logger.debug('ScormWrapper::commit: skipping this commit call as one is already pending.');
-      } else {
-        if (this.scorm.save()) {
-          this.commitRetries = 0;
-          this.lastCommitSuccessTime = new Date();
-        } else {
-          if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
-            this.commitRetries++;
-            this.initRetryCommit();
-          } else {
-            this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
-              code: this.scorm.debug.getCode(),
-              info: this.scorm.debug.getInfo(_errorCode),
-              diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
-            }));
-          }
-        }
+        return;
       }
+
+      if (this.scorm.save()) {
+        this.commitRetries = 0;
+        this.lastCommitSuccessTime = new Date();
+        return;
+      }
+
+      if (this.commitRetries < this.maxCommitRetries && !this.finishCalled) {
+        this.commitRetries++;
+        this.initRetryCommit();
+        return;
+      }
+
+      const errorCode = this.scorm.debug.getCode();
+      this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
+        errorCode,
+        errorInfo: this.scorm.debug.getInfo(errorCode),
+        diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
+      }));
     }
 
     finish() {
@@ -365,8 +369,8 @@ define([
 
     // ****************************** private methods ******************************
 
-    getValue(_property) {
-      this.logger.debug(`ScormWrapper::getValue: _property=${_property}`);
+    getValue(property) {
+      this.logger.debug(`ScormWrapper::getValue: _property=${property}`);
 
       if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::getValue: ignoring request as 'finish' has been called`);
@@ -378,27 +382,31 @@ define([
         return;
       }
 
-      const _value = this.scorm.get(_property);
-      const _errorCode = this.scorm.debug.getCode();
-      let _errorMsg = '';
+      const value = this.scorm.get(property);
+      const errorCode = this.scorm.debug.getCode();
 
-      if (_errorCode !== 0) {
-        if (_errorCode === 403) {
+      switch (errorCode) {
+        case 0:
+          break;
+        case 403:
+          // 403 errors are common (and normal) when targetting SCORM 2004 - they are triggered on any
+          // attempt to get the value of a data model element that hasn't yet been assigned a value.
           this.logger.warn('ScormWrapper::getValue: data model element not initialized');
-        } else {
+          break;
+        default:
           this.handleError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
-            property: _property,
-            info: this.scorm.debug.getInfo(_errorCode),
-            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
+            property,
+            errorCode,
+            errorInfo: this.scorm.debug.getInfo(errorCode),
+            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
-        }
       }
-      this.logger.debug(`ScormWrapper::getValue: returning ${_value}`);
-      return _value + '';
+      this.logger.debug(`ScormWrapper::getValue: returning ${value}`);
+      return value + '';
     }
 
-    setValue(_property, _value) {
-      this.logger.debug(`ScormWrapper::setValue: _property=${_property} _value=${_value}`);
+    setValue(property, value) {
+      this.logger.debug(`ScormWrapper::setValue: _property=${property} _value=${value}`);
 
       if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::setValue: ignoring request as 'finish' has been called`);
@@ -410,31 +418,27 @@ define([
         return;
       }
 
-      const _success = this.scorm.set(_property, _value);
-      const _errorCode = this.scorm.debug.getCode();
-      let _errorMsg = '';
-
-      if (!_success) {
-      /**
-       * Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
-       * So, we should throw an error _only_ if there was a valid error code...
-       */
-        if (_errorCode !== 0) {
+      const success = this.scorm.set(property, value);
+      if (!success) {
+        // Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
+        // So we should only throw an error if there was a valid error code...
+        const errorCode = this.scorm.debug.getCode();
+        if (errorCode !== 0) {
           this.handleError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
-            property: _property,
-            value: _value,
-            info: this.scorm.debug.getInfo(_errorCode),
-            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(_errorCode)
+            property,
+            value,
+            errorCode,
+            errorInfo: this.scorm.debug.getInfo(errorCode),
+            diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
           }));
-        } else {
-          this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
+          return success;
         }
+        this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
       }
-
 
       if (this.commitOnAnyChange) this.debouncedCommit();
 
-      return _success;
+      return success;
     }
 
     /**
@@ -442,8 +446,8 @@ define([
      * Note that the way this check is being performed means it wouldn't work for any element that is
      * 'write only', but so far we've not had a requirement to check for any optional elements that are.
      */
-    isSupported(_property) {
-      this.logger.debug(`ScormWrapper::isSupported: _property=${_property}`);
+    isSupported(property) {
+      this.logger.debug(`ScormWrapper::isSupported: _property=${property}`);
 
       if (this.finishCalled) {
         this.logger.debug(`ScormWrapper::isSupported: ignoring request as 'finish' has been called`);
@@ -455,7 +459,7 @@ define([
         return false;
       }
 
-      this.scorm.get(_property);
+      this.scorm.get(property);
 
       return (this.scorm.debug.getCode() === 401);
     }
@@ -492,6 +496,13 @@ define([
         return;
       }
 
+      if ('value' in error.data) {
+        // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
+        if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
+        // if the value being set is an empty string, ensure it displays in the error as ''
+        if (error.data.value === '') error.data.value = `''`;
+      }
+
       const config = Adapt.course.get('_spoor');
       const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
       const message = Handlebars.compile(messages[error.name])(error.data);
@@ -500,7 +511,7 @@ define([
         case CLIENT_COULD_NOT_CONNECT:
           Adapt.notify.popup({
             _isCancellable: false,
-            title: errorMessages['title'],
+            title: messages.title,
             body: message
           });
           return;
@@ -508,7 +519,7 @@ define([
 
       this.logger.error(message);
 
-      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`An error has occured:\n\n${message}\n\nPress 'OK' to view debug information to send to technical support.`)) {
+      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
         this.showDebugWindow();
       }
 
@@ -521,7 +532,7 @@ define([
 
     recordInteractionScorm12(id, response, correct, latency, type) {
 
-      id = this.trim(id);
+      id = id.trim();
 
       const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
@@ -535,7 +546,7 @@ define([
 
     recordInteractionScorm2004(id, response, correct, latency, type) {
 
-      id = this.trim(id);
+      id = id.trim();
 
       const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
 
@@ -701,10 +712,6 @@ define([
       return numToPad.slice(-padBy);
     }
 
-    trim(str) {
-      return str.replace(/^\s*|\s*$/g, '');
-    }
-
     isSCORM2004() {
       return this.scorm.version === '2004';
     }
@@ -743,7 +750,7 @@ define([
         i = parseInt(r);
 
         if (isNaN(i) || i < 10 || i > 35) {
-          self.handleError(new ScormError(CLIENT_INVALID_CHOICE_VALUE, { value }));
+          self.handleError(new ScormError(CLIENT_INVALID_CHOICE_VALUE));
         }
 
         return Number(i).toString(36); // 10 maps to 'a', 11 maps to 'b', ..., 35 maps to 'z'

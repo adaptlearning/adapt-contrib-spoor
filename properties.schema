@@ -14,7 +14,7 @@
             "_spoor": {
               "type": "object",
               "required": false,
-              "legend": "Spoor",
+              "legend": "Spoor (SCORM)",
               "properties": {
                 "_isEnabled": {
                   "type": "boolean",
@@ -244,7 +244,27 @@
           }
         },
         "course": {
-          "type":"object"
+          "type":"object",
+          "properties": {
+            "_spoor": {
+              "type": "object",
+              "required": false,
+              "legend": "Spoor (SCORM)",
+              "properties": {
+                "_messages": {
+                  "type": "object",
+                  "default": {},
+                  "title": "Error messages",
+                  "inputType": {
+                    "type": "CodeEditor",
+                    "mode": "json"
+                  },
+                  "validators": [],
+                  "help": "Optional object that can be used to amend/translate the error messages shown by the spoor extension"
+                }
+              }
+            }
+          }
         },
         "contentobject": {
           "type":"object"
