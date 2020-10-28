@@ -51,13 +51,13 @@ define([
         this.scorm.showDebugWindow();
       }
       this.scorm.setVersion(settings._scormVersion || '1.2');
-      if (settings._suppressErrors) {
+      if (_.isBoolean(settings._suppressErrors)) {
         this.scorm.suppressErrors = settings._suppressErrors;
       }
-      if (settings._commitOnStatusChange) {
+      if (_.isBoolean(settings._commitOnStatusChange)) {
         this.scorm.commitOnStatusChange = settings._commitOnStatusChange;
       }
-      if (settings._commitOnAnyChange) {
+      if (_.isBoolean(settings._commitOnAnyChange)) {
         this.scorm.commitOnAnyChange = settings._commitOnAnyChange;
       }
       if (_.isFinite(settings._timedCommitFrequency)) {
