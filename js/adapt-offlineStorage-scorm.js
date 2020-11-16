@@ -21,6 +21,7 @@ define([
 
     save() {
       this.statefulSession.saveSessionState();
+      this.scorm.commit();
     }
 
     serialize(...args) {
