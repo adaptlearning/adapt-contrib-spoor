@@ -281,6 +281,7 @@ define([
       if (this.scorm.save()) {
         this.commitRetries = 0;
         this.lastCommitSuccessTime = new Date();
+        Adapt.trigger('spoor:commit', this);
         return;
       }
 
