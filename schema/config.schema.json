@@ -118,34 +118,19 @@
                   "type": "number",
                   "title": "Frequency (mins) of automatic commits",
                   "description": "The frequency (in minutes) at which a 'commit' call should be made automatically. Set to 0 to disable automatic commits altogether.",
-                  "default": "10",
-                  "_backboneForms": {
-                    "validators": [
-                      "number"
-                    ]
-                  }
+                  "default": 10
                 },
                 "_maxCommitRetries": {
                   "type": "number",
                   "title": "Maximum number of commit retries",
                   "description": "If a 'commit' call fails, this setting controls how many times it should be retried before giving up and throwing an error.",
-                  "default": "5",
-                  "_backboneForms": {
-                    "validators": [
-                      "number"
-                    ]
-                  }
+                  "default": 5
                 },
                 "_commitRetryDelay": {
                   "type": "number",
                   "title": "Commit retry delay",
                   "description": "How much of a delay (in milliseconds) to leave between commit retries.",
-                  "default": "2000",
-                  "_backboneForms": {
-                    "validators": [
-                      "number"
-                    ]
-                  }
+                  "default": 2000,
                 },
                 "_suppressErrors": {
                   "type": "boolean",
