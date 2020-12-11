@@ -54,7 +54,7 @@ The attributes listed below are used in *config.json* to configure **Spoor**, an
 
 The `_spoor` object contains the setting `_isEnabled` and the `_tracking`, `_reporting` and `_advancedSettings` objects.
 
-##### \_isEnabled (boolean):
+#### \_isEnabled (boolean):
 Enables/disables this extension. If set to `true` (the default value), the plugin will try to connect to a SCORM conformant LMS when the course is launched via *index_lms.html*. If one is not available, a 'Could not connect to LMS' error message will be displayed. This error can be avoided during course development either by setting this to `false` or - more easily - by launching the course via *index.html*. This latter technique is also useful if you are developing a course that could be run either from an LMS or a regular web server.  
 
 #### \_tracking (object): 
