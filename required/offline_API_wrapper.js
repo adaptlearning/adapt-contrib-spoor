@@ -51,7 +51,7 @@ var GenericAPI = {
     window.Cookies.remove('_spoor');
   },
 
-  createResetButton: function(API) {
+  createResetButton: function() {
     $('body').append($('<style id="spoor-clear-button">.spoor-reset-button { position:fixed; right:0px; bottom:0px; } </style>'));
     var $button = $('<button class="spoor-reset-button">Reset</button>');
     $('body').append($button);
@@ -82,7 +82,7 @@ var GenericAPI = {
 window.API = {
 
   LMSInitialize: function() {
-    if (window.ISCOOKIELMS !== false) this.createResetButton();
+    // if (window.ISCOOKIELMS !== false) this.createResetButton();
     if (!this.fetch()) {
       this.data['cmi.core.lesson_status'] = 'not attempted';
       this.data['cmi.suspend_data'] = '';
