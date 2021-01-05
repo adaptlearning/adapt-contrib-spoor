@@ -144,7 +144,7 @@ Note that due to the data storage limitations of browser cookies, there is less 
 As of [v3.7.0](https://github.com/adaptlearning/adapt-contrib-spoor/releases/tag/v3.7.0), you can make the cookie 'persistent' if you want to be able to have the cookie persist for longer than the browser's 'session'. For example, you might want to make basic tracking & bookmarking functionality available to learners when the course is being run from a regular web server (rather than an LMS or LRS). Just be aware that this isn't officially supported by the Adapt Core Team, so if you want to use this you do so at your own risk! Please see [the comments in scorm_test_harness.html](https://github.com/adaptlearning/adapt-contrib-spoor/blob/ecf5c16ca022345e69b08f02a523eb773f24ba07/required/scorm_test_harness.html#L24-L29) for details on how to make the cookie 'persistent'.
 
 ### SCORM Error Messages
-As of v3.6.0 it's possible to amend and/or translate the error messages that are shown by this extension whenever an LMS error is encountered. See [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json) for the data that needs to be added to course/_lang_/course.json
+As of [v3.6.0](https://github.com/adaptlearning/adapt-contrib-spoor/releases/tag/v3.6.0) it's possible to amend and/or translate the error messages that are shown by this extension whenever an LMS error is encountered. See [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json) for the data that needs to be added to course/_lang_/course.json
 
 Note that you only need to include those you want to amend/translate. 
 
