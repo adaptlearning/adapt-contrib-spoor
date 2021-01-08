@@ -30,8 +30,8 @@ define([
       const config = Adapt.spoor.config;
       if (!config) return;
       const tracking = config._tracking;
-      this._shouldStoreResponses = (tracking && tracking._shouldStoreResponses);
-      this._shouldStoreAttempts = (tracking && tracking._shouldStoreAttempts);
+      this._shouldStoreResponses = (tracking && tracking._shouldStoreResponses) || false;
+      this._shouldStoreAttempts = (tracking && tracking._shouldStoreAttempts) || false;
       // Default should be to record interactions, so only avoid doing that if
       // _shouldRecordInteractions is set to false
       if (tracking && tracking._shouldRecordInteractions === false) {

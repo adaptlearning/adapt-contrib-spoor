@@ -281,6 +281,7 @@ define([
       if (this.scorm.save()) {
         this.commitRetries = 0;
         this.lastCommitSuccessTime = new Date();
+        Adapt.trigger('spoor:commit', this);
         return;
       }
 
@@ -461,7 +462,7 @@ define([
 
       this.scorm.get(property);
 
-      return (this.scorm.debug.getCode() === 401);
+      return (this.scorm.debug.getCode() !== 401); // 401 is the 'not implemented' error code
     }
 
     initTimedCommit() {
