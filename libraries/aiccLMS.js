@@ -112,9 +112,14 @@ function AICC_LMS() {
             if (sSrc.length == 0)
                 break;
 
-            var nGroupBegin = sSrc.search(re);
+            // Locate the position of the start of the second [group] to enable processing the first group i.e [core]
+            var nFirstGroupBegin = sSrc.search(re);
+            var nSecondSearchSrc = sSrc.substr(nFirstGroupBegin + 1);
 
-            //top section
+            // var nGroupBegin = sSrc.search(re);
+            var nGroupBegin = nSecondSearchSrc.search(re) + (nFirstGroupBegin);
+
+            //top section i.e [core]
             var top_section = sSrc.substr(0, nGroupBegin - 1);
             var elements = top_section.split(sCR);
 
