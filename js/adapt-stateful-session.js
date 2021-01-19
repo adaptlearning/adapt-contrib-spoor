@@ -180,11 +180,29 @@ define([
             // id has a 255 character limit according to SCORM standard therefore truncate body if necessary
 
             var id = questionView.model.get('_id');
-            var body = questionView.model.get('body');
-            if (body.length > (255 - id.length)) {
-                body = body.slice(0, (255 - id.length - 1)) // subtract the additional 1 for the pipe separator character
+
+            var questionText = questionView.model.get('body');
+
+            // If body is empty then instead capture the question title
+            if (questionText.length == 0) {
+                questionText = questionView.model.get('title');
             }
-            id = body + "|" + id;
+
+            // Remove any leading or trailing spaces
+            questionText = questionText.trim();
+
+            // Strip out HTML tags from questionText
+            questionText = questionText.replace(/<\/?[^>]+(>|$)/g, "");
+
+            // Ensure length of questionText is within limits 
+            // The id property we are setting will be an amalgamation of
+            // the questionText and the id with a pipe character as a delimiter
+            // This string cannot exceed 255 characters (SCORM 1.2 standard)
+
+            if (questionText.length > (255 - id.length)) {
+                questionText = questionText.slice(0, (255 - id.length - 1)) // subtract the additional 1 for the pipe separator character
+            }
+            id = questionText + "|" + id;
             var response = questionView.getResponse();
             var result = questionView.isCorrect();
             var latency = questionView.getLatency();
