@@ -169,6 +169,9 @@ define([
         },
 
         onQuestionRecordInteraction: function(questionView) {
+
+            console.log("onQuestionRecordInteraction");
+
             var responseType = questionView.getResponseType();
 
             // If responseType doesn't contain any data, assume that the question
@@ -181,28 +184,49 @@ define([
 
             var id = questionView.model.get('_id');
 
+            console.log("id = " + id);
+
             var questionText = questionView.model.get('body');
+
+            console.log("questionText = " + questionText);
 
             // If body is empty then instead capture the question title
             if (questionText.length == 0) {
                 questionText = questionView.model.get('title');
+
+                console.log("questionText after setting to title = " + questionText);
             }
+
+
 
             // Remove any leading or trailing spaces
             questionText = questionText.trim();
 
+            console.log("questionText after trim= " + questionText);
+
             // Strip out HTML tags from questionText
             questionText = questionText.replace(/<\/?[^>]+(>|$)/g, "");
+
+            console.log("questionText after stripping HTML tags= " + questionText);
 
             // Ensure length of questionText is within limits 
             // The id property we are setting will be an amalgamation of
             // the questionText and the id with a pipe character as a delimiter
             // This string cannot exceed 255 characters (SCORM 1.2 standard)
 
+            console.log("questionText.length = " + questionText.length);
+            console.log("id.length = " + id.length);
+
             if (questionText.length > (255 - id.length)) {
                 questionText = questionText.slice(0, (255 - id.length - 1)) // subtract the additional 1 for the pipe separator character
+
+                console.log("questionText after slice = " + questionText);
             }
+
             id = questionText + "|" + id;
+
+            console.log("id = " + id);
+
             var response = questionView.getResponse();
             var result = questionView.isCorrect();
             var latency = questionView.getLatency();
