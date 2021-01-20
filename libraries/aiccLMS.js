@@ -103,6 +103,7 @@ function AICC_LMS() {
         // Remove comments
         sSrc = sSrc.replace(/^;.*$/gm, "");
 
+        // var re = /^\[(\w+)\]$/m;
         var re = /\[(\w+)\]$/m; // Changed by PS 19/1/2021 to remove check for [group] to be at beginning of a line
         var sNameSeparator = " ";
 
