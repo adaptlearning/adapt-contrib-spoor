@@ -269,7 +269,7 @@ define([
       this.logger.debug('ScormWrapper::commit');
 
       if (!this.lmsConnected) {
-        this.handleError(new ScormError(ScormError.CLIENT_COULD_NOT_CONNECT));
+        this.handleError(new ScormError(ScormError.CLIENT_NOT_CONNECTED));
         return;
       }
 
