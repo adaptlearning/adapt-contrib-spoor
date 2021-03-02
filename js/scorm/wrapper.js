@@ -336,7 +336,12 @@ define([
       this.lmsConnected = false;
 
       if (!this.scorm.quit()) {
-        this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH));
+        const errorCode = this.scorm.debug.getCode();
+        this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH, {
+          errorCode,
+          errorInfo: this.scorm.debug.getInfo(errorCode),
+          diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
+        }));
       }
     }
 
