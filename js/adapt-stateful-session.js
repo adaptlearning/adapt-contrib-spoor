@@ -150,7 +150,7 @@ define([
     }
 
     printCompletionInformation(suspendData) {
-      if (typeof sessionPairs === 'string') {
+      if (typeof suspendData === 'string') {
         // In-case LMS data is passed as a string
         suspendData = JSON.parse(suspendData);
       }
