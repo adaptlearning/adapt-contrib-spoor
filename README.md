@@ -154,8 +154,8 @@ These error messages can also be amended via the Adapt Authoring Tool - but must
 "CLIENT_COULD_NOT_CONNECT": "La connexion avec la plate-forme de formation n'a pas pu être établie."
 ```
 
-### Create a completion string from LMS data
-Using the lms suspend data:
+### Print completion information from LMS data
+Using the lms suspend data from a different course:
 ```js
 var suspendData  = "{\"lang\":\"en\",\"a11y\":false,\"captions\":\"en\",\"c\":\"hAA\",\"q\":\"oAPQ4XADAcATDAHC4EYDgCYYA4XEDAcATDAHC4kYDgCYYA4XIDAcATDAHC5gbDgCYYbjhdAMBwBAMAcLqBgOAIBgDhdgMBwBAMAcLuBgOFwBABgDhdyMBwBAMAcLQgDAcLgCADAHC0JAwHC4AgAwBwtCSMBwBAMAcLQoDAcLgCADAHC0LAwHC4AgAwBwtDAMBwuAIAMAcLQwjAcAQDAHC0NAwHC4AgAwBwtDSMBwBAMAcLQ4DAcLgCADAHC0OIwHAEAwBwtDwMBwuAIAMAcLQ8jAcAQDAHC0QAwHC4AgAwBwtECMBwBAMAcLREDAcLgCADAHC0RIwHAEAwBwtEgMBwBAMAcLRMDAcAQDAA\"}";
 require('core/js/adapt').spoor.statefulSession.printCompletionInformation(suspendData);
