@@ -145,11 +145,11 @@ define([
         'c': courseState,
         'q': componentStates
       };
-      this.printCompletionInformation();
+      this.printCompletionInformation(componentStates);
       Adapt.offlineStorage.set(sessionPairs);
     }
 
-    printCompletionInformation() {
+    printCompletionInformation(componentStates) {
       const courseComplete = Boolean(Adapt.course.get('_isComplete'));
       const assessmentPassed = Boolean(Adapt.course.get('_isAssessmentPassed'));
       const trackingIdModels = Adapt.data.filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'));
@@ -158,13 +158,23 @@ define([
         Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: no tracking ids found`);
         return;
       }
-      const max = Math.max(...trackingIds);
-      const completion = trackingIdModels.reduce((completion, model) => {
-        const trackingId = model.get('_trackingId');
-        completion[trackingId] = model.get('_isComplete') ? '1' : '0';
-        return completion;
-      }, (new Array(max + 1)).join('-').split('')).join('');
-      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completion}`);
+      const completionString = this.deserializeComponentStatesToCompletionString(componentStates);
+      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completionString}`);
+    }
+
+    deserializeComponentStatesToCompletionString(componentStates) {
+      if (!componentStates) return '';
+      const data = SCORMSuspendData.deserialize(componentStates);
+      const max = Math.max(...data.map(item => item[0][0]));
+      const completion = data.reduce((markers, item) => {
+        const trackingId = item[0][0];
+        const mark = item[2][1][0] ? '1' : '0';
+        markers[trackingId] = (markers[trackingId] === '-' || markers[trackingId] === '1') ?
+          mark :
+          '0';
+        return markers;
+      }, (new Array(max + 1).join('-').split(''))).join('');
+      return completion;
     }
 
     onLanguageChanged() {

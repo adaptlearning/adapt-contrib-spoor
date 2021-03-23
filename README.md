@@ -154,6 +154,13 @@ These error messages can also be amended via the Adapt Authoring Tool - but must
 "CLIENT_COULD_NOT_CONNECT": "La connexion avec la plate-forme de formation n'a pas pu être établie."
 ```
 
+### Create a completion string from LMS data
+Using the q value of the lms suspend data:
+```js
+var q  = "oAPQ4XADAcAQDAHC4EYDgCAYA4XEDAcAQDAHC4kYDgCAYA4XIDAcAQDAHC5gYDgCAYA4XQDAcAQDAHC6gYDgCAYA4XYDAcAQDAHC7gbDhcQR4YiBwu5GA4AmGAOFoQBsOFxBHhhkOFoSBsOFxBHhg/MAAQAAHC0JIwHAEwwBwtCgNhwuAIAMAcLQsDAcLgCADAHC0MAwHC4AgAwBwtDCMBwBAMAcLQ0DAcLgCADAHC0NIwHAEAwBwtDgMBwuAIAMAcLQ4jAcAQDAHC0PAwHC4AgAwBwtDyMBwBAMAcLRADAcLgCADAHC0QIwHAEAwBwtEQMBwuAIAMAcLREjAcAQDAHC0SAwHAEAwBwtEwMBwBAMAA";
+Adapt.spoor.statefulSession.convertComponentStatesToCompletionString(q);
+```
+
 ## Limitations
  
 Currently (officially) only supports SCORM 1.2  
