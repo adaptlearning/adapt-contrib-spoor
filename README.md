@@ -155,9 +155,9 @@ These error messages can also be amended via the Adapt Authoring Tool - but must
 ```
 
 ### Create a completion string from LMS data
-Using the q value of the lms suspend data:
+Using the lms suspend data:
 ```js
-var q  = "oAPQ4XADAcAQDAHC4EYDgCAYA4XEDAcAQDAHC4kYDgCAYA4XIDAcAQDAHC5gYDgCAYA4XQDAcAQDAHC6gYDgCAYA4XYDAcAQDAHC7gbDhcQR4YiBwu5GA4AmGAOFoQBsOFxBHhhkOFoSBsOFxBHhg/MAAQAAHC0JIwHAEwwBwtCgNhwuAIAMAcLQsDAcLgCADAHC0MAwHC4AgAwBwtDCMBwBAMAcLQ0DAcLgCADAHC0NIwHAEAwBwtDgMBwuAIAMAcLQ4jAcAQDAHC0PAwHC4AgAwBwtDyMBwBAMAcLRADAcLgCADAHC0QIwHAEAwBwtEQMBwuAIAMAcLREjAcAQDAHC0SAwHAEAwBwtEwMBwBAMAA";
+var suspendData  = "{\"lang\":\"en\",\"a11y\":false,\"captions\":\"en\",\"c\":\"hAA\",\"q\":\"oAPQ4XADAcATDAHC4EYDgCYYA4XEDAcATDAHC4kYDgCYYA4XIDAcATDAHC5gbDgCYYbjhdAMBwBAMAcLqBgOAIBgDhdgMBwBAMAcLuBgOFwBABgDhdyMBwBAMAcLQgDAcLgCADAHC0JAwHC4AgAwBwtCSMBwBAMAcLQoDAcLgCADAHC0LAwHC4AgAwBwtDAMBwuAIAMAcLQwjAcAQDAHC0NAwHC4AgAwBwtDSMBwBAMAcLQ4DAcLgCADAHC0OIwHAEAwBwtDwMBwuAIAMAcLQ8jAcAQDAHC0QAwHC4AgAwBwtECMBwBAMAcLREDAcLgCADAHC0RIwHAEAwBwtEgMBwBAMAcLRMDAcAQDAA\"}";
 require('core/js/adapt').spoor.statefulSession.printCompletionInformation(q);
 ```
 
