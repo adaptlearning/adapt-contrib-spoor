@@ -1,6 +1,6 @@
 {
     "name": "adapt-elfh-spoor",
-    "version": "4.0.2beta",
+    "version": "4.0.2",
     "framework": ">=3",
     "homepage": "https://github.com/e-LfH/adapt-elfh-spoor",
     "displayName": "e-LfH Spoor",
