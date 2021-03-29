@@ -115,7 +115,7 @@ function AICC_LMS() {
             var nFirstGroupBegin = sSrc.search(re);
             var nSecondSearchSrc = sSrc.substr(nFirstGroupBegin + 1);
 
-            var nGroupBegin = nSecondSearchSrc.search(re) + (nFirstGroupBegin);
+            var nGroupBegin = nSecondSearchSrc.search(re) + (nFirstGroupBegin) + 1;
 
             //top section i.e [core]
             var top_section = sSrc.substr(0, nGroupBegin - 1);
