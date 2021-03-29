@@ -160,7 +160,11 @@ Using the lms suspend data from a different course:
 var suspendData  = "{\"lang\":\"en\",\"a11y\":false,\"captions\":\"en\",\"c\":\"hAA\",\"q\":\"oAPQ4XADAcATDAHC4EYDgCYYA4XEDAcATDAHC4kYDgCYYA4XIDAcATDAHC5gbDgCYYbjhdAMBwBAMAcLqBgOAIBgDhdgMBwBAMAcLuBgOFwBABgDhdyMBwBAMAcLQgDAcLgCADAHC0JAwHC4AgAwBwtCSMBwBAMAcLQoDAcLgCADAHC0LAwHC4AgAwBwtDAMBwuAIAMAcLQwjAcAQDAHC0NAwHC4AgAwBwtDSMBwBAMAcLQ4DAcLgCADAHC0OIwHAEAwBwtDwMBwuAIAMAcLQ8jAcAQDAHC0QAwHC4AgAwBwtECMBwBAMAcLREDAcLgCADAHC0RIwHAEAwBwtEgMBwBAMAcLRMDAcAQDAA\"}";
 require('core/js/adapt').spoor.statefulSession.printCompletionInformation(suspendData);
 ```
-
+That will output something like the following:
+```console
+INFO: course._isComplete: false, course._isAssessmentPassed: false, block completion: 11110000000000000000
+```
+Which, in the above example, indicates that the learner only completed the blocks with trackingIds 0, 1, 2, & 3.
 ## Limitations
  
 Currently (officially) only supports SCORM 1.2  
