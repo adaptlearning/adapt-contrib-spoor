@@ -102,8 +102,7 @@ function AICC_LMS() {
 
         // Remove comments
         sSrc = sSrc.replace(/^;.*$/gm, "");
-
-        var re = /\[(\w+)\]$/m; // Amended to remove requirement for  [group] pattern to be at the start of a line
+        var re = /\[(\w+)\]$/m; // Changed by PS 19/1/2021 to remove check for [group] to be at beginning of a line
         var sNameSeparator = " ";
 
         var pGroups = null;
@@ -112,9 +111,13 @@ function AICC_LMS() {
             if (sSrc.length == 0)
                 break;
 
-            var nGroupBegin = sSrc.search(re);
+            // Locate the position of the start of the second [group] to enable processing the first group i.e [core]
+            var nFirstGroupBegin = sSrc.search(re);
+            var nSecondSearchSrc = sSrc.substr(nFirstGroupBegin + 1);
 
-            //top section
+            var nGroupBegin = nSecondSearchSrc.search(re) + (nFirstGroupBegin) + 1;
+
+            //top section i.e [core]
             var top_section = sSrc.substr(0, nGroupBegin - 1);
             var elements = top_section.split(sCR);
 
