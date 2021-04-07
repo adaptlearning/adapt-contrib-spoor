@@ -183,55 +183,34 @@ define([
             // id has a 255 character limit according to SCORM standard therefore truncate body if necessary
 
             var id = questionView.model.get('_id');
-
-            console.log("id = " + id);
-
             var questionText = questionView.model.get('body');
-
-            console.log("questionText = " + questionText);
 
             // If body is empty then instead capture the question title
             if (questionText.length == 0) {
                 questionText = questionView.model.get('title');
-
-                console.log("questionText after setting to title = " + questionText);
             }
-
-
 
             // Remove any leading or trailing spaces
             questionText = questionText.trim();
 
-            console.log("questionText after trim= " + questionText);
+            // Replace any spaces with underscores as SCORM 1.2 standard does not permit spaces
+            questionText.replace(/ /g, '_');
 
             // Strip out HTML tags from questionText
-            questionText = questionText.replace(/<\/?[^>]+(>|$)/g, "");
-
-            console.log("questionText after stripping HTML tags= " + questionText);
+            // questionText = questionText.replace(/<\/?[^>]+(>|$)/g, "");
 
             // Ensure length of questionText is within limits 
-            // The id property we are setting will be an amalgamation of
-            // the questionText and the id with a pipe character as a delimiter
-            // This string cannot exceed 255 characters (SCORM 1.2 standard)
+            // The interactionsId property we are setting will be an amalgamation of
+            // the questionText and the id being the last 16 characters
+            // This string cannot exceed 255 characters (SCORM 1.2 standard)    
 
-            console.log("questionText.length = " + questionText.length);
-            console.log("id.length = " + id.length);
-
-            if (questionText.length > (255 - id.length)) {
-                questionText = questionText.slice(0, (255 - id.length - 1)) // subtract the additional 1 for the pipe separator character
-
-                console.log("questionText after slice = " + questionText);
-            }
-
-            id = questionText + "|" + id;
-
-            console.log("id = " + id);
+            var interactionsId = questionText.substring(0, 238) + "|" + id;
 
             var response = questionView.getResponse();
             var result = questionView.isCorrect();
             var latency = questionView.getLatency();
 
-            Adapt.offlineStorage.set("interaction", id, response, result, latency, responseType);
+            Adapt.offlineStorage.set("interaction", interactionsId, response, result, latency, responseType);
         },
 
         /**
