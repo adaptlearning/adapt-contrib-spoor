@@ -204,7 +204,7 @@ define([
             // the questionText and the id being the last 16 characters
             // This string cannot exceed 255 characters (SCORM 1.2 standard)    
 
-            var interactionsId = questionText.substring(0, 238) + "|" + id;
+            var interactionsId = questionText.substring(0, 255 - (id.length + 1)) + "|" + id;
 
             var response = questionView.getResponse();
             var result = questionView.isCorrect();
