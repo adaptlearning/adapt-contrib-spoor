@@ -154,12 +154,25 @@ These error messages can also be amended via the Adapt Authoring Tool - but must
 "CLIENT_COULD_NOT_CONNECT": "La connexion avec la plate-forme de formation n'a pas pu être établie."
 ```
 
+### Print completion information from LMS data
+If you have a course where learners are reporting completion problems, it can often be useful to check the stored suspend data to see if they are simply missing something out. As the relevant part of the suspend data is no longer in 'human-readable' format, Spoor v3.8.0 includes a `printCompletionInformation` function that translates this into into a more readable string of 1s and 0s which you can then match to the course's 'tracking ids' to see which bits of the course the learner hasn't completed.
+
+To do this, run any course that uses Spoor v3.8.0 (or better) and execute the following via the browser console. Naturally, you need to replace the `suspendData` shown below with the one from the course you're trying to debug...
+```js
+var suspendData  = '{"lang":"en","a11y":false,"captions":"en","c":"hAA","q":"oAPQ4XADAcATDAHC4EYDgCYYA4XEDAcATDAHC4kYDgCYYA4XIDAcATDAHC5gbDgCYYbjhdAMBwBAMAcLqBgOAIBgDhdgMBwBAMAcLuBgOFwBABgDhdyMBwBAMAcLQgDAcLgCADAHC0JAwHC4AgAwBwtCSMBwBAMAcLQoDAcLgCADAHC0LAwHC4AgAwBwtDAMBwuAIAMAcLQwjAcAQDAHC0NAwHC4AgAwBwtDSMBwBAMAcLQ4DAcLgCADAHC0OIwHAEAwBwtDwMBwuAIAMAcLQ8jAcAQDAHC0QAwHC4AgAwBwtECMBwBAMAcLREDAcLgCADAHC0RIwHAEAwBwtEgMBwBAMAcLRMDAcAQDAA"}';
+require('core/js/adapt').spoor.statefulSession.printCompletionInformation(suspendData);
+```
+That will output something like the following:
+```console
+INFO: course._isComplete: false, course._isAssessmentPassed: false, block completion: 11110000000000000000
+```
+Which, in the above example, indicates that the learner only completed the blocks with trackingIds 0, 1, 2, & 3.
 ## Limitations
  
 Currently (officially) only supports SCORM 1.2  
 
 ----------------------------
-**Version number:**  3.7.0   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a>  
+**Version number:**  3.8.0   <a href="https://community.adaptlearning.org/" target="_blank"><img src="https://github.com/adaptlearning/documentation/blob/master/04_wiki_assets/plug-ins/images/adapt-logo-mrgn-lft.jpg" alt="adapt learning logo" align="right"></a>  
 **Framework versions:** 5.5+  
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors)  
 **Accessibility support:** n/a  

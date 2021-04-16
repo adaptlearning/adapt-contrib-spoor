@@ -269,7 +269,7 @@ define([
       this.logger.debug('ScormWrapper::commit');
 
       if (!this.lmsConnected) {
-        this.handleError(new ScormError(ScormError.CLIENT_COULD_NOT_CONNECT));
+        this.handleError(new ScormError(ScormError.CLIENT_NOT_CONNECTED));
         return;
       }
 
@@ -336,7 +336,12 @@ define([
       this.lmsConnected = false;
 
       if (!this.scorm.quit()) {
-        this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH));
+        const errorCode = this.scorm.debug.getCode();
+        this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH, {
+          errorCode,
+          errorInfo: this.scorm.debug.getInfo(errorCode),
+          diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
+        }));
       }
     }
 
