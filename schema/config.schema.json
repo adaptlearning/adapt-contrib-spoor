@@ -33,7 +33,7 @@
                 "_shouldStoreResponses": {
                   "type": "boolean",
                   "title": "Store question state",
-                  "description": "If enabled, the user's responses to questions will be saved and restored in each session. Note: this setting should be enabled in the majority of cases.",
+                  "description": "If enabled, the user's responses to questions will be saved and restored in each session. Note: this setting should be enabled in the majority of cases",
                   "default": true
                 },
                 "_shouldStoreAttempts": {
