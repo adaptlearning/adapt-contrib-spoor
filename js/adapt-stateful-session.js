@@ -194,7 +194,7 @@ define([
             questionText = questionText.trim();
 
             // Replace any spaces with underscores as SCORM 1.2 standard does not permit spaces
-            questionText.replace(/ /g, '_');
+            questionText = questionText.replace(/ /g, '_');
 
             // Strip out HTML tags from questionText
             // questionText = questionText.replace(/<\/?[^>]+(>|$)/g, "");
