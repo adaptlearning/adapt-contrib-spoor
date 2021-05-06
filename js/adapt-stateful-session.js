@@ -165,9 +165,10 @@ define([
       }
       const data = SCORMSuspendData.deserialize(suspendData.q);
       const max = Math.max(...data.map(item => item[0][0]));
+      const shouldStoreResponses = (data[0].length === 3);
       const completionString = data.reduce((markers, item) => {
         const trackingId = item[0][0];
-        const isComplete = this._shouldStoreResponses ?
+        const isComplete = shouldStoreResponses ?
           item[2][1][0] :
           item[1][0];
         const mark = isComplete ? '1' : '0';
