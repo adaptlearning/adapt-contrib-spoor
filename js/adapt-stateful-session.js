@@ -167,7 +167,10 @@ define([
       const max = Math.max(...data.map(item => item[0][0]));
       const completionString = data.reduce((markers, item) => {
         const trackingId = item[0][0];
-        const mark = item[2][1][0] ? '1' : '0';
+        const isComplete = this._shouldStoreResponses ?
+          item[2][1][0] :
+          item[1][0];
+        const mark = isComplete ? '1' : '0';
         markers[trackingId] = (markers[trackingId] === '-' || markers[trackingId] === '1') ?
           mark :
           '0';
