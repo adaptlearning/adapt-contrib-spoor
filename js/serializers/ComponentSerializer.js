@@ -27,14 +27,10 @@ define([
         const components = isContainer ?
           model.findDescendantModels('component') :
           [model];
-
-        let indexOffset = 0;
         components.forEach((component, index) => {
           if (component.get('_isTrackable') === false) {
-            indexOffset -= 1;
             return;
           }
-          index += indexOffset;
           if (!shouldStoreResponses) {
             // Store only component completion
             const state = [
