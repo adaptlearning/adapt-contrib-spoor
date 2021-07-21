@@ -126,7 +126,7 @@ define([
           [model];
         const component = components[index];
         if (!component) {
-          log.warnOnce(`SPOOR could not restore tracking id: ${trackingId}, index: ${index}`);
+          log.warn(`SPOOR could not restore tracking id: ${trackingId}, index: ${index}`);
           return;
         }
         if (!shouldStoreResponses) {
