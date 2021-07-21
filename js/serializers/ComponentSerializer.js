@@ -1,7 +1,8 @@
 define([
   'core/js/adapt',
+  'core/js/logging',
   './SCORMSuspendData'
-], function (Adapt, SCORMSuspendData) {
+], function (Adapt, log, SCORMSuspendData) {
 
   class ComponentSerializer extends Backbone.Controller {
 
@@ -11,7 +12,7 @@ define([
 
     serialize(shouldStoreResponses, shouldStoreAttempts) {
       if (shouldStoreAttempts && !shouldStoreResponses) {
-        Adapt.log.warnOnce(`SPOOR configuration error, cannot use '_shouldStoreAttempts' without '_shouldStoreResponses'`);
+        log.warnOnce(`SPOOR configuration error, cannot use '_shouldStoreAttempts' without '_shouldStoreResponses'`);
       }
       const states = [];
       Adapt.data.each(model => {
@@ -27,6 +28,9 @@ define([
           model.findDescendantModels('component') :
           [model];
         components.forEach((component, index) => {
+          if (component.get('_isTrackable') === false) {
+            return;
+          }
           if (!shouldStoreResponses) {
             // Store only component completion
             const state = [
@@ -121,6 +125,10 @@ define([
           model.findDescendantModels('component') :
           [model];
         const component = components[index];
+        if (!component) {
+          log.warn(`SPOOR could not restore tracking id: ${trackingId}, index: ${index}`);
+          return;
+        }
         if (!shouldStoreResponses) {
           // Restore only component completion
           const isComplete = state[1][0];
