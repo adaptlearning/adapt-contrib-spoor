@@ -1,0 +1,31 @@
+{
+  "$anchor": "spoor-course",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "$patch": {
+    "source": {
+      "$ref": "course"
+    },
+    "with": {
+      "properties": {
+        "_spoor": {
+          "type": "object",
+          "title": "Spoor (SCORM)",
+          "default": {},
+          "properties": {
+            "_messages": {
+              "type": "object",
+              "title": "Error messages",
+              "description": "Optional object that can be used to amend/translate the error messages shown by the spoor extension",
+              "default": {},
+              "_backboneForms": {
+                "type": "CodeEditor",
+                "mode": "json"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

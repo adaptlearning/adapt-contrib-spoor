@@ -1,0 +1,184 @@
+{
+  "$anchor": "spoor-config",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "$merge": {
+    "source": {
+      "$ref": "config"
+    },
+    "with": {
+      "properties": {
+        "_spoor": {
+          "type": "object",
+          "title": "Spoor (SCORM)",
+          "default": {},
+          "properties": {
+            "_isEnabled": {
+              "type": "boolean",
+              "title": "Enable SCORM support",
+              "description": "If enabled, the plugin will try to find and track to a SCORM conformant LMS. Uncheck to switch off SCORM tracking",
+              "default": true
+            },
+            "_tracking": {
+              "type": "object",
+              "title": "Tracking",
+              "default": {},
+              "properties": {
+                "_shouldSubmitScore": {
+                  "type": "boolean",
+                  "title": "Submit score to LMS",
+                  "description": "If enabled, the score attained in any assessment will be reported back to the LMS (regardless of whether the user passes or fails the assessment)",
+                  "default": false
+                },
+                "_shouldStoreResponses": {
+                  "type": "boolean",
+                  "title": "Store question state",
+                  "description": "If enabled, the user's responses to questions will be saved and restored in each session. Note: this setting should be enabled in the majority of cases",
+                  "default": true
+                },
+                "_shouldStoreAttempts": {
+                  "type": "boolean",
+                  "title": "Store question attempt states",
+                  "description": "If enabled, a history of the user's responses to questions will be saved and restored in each session. Note: this setting should be disabled in the majority of cases",
+                  "default": false
+                },
+                "_shouldRecordInteractions": {
+                  "type": "boolean",
+                  "title": "Record interactions",
+                  "description": "If enabled, the course will record the user's responses to questions to the cmi.interactions SCORM data fields",
+                  "default": true
+                }
+              }
+            },
+            "_reporting": {
+              "type": "object",
+              "title": "Reporting",
+              "default": {},
+              "properties": {
+                "_onTrackingCriteriaMet": {
+                  "type": "string",
+                  "title": "Tracking success status",
+                  "description": "What status to report back to the LMS when the tracking criteria are met",
+                  "default": "completed",
+                  "enum": [
+                    "completed",
+                    "passed",
+                    "failed",
+                    "incomplete"
+                  ],
+                  "_backboneForms": "Select"
+                },
+                "_onAssessmentFailure": {
+                  "type": "string",
+                  "title": "Assessment failure status",
+                  "description": "What status to report back to the LMS when the assessment is failed",
+                  "default": "incomplete",
+                  "enum": [
+                    "completed",
+                    "failed",
+                    "incomplete"
+                  ],
+                  "_backboneForms": "Select"
+                },
+                "_resetStatusOnLanguageChange": {
+                  "type": "boolean",
+                  "title": "Reset status on language change",
+                  "description": "If enabled, the the course status will be reset to 'incomplete' when the user changes the course language",
+                  "default": false
+                }
+              }
+            },
+            "_advancedSettings": {
+              "type": "object",
+              "title": "Advanced settings",
+              "default": {},
+              "required": [
+                "_manifestIdentifier"
+              ],
+              "properties": {
+                "_showDebugWindow": {
+                  "type": "boolean",
+                  "title": "Enable SCORM debug window",
+                  "description": "If enabled, a popup window will be shown on course launch that gives detailed information about what SCORM calls are being made. This can be very useful for debugging SCORM issues. Note that this popup window will appear automatically if the SCORM code encounters an error, even if this is set to false",
+                  "default": false
+                },
+                "_commitOnStatusChange": {
+                  "type": "boolean",
+                  "title": "Commit data on status change",
+                  "description": "If enabled, a 'commit' call will be made any time the lesson_status is changed",
+                  "default": true
+                },
+                "_commitOnAnyChange": {
+                  "type": "boolean",
+                  "title": "Commit data on any change",
+                  "description": "If enabled, a 'commit' (save all data) call will be made any time a value is changed. Note that enabling this setting may have a detrimental impact on the server and should only be used if absolutely necessary and only after careful load testing. Consider trying a lower value for 'Frequency of automatic commits' before changing this setting",
+                  "default": false
+                },
+                "_timedCommitFrequency": {
+                  "type": "number",
+                  "title": "Frequency of automatic commits",
+                  "description": "The frequency (in minutes) at which a 'commit' call should be made automatically. Set to 0 to disable automatic commits altogether",
+                  "default": 10
+                },
+                "_maxCommitRetries": {
+                  "type": "number",
+                  "title": "Maximum number of commit retries",
+                  "description": "If a 'commit' call fails, this setting controls how many times it should be retried before giving up and throwing an error",
+                  "default": 5
+                },
+                "_commitRetryDelay": {
+                  "type": "number",
+                  "title": "Commit retry delay",
+                  "description": "How much of a delay (in milliseconds) to leave between commit retries",
+                  "default": 2000
+                },
+                "_suppressErrors": {
+                  "type": "boolean",
+                  "title": "Supress LMS errors",
+                  "description": "If enabled, error messages will not be displayed when SCORM tracking problems occur",
+                  "default": false
+                },
+                "_commitOnVisibilityChangeHidden": {
+                  "type": "boolean",
+                  "title": "Commit when browser tab is hidden",
+                  "description": "If enabled, a 'commit' call will be made whenever the course window is hidden/minimised. Requires a browser that supports the 'visibilitychange' event",
+                  "default": true
+                },
+                "_manifestIdentifier": {
+                  "type": "string",
+                  "title": "Manifest identifier",
+                  "description": "Sets the 'identifier' attribute in the imsmanifest.xml",
+                  "default": "adapt_manifest"
+                },
+                "_exitStateIfIncomplete": {
+                  "type": "string",
+                  "title": "Incomplete course exit status",
+                  "default": "auto",
+                  "enum": [
+                    "auto",
+                    "suspend",
+                    "normal",
+                    ""
+                  ],
+                  "_backboneForms": "Select"
+                },
+                "_exitStateIfComplete": {
+                  "type": "string",
+                  "title": "Complete course exit status",
+                  "default": "auto",
+                  "enum": [
+                    "auto",
+                    "suspend",
+                    "normal",
+                    ""
+                  ],
+                  "_backboneForms": "Select"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
