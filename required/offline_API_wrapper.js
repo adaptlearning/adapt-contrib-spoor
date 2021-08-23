@@ -1,13 +1,3 @@
-function checkJQueryStatus() {
-  if (window.jQuery === undefined) {
-    setTimeout(checkJQueryStatus, 100);
-    return;
-  }
-
-  $.extend(true, window.API, GenericAPI);
-  $.extend(true, window.API_1484_11, GenericAPI);
-}
-
 var GenericAPI = {
 
   __offlineAPIWrapper: true,
@@ -179,4 +169,7 @@ window.API_1484_11 = {
 
 };
 
-checkJQueryStatus();
+for (var key in GenericAPI) {
+  window.API[key] = window.API_1484_11[key] = GenericAPI[key];
+}
+
