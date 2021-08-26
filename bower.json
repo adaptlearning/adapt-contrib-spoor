@@ -3,7 +3,7 @@
   "version": "3.10.0",
   "framework": ">=5.5",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-spoor",
-  "issues": "https://github.com/adaptlearning/adapt_framework/issues/new",
+  "bugs": "https://github.com/adaptlearning/adapt-contrib-spoor/issues",
   "extension" : "spoor",
   "displayName" : "Spoor",
   "description": "An extension which allows basic SCORM tracking",
