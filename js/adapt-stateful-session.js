@@ -34,7 +34,7 @@ define([
       this._shouldStoreAttempts = (tracking && tracking._shouldStoreAttempts) || false;
       // Default should be to record interactions, so only avoid doing that if
       // _shouldRecordInteractions is set to false
-      if (tracking && tracking._shouldRecordInteractions === false) {
+      if (tracking?._shouldRecordInteractions === false) {
         this._shouldRecordInteractions = false;
       }
       const settings = config._advancedSettings;
@@ -108,9 +108,8 @@ define([
           _isAssessmentPassed
         });
       }
-      if (sessionPairs.q) {
-        this._componentSerializer.deserialize(sessionPairs.q);
-      }
+      if (!sessionPairs.q) return;
+      this._componentSerializer.deserialize(sessionPairs.q);
     }
 
     setupEventListeners() {
@@ -142,8 +141,8 @@ define([
       ]);
       const componentStates = this._componentSerializer.serialize(this._shouldStoreResponses, this._shouldStoreAttempts);
       const sessionPairs = {
-        'c': courseState,
-        'q': componentStates
+        c: courseState,
+        q: componentStates
       };
       Adapt.offlineStorage.set(sessionPairs);
       this.printCompletionInformation(sessionPairs);
@@ -193,9 +192,8 @@ define([
       this.removeEventListeners();
       this.setupEventListeners();
       this.saveSessionState();
-      if (config && config._reporting && config._reporting._resetStatusOnLanguageChange === true) {
-        Adapt.offlineStorage.set('status', 'incomplete');
-      }
+      if (config?._reporting?._resetStatusOnLanguageChange === false) return;
+      Adapt.offlineStorage.set('status', 'incomplete');
     }
 
     onVisibilityChange() {
@@ -219,7 +217,7 @@ define([
       const config = Adapt.spoor.config;
       Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
       this.saveSessionState();
-      const shouldSubmitScore = (config && config._tracking && config._tracking._shouldSubmitScore);
+      const shouldSubmitScore = (config?._tracking?._shouldSubmitScore);
       if (!shouldSubmitScore) return;
       const scoreArgs = stateModel.isPercentageBased ?
         [ stateModel.scoreAsPercent, 0, 100 ] :
@@ -235,7 +233,7 @@ define([
       switch (completionData.status) {
         case COMPLETION_STATE.COMPLETED:
         case COMPLETION_STATE.PASSED: {
-          if (!config || !config._reporting || !config._reporting._onTrackingCriteriaMet) {
+          if (!config?._reporting?._onTrackingCriteriaMet) {
             Adapt.log.warn(`No value defined for '_onTrackingCriteriaMet', so defaulting to '${completionStatus}'`);
           } else {
             completionStatus = config._reporting._onTrackingCriteriaMet;
@@ -244,7 +242,7 @@ define([
           break;
         }
         case COMPLETION_STATE.FAILED: {
-          if (!config || !config._reporting || !config._reporting._onAssessmentFailure) {
+          if (!config?._reporting?._onAssessmentFailure) {
             Adapt.log.warn(`No value defined for '_onAssessmentFailure', so defaulting to '${completionStatus}'`);
           } else {
             completionStatus = config._reporting._onAssessmentFailure;
