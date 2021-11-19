@@ -71,7 +71,7 @@ define([
           return this.scorm.getStudentName();
         case 'learnerinfo':
           return this.getLearnerInfo();
-        case 'coursestate':
+        case 'coursestate': {
           courseState = this.getCustomState('c');
           const stateArray = (courseState && SCORMSuspendData.deserialize(courseState)) || [];
           return {
@@ -79,6 +79,7 @@ define([
             _isAssessmentPassed: Boolean(stateArray.slice(1, 2).map(Number)[0]),
             completion: stateArray.slice(2).map(Number).map(String).join('') || ''
           };
+        }
         case 'completion':
           courseState = this.getCustomState('c');
           return (courseState && SCORMSuspendData
@@ -99,9 +100,10 @@ define([
             .deserialize(courseState)
             .slice(1, 2)
             .map(Number)[0]);
-        case 'questions':
+        case 'questions': {
           const questionsState = this.getCustomState('q');
           return questionsState || '';
+        }
         default:
           return this.getCustomState(name);
       }
@@ -172,7 +174,7 @@ define([
         return {};
       }
 
-      let dataAsJSON = JSON.parse(dataAsString);
+      const dataAsJSON = JSON.parse(dataAsString);
       if (!isSuspendDataStoreEmpty && !this.suspendDataRestored) {
         Object.assign(dataAsJSON, this.suspendDataStore);
       }
@@ -216,7 +218,7 @@ define([
       hasName = hasName && (isNameCommaSeparated || isNameSpaceSeparated);
 
       if (!hasName) {
-        console.log(`SPOOR: LMS learner_name not in 'lastname, firstname' or 'firstname lastname' format`);
+        console.log('SPOOR: LMS learner_name not in \'lastname, firstname\' or \'firstname lastname\' format');
         return { id, name, firstname, lastname };
       }
 
