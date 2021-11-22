@@ -89,9 +89,8 @@ define([
         this.showDebugWindow();
       }
 
-      if ((window.API && window.API.__offlineAPIWrapper) || (window.API_1484_11 && window.API_1484_11.__offlineAPIWrapper)) {
-        this.logger.error('Offline SCORM API is being used. No data will be reported to the LMS!');
-      }
+      if (!(window.API?.__offlineAPIWrapper && window?.API_1484_11.__offlineAPIWrapper)) return;
+      this.logger.error('Offline SCORM API is being used. No data will be reported to the LMS!');
     }
 
     // ******************************* public methods *******************************
@@ -260,9 +259,8 @@ define([
         this.setValue('cmi.learner_preference.language', lang);
         return;
       }
-      if (this.isSupported('cmi.student_preference.language')) {
-        this.setValue('cmi.student_preference.language', lang);
-      }
+      if (!this.isSupported('cmi.student_preference.language')) return;
+      this.setValue('cmi.student_preference.language', lang);
     }
 
     commit() {
@@ -335,14 +333,13 @@ define([
       // api no longer available from this point
       this.lmsConnected = false;
 
-      if (!this.scorm.quit()) {
-        const errorCode = this.scorm.debug.getCode();
-        this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH, {
-          errorCode,
-          errorInfo: this.scorm.debug.getInfo(errorCode),
-          diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
-        }));
-      }
+      if (this.scorm.quit()) return;
+      const errorCode = this.scorm.debug.getCode();
+      this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH, {
+        errorCode,
+        errorInfo: this.scorm.debug.getInfo(errorCode),
+        diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
+      }));
     }
 
     recordInteraction(id, response, correct, latency, type) {
@@ -379,7 +376,7 @@ define([
       this.logger.debug(`ScormWrapper::getValue: _property=${property}`);
 
       if (this.finishCalled) {
-        this.logger.debug(`ScormWrapper::getValue: ignoring request as 'finish' has been called`);
+        this.logger.debug('ScormWrapper::getValue: ignoring request as \'finish\' has been called');
         return;
       }
 
@@ -415,7 +412,7 @@ define([
       this.logger.debug(`ScormWrapper::setValue: _property=${property} _value=${value}`);
 
       if (this.finishCalled) {
-        this.logger.debug(`ScormWrapper::setValue: ignoring request as 'finish' has been called`);
+        this.logger.debug('ScormWrapper::setValue: ignoring request as \'finish\' has been called');
         return;
       }
 
@@ -439,7 +436,7 @@ define([
           }));
           return success;
         }
-        this.logger.warn(`ScormWrapper::setValue: LMS reported that the 'set' call failed but then said there was no error!`);
+        this.logger.warn('ScormWrapper::setValue: LMS reported that the \'set\' call failed but then said there was no error!');
       }
 
       if (this.commitOnAnyChange) this.debouncedCommit();
@@ -456,7 +453,7 @@ define([
       this.logger.debug(`ScormWrapper::isSupported: _property=${property}`);
 
       if (this.finishCalled) {
-        this.logger.debug(`ScormWrapper::isSupported: ignoring request as 'finish' has been called`);
+        this.logger.debug('ScormWrapper::isSupported: ignoring request as \'finish\' has been called');
         return;
       }
 
@@ -506,7 +503,7 @@ define([
         // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
         if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
         // if the value being set is an empty string, ensure it displays in the error as ''
-        if (error.data.value === '') error.data.value = `''`;
+        if (error.data.value === '') error.data.value = '\'\'';
       }
 
       const config = Adapt.course.get('_spoor');
@@ -617,10 +614,8 @@ define([
 
       this.logOutputWin = window.open('log_output.html', 'Log', 'width=600,height=300,status=no,scrollbars=yes,resizable=yes,menubar=yes,toolbar=yes,location=yes,top=0,left=0');
 
-      if (this.logOutputWin) {
-        this.logOutputWin.focus();
-      }
-
+      if (!this.logOutputWin) return;
+      this.logOutputWin.focus();
     }
 
     convertToSCORM12Time(msConvert) {
@@ -744,8 +739,6 @@ define([
       }
 
       function checkIdentifier(r) {
-        let i;
-
         // if [0-9] then ok
         if (r.length === 1 && r >= '0' && r <= '9') return r;
 
@@ -753,7 +746,7 @@ define([
         if (r.length === 1 && r >= 'a' && r <= 'z') return r;
 
         // try to map integers 10-35 to [a-z]
-        i = parseInt(r);
+        const i = parseInt(r);
 
         if (isNaN(i) || i < 10 || i > 35) {
           self.handleError(new ScormError(CLIENT_INVALID_CHOICE_VALUE));
