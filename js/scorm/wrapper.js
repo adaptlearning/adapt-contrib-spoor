@@ -87,7 +87,7 @@ class ScormWrapper {
       this.showDebugWindow();
     }
 
-    if (!(window.API?.__offlineAPIWrapper && window?.API_1484_11.__offlineAPIWrapper)) return;
+    if (!(window.API?.__offlineAPIWrapper && window?.API_1484_11?.__offlineAPIWrapper)) return;
     this.logger.error('Offline SCORM API is being used. No data will be reported to the LMS!');
   }
 
