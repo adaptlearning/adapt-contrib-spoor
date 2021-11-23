@@ -375,7 +375,7 @@ define([
    * @returns {string}
    */
   function binaryToBase64(binary) {
-    binary = _.flatten(binary).join('');
+    binary = Array.prototype.concat.apply([], binary).join('');
     binary = zeroPadRightToMultiple(binary, BYTE_BIT_LENGTH);
     const bytesCount = binary.length / BYTE_BIT_LENGTH;
     const charCodes = new Array(bytesCount);
@@ -1063,7 +1063,7 @@ define([
      * @returns {number|boolean|Array}
      */
     valueFromBinary(binary, typeName = null) {
-      binary = _.flatten(binary).join('');
+      binary = Array.prototype.concat.apply([], binary).join('');
       const hasInitialType = typeof typeName === 'string';
       let valueType;
       if (hasInitialType) {
