@@ -119,7 +119,6 @@ export default class StatefulSession extends Backbone.Controller {
     this.listenTo(Adapt, {
       'app:languageChanged': this.onLanguageChanged,
       'questionView:recordInteraction': this.onQuestionRecordInteraction,
-      'assessment:complete': this.onAssessmentComplete,
       'tracking:complete': this.onTrackingComplete
     });
     const config = Adapt.spoor.config;
@@ -190,7 +189,7 @@ export default class StatefulSession extends Backbone.Controller {
     this.removeEventListeners();
     this.setupEventListeners();
     this.saveSessionState();
-    if (config?._reporting?._resetStatusOnLanguageChange === false) return;
+    if (config?._reporting?._resetStatusOnLanguageChange !== true) return;
     Adapt.offlineStorage.set('status', 'incomplete');
   }
 
@@ -209,18 +208,6 @@ export default class StatefulSession extends Backbone.Controller {
     const result = questionView.isCorrect();
     const latency = questionView.getLatency();
     Adapt.offlineStorage.set('interaction', id, response, result, latency, responseType);
-  }
-
-  onAssessmentComplete(stateModel) {
-    const config = Adapt.spoor.config;
-    Adapt.course.set('_isAssessmentPassed', stateModel.isPass);
-    this.saveSessionState();
-    const shouldSubmitScore = (config?._tracking?._shouldSubmitScore);
-    if (!shouldSubmitScore) return;
-    const scoreArgs = stateModel.isPercentageBased ?
-      [ stateModel.scoreAsPercent, 0, 100 ] :
-      [ stateModel.score, 0, stateModel.maxScore ];
-    Adapt.offlineStorage.set('score', ...scoreArgs);
   }
 
   onTrackingComplete(completionData) {

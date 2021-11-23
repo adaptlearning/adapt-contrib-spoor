@@ -375,7 +375,7 @@ define([
    * @returns {string}
    */
   function binaryToBase64(binary) {
-    binary = Array.prototype.concat.apply([], binary).join('');
+    binary = _.flatten(binary).join('');
     binary = zeroPadRightToMultiple(binary, BYTE_BIT_LENGTH);
     const bytesCount = binary.length / BYTE_BIT_LENGTH;
     const charCodes = new Array(bytesCount);
@@ -538,8 +538,7 @@ define([
       this.parent = parent;
       this.name = name;
       this.bitSizes = bitSizes;
-      this.maxValues = Array.prototype.concat.apply([], this.bitSizes)
-        .map(value => (Math.pow(2, value) - 1));
+      this.maxValues = _.flatten(this.bitSizes).map(value => (Math.pow(2, value) - 1));
       this.maxValue = this.maxValues[this.maxValues.length - 1];
       this.sizeBinaryLength = unsignedIntegerToBinary(this.bitSizes.length - 1).length;
     }
@@ -1063,7 +1062,7 @@ define([
      * @returns {number|boolean|Array}
      */
     valueFromBinary(binary, typeName = null) {
-      binary = Array.prototype.concat.apply([], binary).join('');
+      binary = _.flatten(binary).join('');
       const hasInitialType = typeof typeName === 'string';
       let valueType;
       if (hasInitialType) {

@@ -82,7 +82,7 @@ class ScormWrapper {
     this.scorm.handleExitMode = false;
 
     this.suppressErrors = false;
-    this.debouncedCommit = setTimeout(this.commit.bind(this), 100);
+    this.debouncedCommit = _.debounce(this.commit.bind(this), 100);
     if (window.__debug) {
       this.showDebugWindow();
     }
