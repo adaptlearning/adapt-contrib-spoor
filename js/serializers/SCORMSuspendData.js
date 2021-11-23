@@ -615,7 +615,7 @@ define([
      */
     valueToBinary(integer, logStats = null) {
       integer = integer.toFixed(0);
-      let binary = this.integer.valueToBinary(Math.abs(integer), logStats);
+      const binary = this.integer.valueToBinary(Math.abs(integer), logStats);
       if (logStats) {
         this.log(binary);
       }
