@@ -1,6 +1,6 @@
 {
   "name": "adapt-contrib-spoor",
-  "version": "3.10.2",
+  "version": "4.0.0",
   "framework": ">=5.17.7",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-spoor",
   "bugs": "https://github.com/adaptlearning/adapt-contrib-spoor/issues",
