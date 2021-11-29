@@ -940,8 +940,8 @@ define([
     const esTypes = values.map(value => {
       const valueType = findValueTypeFromValue(value, isFloat);
       if (valueType.esType === 'number') {
-        minValue = Math.min([value, minValue]);
-        maxValue = Math.max([value, maxValue]);
+        minValue = Math.min(...[value, minValue]);
+        maxValue = Math.max(...[value, maxValue]);
         isFloat = isFloat || !Number.isInteger(value);
       }
       return valueType.esType;
