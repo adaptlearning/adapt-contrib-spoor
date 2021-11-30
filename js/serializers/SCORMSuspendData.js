@@ -615,7 +615,7 @@ define([
      */
     valueToBinary(integer, logStats = null) {
       integer = integer.toFixed(0);
-      let binary = this.integer.valueToBinary(Math.abs(integer), logStats);
+      const binary = this.integer.valueToBinary(Math.abs(integer), logStats);
       if (logStats) {
         this.log(binary);
       }
@@ -940,13 +940,13 @@ define([
     const esTypes = values.map(value => {
       const valueType = findValueTypeFromValue(value, isFloat);
       if (valueType.esType === 'number') {
-        minValue = _.min([value, minValue]);
-        maxValue = _.max([value, maxValue]);
+        minValue = Math.min(value, minValue);
+        maxValue = Math.max(value, maxValue);
         isFloat = isFloat || !Number.isInteger(value);
       }
       return valueType.esType;
     });
-    const uniqESTypes = _.uniq(esTypes);
+    const uniqESTypes = [...new Set(esTypes)];
     if (uniqESTypes.length > 1) {
       throw new Error(`Cannot resolve array to one type: ${uniqESTypes.join()}`);
     }
