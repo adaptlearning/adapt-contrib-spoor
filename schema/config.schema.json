@@ -24,12 +24,6 @@
               "title": "Tracking",
               "default": {},
               "properties": {
-                "_shouldSubmitScore": {
-                  "type": "boolean",
-                  "title": "Submit score to LMS",
-                  "description": "If enabled, the score attained in any assessment will be reported back to the LMS (regardless of whether the user passes or fails the assessment)",
-                  "default": false
-                },
                 "_shouldStoreResponses": {
                   "type": "boolean",
                   "title": "Store question state",
