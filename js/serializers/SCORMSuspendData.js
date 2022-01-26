@@ -1,7 +1,9 @@
 define([
   'underscore',
-  'libraries/lzma_worker-min'
+  'libraries/lzma-min',
+  'libraries/lzma_worker-min.js'
 ], function(_) {
+  const LZMAWorker = window.LZMAFactory('./libraries/lzma_worker-min.js')
   /**
    * 2020/05/06 SCORMSuspendData
    *
@@ -1106,11 +1108,27 @@ define([
     serialize(value, typeName = null, logStats = null) {
       const binary = this.valueToBinary(value, typeName, logStats);
       const base64 = binaryToBase64(binary);
+      return base64;
+    }
+
+    /**
+     * Convert an array, boolean or number into a base64 string, asynchronously
+     * @param {number|boolean|Array} value
+     * @returns {string}
+     */
+    async serializeAsync(value, typeName = null, logStats = null ) {
+      const binary = this.valueToBinary(value, null, null);
+      const base64 = binaryToBase64(binary);
       const isLargeArray = (Array.isArray(value) && value.length > 10);
-      if (isLargeArray && this._shouldCompress) {
-        const compressedBase64 = `#${window.btoa(window.LZMA.compress(JSON.stringify(value), 1).map(i => String.fromCharCode(i + 128)).join('')).replace(/=/g, '')}`;
-        const isCompressedSmaller = (compressedBase64.length < base64.length);
-        if (isCompressedSmaller) return compressedBase64;
+      if (isLargeArray) {
+        return new Promise(resolve => {
+          LZMAWorker.compress(JSON.stringify(value), 1, data => {
+            const compressedBase64 = `#${window.btoa(data.map(i => String.fromCharCode(i + 128)).join('')).replace(/=/g, '')}`;
+            const isCompressedSmaller = (compressedBase64.length < base64.length);
+            if (isCompressedSmaller) return resolve(compressedBase64);
+            return resolve(base64);
+          });
+        });
       }
       return base64;
     }
@@ -1127,10 +1145,6 @@ define([
       const binary = base64ToBinary(base64);
       const value = this.valueFromBinary(binary, typeName);
       return value;
-    }
-
-    setShouldCompress(value) {
-      this._shouldCompress = Boolean(value);
     }
 
   }

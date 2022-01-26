@@ -113,11 +113,11 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   setupEventListeners() {
-    const debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
-    this.listenTo(Adapt.components, 'change:_isComplete', debouncedSaveSession);
-    this.listenTo(Adapt.course, 'change:_isComplete', debouncedSaveSession);
+    this.debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
+    this.listenTo(Adapt.components, 'change:_isComplete', this.debouncedSaveSession);
+    this.listenTo(Adapt.course, 'change:_isComplete', this.debouncedSaveSession);
     if (this._shouldStoreResponses) {
-      this.listenTo(Adapt.data, 'change:_isSubmitted change:_userAnswer', debouncedSaveSession);
+      this.listenTo(Adapt.data, 'change:_isSubmitted change:_userAnswer', this.debouncedSaveSession);
     }
     this.listenTo(Adapt, {
       'app:languageChanged': this.onLanguageChanged,
@@ -134,12 +134,15 @@ export default class StatefulSession extends Backbone.Controller {
     $(window).on('beforeunload unload', this.endSession);
   }
 
-  saveSessionState() {
+  async saveSessionState() {
+    const isMidRender = !Adapt.parentView?.model.get('_isReady');
+    // Wait until finished rendering to save
+    if (isMidRender) return this.debouncedSaveSession();
     const courseState = SCORMSuspendData.serialize([
       Boolean(Adapt.course.get('_isComplete')),
       Boolean(Adapt.course.get('_isAssessmentPassed'))
     ]);
-    const componentStates = this._componentSerializer?.serialize(this._shouldStoreResponses, this._shouldStoreAttempts);
+    const componentStates = await this._componentSerializer?.serialize(this._shouldStoreResponses, this._shouldStoreAttempts);
     const sessionPairs = {
       c: courseState,
       q: componentStates
