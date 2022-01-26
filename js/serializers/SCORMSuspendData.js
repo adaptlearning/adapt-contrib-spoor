@@ -1107,7 +1107,7 @@ define([
       const binary = this.valueToBinary(value, typeName, logStats);
       const base64 = binaryToBase64(binary);
       if (this._shouldCompress) {
-        const compressedBase64 = `#${window.btoa(window.LZMA.compress(JSON.stringify(value)).map(i => String.fromCharCode(i + 128)).join(''))}`;
+        const compressedBase64 = `#${window.btoa(window.LZMA.compress(JSON.stringify(value)).map(i => String.fromCharCode(i + 128)).join('')).replace(/=/g, '')}`;
         const isCompressedSmaller = (compressedBase64.length < base64.length);
         if (isCompressedSmaller) return compressedBase64;
       }
