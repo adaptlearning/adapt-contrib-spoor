@@ -1106,8 +1106,9 @@ define([
     serialize(value, typeName = null, logStats = null) {
       const binary = this.valueToBinary(value, typeName, logStats);
       const base64 = binaryToBase64(binary);
-      if (this._shouldCompress) {
-        const compressedBase64 = `#${window.btoa(window.LZMA.compress(JSON.stringify(value)).map(i => String.fromCharCode(i + 128)).join('')).replace(/=/g, '')}`;
+      const isLargeArray = (Array.isArray(value) && value.length > 10);
+      if (isLargeArray && this._shouldCompress) {
+        const compressedBase64 = `#${window.btoa(window.LZMA.compress(JSON.stringify(value), 1).map(i => String.fromCharCode(i + 128)).join('')).replace(/=/g, '')}`;
         const isCompressedSmaller = (compressedBase64.length < base64.length);
         if (isCompressedSmaller) return compressedBase64;
       }
