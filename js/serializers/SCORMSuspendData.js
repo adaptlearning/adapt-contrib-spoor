@@ -3,7 +3,7 @@ define([
   'libraries/lzma-min',
   'libraries/lzma_worker-min.js'
 ], function(_) {
-  const LZMAWorker = window.LZMAFactory('./libraries/lzma_worker-min.js')
+  const LZMAWorker = window.LZMAFactory('./libraries/lzma_worker-min.js');
   /**
    * 2020/05/06 SCORMSuspendData
    *
@@ -1116,7 +1116,7 @@ define([
      * @param {number|boolean|Array} value
      * @returns {string}
      */
-    async serializeAsync(value, typeName = null, logStats = null ) {
+    async serializeAsync(value, typeName = null, logStats = null) {
       const binary = this.valueToBinary(value, null, null);
       const base64 = binaryToBase64(binary);
       const isLargeArray = (Array.isArray(value) && value.length > 10);
