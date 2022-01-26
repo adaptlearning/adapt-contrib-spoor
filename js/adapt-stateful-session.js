@@ -114,7 +114,8 @@ export default class StatefulSession extends Backbone.Controller {
 
   setupEventListeners() {
     const debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
-    this.listenTo(Adapt.data, 'change:_isComplete', debouncedSaveSession);
+    this.listenTo(Adapt.components, 'change:_isComplete', debouncedSaveSession);
+    this.listenTo(Adapt.course, 'change:_isComplete', debouncedSaveSession);
     if (this._shouldStoreResponses) {
       this.listenTo(Adapt.data, 'change:_isSubmitted change:_userAnswer', debouncedSaveSession);
     }
