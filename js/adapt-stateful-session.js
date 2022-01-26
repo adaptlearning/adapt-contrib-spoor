@@ -11,6 +11,7 @@ export default class StatefulSession extends Backbone.Controller {
     this.scorm = ScormWrapper.getInstance();
     this._trackingIdType = 'block';
     this._componentSerializer = null;
+    this._shouldCompress = false;
     this._shouldStoreResponses = true;
     this._shouldStoreAttempts = false;
     this._shouldRecordInteractions = true;
@@ -20,7 +21,6 @@ export default class StatefulSession extends Backbone.Controller {
   beginSession() {
     this.listenTo(Adapt, 'app:dataReady', this.restoreSession);
     this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
-    this._componentSerializer = new ComponentSerializer(this._trackingIdType);
     // suppress SCORM errors if 'nolmserrors' is found in the querystring
     if (window.location.search.indexOf('nolmserrors') !== -1) {
       this.scorm.suppressErrors = true;
@@ -30,6 +30,8 @@ export default class StatefulSession extends Backbone.Controller {
     const tracking = config._tracking;
     this._shouldStoreResponses = (tracking && tracking._shouldStoreResponses) || false;
     this._shouldStoreAttempts = (tracking && tracking._shouldStoreAttempts) || false;
+    this._shouldCompress = (tracking && tracking._shouldCompress) || false;
+    this._componentSerializer = new ComponentSerializer(this._trackingIdType, this._shouldCompress);
     // Default should be to record interactions, so only avoid doing that if
     // _shouldRecordInteractions is set to false
     if (tracking?._shouldRecordInteractions === false) {
@@ -107,7 +109,7 @@ export default class StatefulSession extends Backbone.Controller {
       });
     }
     if (!sessionPairs.q) return;
-    this._componentSerializer.deserialize(sessionPairs.q);
+    this._componentSerializer?.deserialize(sessionPairs.q);
   }
 
   setupEventListeners() {
@@ -136,7 +138,7 @@ export default class StatefulSession extends Backbone.Controller {
       Boolean(Adapt.course.get('_isComplete')),
       Boolean(Adapt.course.get('_isAssessmentPassed'))
     ]);
-    const componentStates = this._componentSerializer.serialize(this._shouldStoreResponses, this._shouldStoreAttempts);
+    const componentStates = this._componentSerializer?.serialize(this._shouldStoreResponses, this._shouldStoreAttempts);
     const sessionPairs = {
       c: courseState,
       q: componentStates

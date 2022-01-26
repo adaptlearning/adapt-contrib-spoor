@@ -65,6 +65,15 @@
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, the course will record the user's responses to questions to the cmi.interactions SCORM data fields."
+                    },
+                    "_shouldCompress": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Should compress data",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, the data stored at the lms will be further compressed."
                     }
                   }
                 },

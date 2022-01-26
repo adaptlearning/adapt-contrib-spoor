@@ -4,8 +4,9 @@ import SCORMSuspendData from './SCORMSuspendData';
 
 export default class ComponentSerializer extends Backbone.Controller {
 
-  initialize(trackingIdType) {
+  initialize(trackingIdType, shouldCompress) {
     this.trackingIdType = trackingIdType;
+    SCORMSuspendData.setShouldCompress(shouldCompress);
   }
 
   serialize(shouldStoreResponses, shouldStoreAttempts) {
