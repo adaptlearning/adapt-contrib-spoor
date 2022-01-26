@@ -1107,7 +1107,7 @@ define([
       const binary = this.valueToBinary(value, typeName, logStats);
       const base64 = binaryToBase64(binary);
       if (this._shouldCompress) {
-        const compressedBase64 = binaryToBase64(this.valueToBinary(window.LZMA.compress(JSON.stringify(value)).map(i => i + 128)));
+        const compressedBase64 = `#${window.btoa(window.LZMA.compress(JSON.stringify(value)).map(i => String.fromCharCode(i + 128)).join(''))}`;
         const isCompressedSmaller = (compressedBase64.length < base64.length);
         if (isCompressedSmaller) return compressedBase64;
       }
@@ -1121,10 +1121,10 @@ define([
      * @returns {number|boolean|Array}
      */
     deserialize(base64, typeName = null) {
+      const isLZMACompressed = (base64[0] === '#');
+      if (isLZMACompressed) return JSON.parse(window.LZMA.decompress(window.atob(base64.slice(1)).split('').map(c => c.charCodeAt(0) - 128)));
       const binary = base64ToBinary(base64);
       const value = this.valueFromBinary(binary, typeName);
-      const isLZMACompressed = (Array.isArray(value) && typeof value[0] === 'number');
-      if (isLZMACompressed) return JSON.parse(window.LZMA.decompress(value.map(i => i - 128)));
       return value;
     }
 
