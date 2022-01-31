@@ -1,6 +1,9 @@
 define([
-  'underscore'
+  'underscore',
+  'libraries/lzma-min',
+  'libraries/lzma_worker-min.js'
 ], function(_) {
+  const LZMAWorker = window.LZMAFactory('./libraries/lzma_worker-min.js');
   /**
    * 2020/05/06 SCORMSuspendData
    *
@@ -1109,12 +1112,36 @@ define([
     }
 
     /**
+     * Convert an array, boolean or number into a base64 string, asynchronously
+     * @param {number|boolean|Array} value
+     * @returns {string}
+     */
+    async serializeAsync(value, typeName = null, logStats = null) {
+      const binary = this.valueToBinary(value, null, null);
+      const base64 = binaryToBase64(binary);
+      const isLargeArray = (Array.isArray(value) && value.length > 10);
+      if (isLargeArray) {
+        return new Promise(resolve => {
+          LZMAWorker.compress(JSON.stringify(value), 1, data => {
+            const compressedBase64 = `#${window.btoa(data.map(i => String.fromCharCode(i + 128)).join('')).replace(/=/g, '')}`;
+            const isCompressedSmaller = (compressedBase64.length < base64.length);
+            if (isCompressedSmaller) return resolve(compressedBase64);
+            return resolve(base64);
+          });
+        });
+      }
+      return base64;
+    }
+
+    /**
      * Convert the base64 string back into an array, boolean or number
      * @param {string} base64 A string representation of data from serialize
      * @param {string} [typeName] To force an internal data type for testing
      * @returns {number|boolean|Array}
      */
     deserialize(base64, typeName = null) {
+      const isLZMACompressed = (base64[0] === '#');
+      if (isLZMACompressed) return JSON.parse(window.LZMA.decompress(window.atob(base64.slice(1)).split('').map(c => c.charCodeAt(0) - 128)));
       const binary = base64ToBinary(base64);
       const value = this.valueFromBinary(binary, typeName);
       return value;

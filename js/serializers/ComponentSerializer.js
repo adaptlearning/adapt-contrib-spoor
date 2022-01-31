@@ -4,11 +4,12 @@ import SCORMSuspendData from './SCORMSuspendData';
 
 export default class ComponentSerializer extends Backbone.Controller {
 
-  initialize(trackingIdType) {
+  initialize(trackingIdType, shouldCompress) {
     this.trackingIdType = trackingIdType;
+    this.shouldCompress = shouldCompress;
   }
 
-  serialize(shouldStoreResponses, shouldStoreAttempts) {
+  async serialize(shouldStoreResponses, shouldStoreAttempts) {
     if (shouldStoreAttempts && !shouldStoreResponses) {
       log.warnOnce('SPOOR configuration error, cannot use \'_shouldStoreAttempts\' without \'_shouldStoreResponses\'');
     }
@@ -95,7 +96,8 @@ export default class ComponentSerializer extends Backbone.Controller {
         states.push(state);
       });
     });
-    return SCORMSuspendData.serialize(states);
+    if (this.shouldCompress) return await SCORMSuspendData.serializeAsync(states);
+    return SCORMSuspendData.serialize(states)
   }
 
   deserialize(binary) {

@@ -5,7 +5,8 @@
             "_shouldSubmitScore": false,
             "_shouldStoreResponses": true,
             "_shouldStoreAttempts": false,
-            "_shouldRecordInteractions": true
+            "_shouldRecordInteractions": true,
+            "_shouldCompress": false
         },
         "_reporting": {
             "_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
