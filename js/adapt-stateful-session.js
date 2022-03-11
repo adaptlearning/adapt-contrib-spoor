@@ -233,6 +233,7 @@ export default class StatefulSession extends Backbone.Controller {
         break;
       }
       case COMPLETION_STATE.FAILED: {
+        if (completionData.assessment?.canRetry === true) return;
         if (!config?._reporting?._onAssessmentFailure) {
           Adapt.log.warn(`No value defined for '_onAssessmentFailure', so defaulting to '${completionStatus}'`);
         } else {
