@@ -205,14 +205,16 @@ export default class StatefulSession extends Backbone.Controller {
 
   onQuestionRecordInteraction(questionView) {
     if (!this._shouldRecordInteractions) return;
-    const responseType = questionView.getResponseType();
+    // View functions are deprecated: getResponseType, getResponse, isCorrect, getLatency
+    const questionModel = questionView.model;
+    const responseType = (questionModel.getResponseType ? questionModel.getResponseType() : questionView.getResponseType());
     // If responseType doesn't contain any data, assume that the question
     // component hasn't been set up for cmi.interaction tracking
     if (_.isEmpty(responseType)) return;
-    const id = questionView.model.get('_id');
-    const response = questionView.getResponse();
-    const result = questionView.isCorrect();
-    const latency = questionView.getLatency();
+    const id = questionModel.get('_id');
+    const response = (questionModel.getResponse ? questionModel.getResponse() : questionView.getResponse());
+    const result = (questionModel.isCorrect ? questionModel.isCorrect() : questionView.isCorrect());
+    const latency = (questionModel.getLatency ? questionModel.getLatency() : questionView.getLatency());
     Adapt.offlineStorage.set('interaction', id, response, result, latency, responseType);
   }
 
