@@ -2,6 +2,7 @@ import Adapt from 'core/js/adapt';
 import ScormWrapper from './scorm/wrapper';
 import StatefulSession from './adapt-stateful-session';
 import OfflineStorage from './adapt-offlineStorage-scorm';
+import offlineStorage from 'core/js/offlineStorage';
 
 class Spoor extends Backbone.Controller {
 
@@ -14,7 +15,7 @@ class Spoor extends Backbone.Controller {
   _prepare() {
     this.config = Adapt.config.get('_spoor');
     if (!this.isEnabled) {
-      Adapt.offlineStorage.setReadyStatus();
+      offlineStorage.setReadyStatus();
       return;
     }
     this.statefulSession = new StatefulSession();
@@ -22,8 +23,8 @@ class Spoor extends Backbone.Controller {
     // force offlineStorage-scorm to initialise suspendDataStore - this allows
     // us to do things like store the user's chosen language before the rest
     // of the course data loads
-    Adapt.offlineStorage.get();
-    Adapt.offlineStorage.setReadyStatus();
+    offlineStorage.get();
+    offlineStorage.setReadyStatus();
     // setup debug window keyboard shortcut
     require(['libraries/jquery.keycombo'], () => {
       // listen for user holding 'd', 'e', 'v' keys together

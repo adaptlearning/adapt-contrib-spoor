@@ -1,8 +1,11 @@
 import Adapt from 'core/js/adapt';
+import data from 'core/js/data';
+import logging from 'core/js/logging';
 import ScormWrapper from './scorm/wrapper';
 import COMPLETION_STATE from 'core/js/enums/completionStateEnum';
 import ComponentSerializer from './serializers/ComponentSerializer';
 import SCORMSuspendData from './serializers/SCORMSuspendData';
+import offlineStorage from 'core/js/offlineStorage';
 
 export default class StatefulSession extends Backbone.Controller {
 
@@ -94,11 +97,11 @@ export default class StatefulSession extends Backbone.Controller {
     if (!globals._learnerInfo) {
       globals._learnerInfo = {};
     }
-    Object.assign(globals._learnerInfo, Adapt.offlineStorage.get('learnerinfo'));
+    Object.assign(globals._learnerInfo, offlineStorage.get('learnerinfo'));
   }
 
   restoreSessionState() {
-    const sessionPairs = Adapt.offlineStorage.get();
+    const sessionPairs = offlineStorage.get();
     const hasNoPairs = !Object.keys(sessionPairs).length;
     if (hasNoPairs) return;
     if (sessionPairs.c) {
@@ -117,7 +120,7 @@ export default class StatefulSession extends Backbone.Controller {
     this.listenTo(Adapt.components, 'change:_isComplete', this.debouncedSaveSession);
     this.listenTo(Adapt.course, 'change:_isComplete', this.debouncedSaveSession);
     if (this._shouldStoreResponses) {
-      this.listenTo(Adapt.data, 'change:_isSubmitted change:_userAnswer', this.debouncedSaveSession);
+      this.listenTo(data, 'change:_isSubmitted change:_userAnswer', this.debouncedSaveSession);
     }
     this.listenTo(Adapt, {
       'app:languageChanged': this.onLanguageChanged,
@@ -147,7 +150,7 @@ export default class StatefulSession extends Backbone.Controller {
       c: courseState,
       q: componentStates
     };
-    Adapt.offlineStorage.set(sessionPairs);
+    offlineStorage.set(sessionPairs);
     this.printCompletionInformation(sessionPairs);
   }
 
@@ -159,16 +162,16 @@ export default class StatefulSession extends Backbone.Controller {
     const courseState = SCORMSuspendData.deserialize(suspendData.c);
     const courseComplete = courseState[0];
     const assessmentPassed = courseState[1];
-    const trackingIdModels = Adapt.data.filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'));
+    const trackingIdModels = data.filter(model => model.get('_type') === this._trackingIdType && model.has('_trackingId'));
     const trackingIds = trackingIdModels.map(model => model.get('_trackingId'));
     if (!trackingIds.length) {
-      Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: no tracking ids found`);
+      logging.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: no tracking ids found`);
       return;
     }
-    const data = SCORMSuspendData.deserialize(suspendData.q);
-    const max = Math.max(...data.map(item => item[0][0]));
-    const shouldStoreResponses = (data[0].length === 3);
-    const completionString = data.reduce((markers, item) => {
+    const completionData = SCORMSuspendData.deserialize(suspendData.q);
+    const max = Math.max(...completionData.map(item => item[0][0]));
+    const shouldStoreResponses = (completionData[0].length === 3);
+    const completionString = completionData.reduce((markers, item) => {
       const trackingId = item[0][0];
       const isComplete = shouldStoreResponses ?
         item[2][1][0] :
@@ -179,7 +182,7 @@ export default class StatefulSession extends Backbone.Controller {
         '0';
       return markers;
     }, (new Array(max + 1).join('-').split(''))).join('');
-    Adapt.log.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completionString}`);
+    logging.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completionString}`);
   }
 
   onLanguageChanged() {
@@ -196,7 +199,7 @@ export default class StatefulSession extends Backbone.Controller {
     this.setupEventListeners();
     this.saveSessionState();
     if (config?._reporting?._resetStatusOnLanguageChange !== true) return;
-    Adapt.offlineStorage.set('status', 'incomplete');
+    offlineStorage.set('status', 'incomplete');
   }
 
   onVisibilityChange() {
@@ -215,7 +218,7 @@ export default class StatefulSession extends Backbone.Controller {
     const response = (questionModel.getResponse ? questionModel.getResponse() : questionView.getResponse());
     const result = (questionModel.isCorrect ? questionModel.isCorrect() : questionView.isCorrect());
     const latency = (questionModel.getLatency ? questionModel.getLatency() : questionView.getLatency());
-    Adapt.offlineStorage.set('interaction', id, response, result, latency, responseType);
+    offlineStorage.set('interaction', id, response, result, latency, responseType);
   }
 
   onTrackingComplete(completionData) {
@@ -227,7 +230,7 @@ export default class StatefulSession extends Backbone.Controller {
       case COMPLETION_STATE.COMPLETED:
       case COMPLETION_STATE.PASSED: {
         if (!config?._reporting?._onTrackingCriteriaMet) {
-          Adapt.log.warn(`No value defined for '_onTrackingCriteriaMet', so defaulting to '${completionStatus}'`);
+          logging.warn(`No value defined for '_onTrackingCriteriaMet', so defaulting to '${completionStatus}'`);
         } else {
           completionStatus = config._reporting._onTrackingCriteriaMet;
         }
@@ -236,13 +239,13 @@ export default class StatefulSession extends Backbone.Controller {
       }
       case COMPLETION_STATE.FAILED: {
         if (!config?._reporting?._onAssessmentFailure) {
-          Adapt.log.warn(`No value defined for '_onAssessmentFailure', so defaulting to '${completionStatus}'`);
+          logging.warn(`No value defined for '_onAssessmentFailure', so defaulting to '${completionStatus}'`);
         } else {
           completionStatus = config._reporting._onAssessmentFailure;
         }
       }
     }
-    Adapt.offlineStorage.set('status', completionStatus);
+    offlineStorage.set('status', completionStatus);
   }
 
   endSession() {
