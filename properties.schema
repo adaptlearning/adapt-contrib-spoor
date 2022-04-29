@@ -30,15 +30,6 @@
                   "required": false,
                   "title": "Tracking",
                   "properties": {
-                    "_shouldSubmitScore": {
-                      "type": "boolean",
-                      "required": false,
-                      "default": false,
-                      "title": "Submit score",
-                      "inputType": "Checkbox",
-                      "validators": [],
-                      "help": "If enabled, the score attained in any assessment will be reported back to the LMS (regardless of whether the user passes or fails the assessment)."
-                    },
                     "_shouldStoreResponses": {
                       "type": "boolean",
                       "required": false,
