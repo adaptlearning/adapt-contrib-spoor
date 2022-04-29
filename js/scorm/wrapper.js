@@ -1,4 +1,5 @@
 import Adapt from 'core/js/adapt';
+import notify from 'core/js/notify';
 import pipwerks from 'libraries/SCORM_API_wrapper';
 import Logger from './logger';
 import ScormError from './error';
@@ -510,7 +511,7 @@ class ScormWrapper {
 
     switch (error.name) {
       case CLIENT_COULD_NOT_CONNECT:
-        Adapt.notify.popup({
+        notify.popup({
           _isCancellable: false,
           title: messages.title,
           body: message

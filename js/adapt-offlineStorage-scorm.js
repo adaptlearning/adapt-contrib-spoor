@@ -1,21 +1,21 @@
 import Adapt from 'core/js/adapt';
 import ScormWrapper from './scorm/wrapper';
 import SCORMSuspendData from './serializers/SCORMSuspendData';
-import OfflineStorage from 'core/js/offlineStorage';
+import offlineStorage from 'core/js/offlineStorage';
 
 /**
- * SCORM handler for Adapt.offlineStorage interface.
+ * SCORM handler for offlineStorage interface.
  */
 export default class OfflineStorageScorm extends Backbone.Controller {
 
   initialize(statefulSession) {
-    this.offlineStorage = OfflineStorage;
+    this.offlineStorage = offlineStorage;
     this.scorm = ScormWrapper.getInstance();
     this.statefulSession = statefulSession;
     this.temporaryStore = {};
     this.suspendDataStore = {};
     this.suspendDataRestored = false;
-    Adapt.offlineStorage.initialize(this);
+    offlineStorage.initialize(this);
   }
 
   save() {
