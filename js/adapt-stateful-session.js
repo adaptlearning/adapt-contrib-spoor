@@ -11,6 +11,7 @@ export default class StatefulSession extends Backbone.Controller {
 
   initialize() {
     _.bindAll(this, 'beginSession', 'onVisibilityChange', 'endSession');
+    this.debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
     this.scorm = ScormWrapper.getInstance();
     this._trackingIdType = 'block';
     this._componentSerializer = null;
@@ -116,13 +117,14 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   setupEventListeners() {
-    this.debouncedSaveSession = _.debounce(this.saveSessionState.bind(this), 1);
+    this.removeEventListeners();
     this.listenTo(Adapt.components, 'change:_isComplete', this.debouncedSaveSession);
     this.listenTo(Adapt.course, 'change:_isComplete', this.debouncedSaveSession);
     if (this._shouldStoreResponses) {
       this.listenTo(data, 'change:_isSubmitted change:_userAnswer', this.debouncedSaveSession);
     }
     this.listenTo(Adapt, {
+      'app:dataReady': this.restoreSession,
       'app:languageChanged': this.onLanguageChanged,
       'questionView:recordInteraction': this.onQuestionRecordInteraction,
       'tracking:complete': this.onTrackingComplete
@@ -186,18 +188,7 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   onLanguageChanged() {
-    // when the user switches language, we need to:
-    // - reattach the event listeners as the language change triggers a reload of
-    //   the json, which will create brand new collections
-    // - get and save a fresh copy of the session state. as the json has been reloaded,
-    //   the blocks completion data will be reset (the user is warned that this will
-    //   happen by the language picker extension)
-    // - check to see if the config requires that the lesson_status be reset to
-    //   'incomplete'
     const config = Adapt.spoor.config;
-    this.removeEventListeners();
-    this.setupEventListeners();
-    this.saveSessionState();
     if (config?._reporting?._resetStatusOnLanguageChange !== true) return;
     offlineStorage.set('status', 'incomplete');
   }

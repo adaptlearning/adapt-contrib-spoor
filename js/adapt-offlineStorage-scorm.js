@@ -162,6 +162,13 @@ export default class OfflineStorageScorm extends Backbone.Controller {
     return (this.suspendDataRestored) ? this.scorm.setSuspendData(dataAsString) : false;
   }
 
+  clear() {
+    this.temporaryStore = {};
+    this.suspendDataStore = {};
+    const dataAsString = JSON.stringify(this.suspendDataStore);
+    this.scorm.setSuspendData(dataAsString);
+  }
+
   getCustomStates() {
     const isSuspendDataStoreEmpty = _.isEmpty(this.suspendDataStore);
     if (!isSuspendDataStoreEmpty && this.suspendDataRestored) {
