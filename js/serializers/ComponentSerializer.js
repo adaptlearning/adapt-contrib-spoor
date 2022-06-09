@@ -23,9 +23,10 @@ export default class ComponentSerializer extends Backbone.Controller {
         return;
       }
       const isContainer = model.hasManagedChildren;
-      const components = isContainer ?
+      let components = isContainer ?
         model.findDescendantModels('component') :
         [model];
+      components = components.filter(component => component.get('_isTrackable') === false);
       components.forEach((component, index) => {
         if (component.get('_isTrackable') === false) {
           return;
@@ -121,9 +122,10 @@ export default class ComponentSerializer extends Backbone.Controller {
         return;
       }
       const isContainer = model.hasManagedChildren;
-      const components = isContainer ?
+      let components = isContainer ?
         model.findDescendantModels('component') :
         [model];
+      components = components.filter(component => component.get('_isTrackable') === false);
       const component = components[index];
       if (!component) {
         logging.warn(`SPOOR could not restore tracking id: ${trackingId}, index: ${index}`);
