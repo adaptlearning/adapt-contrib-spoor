@@ -14,8 +14,9 @@ Currently has a dependence on the pipwerks.UTILS object for reporting status and
 ======================================================================================================== */
 
 define([
-    'libraries/SCORM_API_wrapper'
-], function(pipwerks) {
+    'libraries/SCORM_API_wrapper',
+	'libraries/aiccLMS', // AICC addition
+], function(pipwerks,aiccLMS) {
 
     var elfh = {}; //elfh 'namespace' helps ensure no conflicts with possible other "SCORM" variables
 
