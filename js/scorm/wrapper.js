@@ -1,11 +1,10 @@
 define([
     'core/js/adapt',
-    'libraries/SCORM_API_wrapper',
-    'libraries/aiccLMS', // AICC addition
+    'libraries/SCORM_API_wrapper',    
     'libraries/aiccAPI', // e-lfh aicc
     './logger',
     './error'
-], function(Adapt, pipwerks, aiccLMS, aiccAPI, Logger, ScormError) {
+], function(Adapt, pipwerks, aiccAPI, Logger, ScormError) {
 
     const {
         CLIENT_COULD_NOT_CONNECT,
@@ -20,7 +19,7 @@ define([
     } = ScormError;
 
     /**
-     * IMPORTANT: This wrapper uses the Pipwerks SCORM wrapper and should therefore support both SCORM 1.2 and 2004. Ensure any changes support both versions.
+     * IMPORTANT!: This wrapper uses the Pipwerks SCORM wrapper and should therefore support both SCORM 1.2 and 2004. Ensure any changes support both versions.
      */
     class ScormWrapper {
 
