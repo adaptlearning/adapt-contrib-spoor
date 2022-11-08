@@ -74,7 +74,11 @@ var GenericAPI = {
 window.API = {
 
   LMSInitialize: function() {
-    if (window.ISCOOKIELMS !== false) this.createResetButton();
+    const Adapt = require('core/js/adapt');
+    
+    if (window.ISCOOKIELMS !== false && Adapt?.config?.get('_spoor')?._showCookieLmsResetButton) {
+      this.createResetButton();
+    }
     if (!this.fetch()) {
       this.data['cmi.core.lesson_status'] = 'not attempted';
       this.data['cmi.suspend_data'] = '';
@@ -124,7 +128,11 @@ window.API = {
 window.API_1484_11 = {
 
   Initialize: function() {
-    if (window.ISCOOKIELMS !== false) this.createResetButton();
+    const Adapt = require('core/js/adapt');
+
+    if (window.ISCOOKIELMS !== false && Adapt?.config?.get('_spoor')?._showCookieLmsResetButton) {
+      this.createResetButton();
+    }
     if (!this.fetch()) {
       this.data['cmi.completion_status'] = 'not attempted';
       this.data['cmi.suspend_data'] = '';
