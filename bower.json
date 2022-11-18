@@ -25,7 +25,8 @@
     "semantic-release": "^19.0.3"
   },
   "scripts": {
-    "postversion": "cp package.json bower.json"
+    "postversion": "cp package.json bower.json",
+    "adaptpostcopy": "/scripts/postcopy.js"
   },
   "release": {
     "plugins": [
