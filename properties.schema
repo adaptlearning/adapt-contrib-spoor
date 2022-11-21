@@ -115,6 +115,19 @@
                   "required": false,
                   "title": "Advanced Settings",
                   "properties": {
+                    "_scormVersion": {
+                      "type": "string",
+                      "required": false,
+                      "default": "1.2",
+                      "title": "SCORM version",
+                      "enum": ["1.2", "2004"],
+                      "inputType": {
+                        "type": "Select",
+                        "options": ["1.2", "2004"]
+                      },
+                      "validators": [],
+                      "help": "What SCORM standard to use - SCORM 1.2 or SCORM 2004 4th Edition."
+                    },
                     "_showDebugWindow": {
                       "type": "boolean",
                       "required": false,
