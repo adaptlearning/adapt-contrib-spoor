@@ -2,7 +2,7 @@
 
 **Spoor** is an *extension* bundled with the [Adapt framework](https://github.com/adaptlearning/adapt_framework).
 
-This extension provides course tracking functionality (hence the name [spoor](https://en.wikipedia.org/wiki/Spoor_(animal))). Currently it only officially supports tracking to [SCORM](https://en.wikipedia.org/wiki/Sharable_Content_Object_Reference_Model) 1.2 [Learning Management Systems (LMS)](https://en.wikipedia.org/wiki/Learning_management_system), however, experienced users should be able to implement SCORM 2004 should this be needed as the underlying code is almost entirely version-agnostic (it's the packaging part you'll need to do yourself).
+This extension provides course tracking functionality (hence the name [spoor](https://en.wikipedia.org/wiki/Spoor_(animal))) via [SCORM](https://en.wikipedia.org/wiki/Sharable_Content_Object_Reference_Model) standards for compliant [Learning Management Systems (LMS)](https://en.wikipedia.org/wiki/Learning_management_system). As default, only SCORM 1.2 or SCORM 2004 4th Edition files are included. See [_scormVersion](https://github.com/adaptlearning/adapt-contrib-spoor#_scormVersion) for details on how to configure this accordingly.
 
 **Spoor** makes use of the excellent [pipwerks SCORM API Wrapper](https://github.com/pipwerks/scorm-api-wrapper/).
 
