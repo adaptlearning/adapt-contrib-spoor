@@ -26,7 +26,8 @@
             "_commitRetryDelay": 2000,
             "_commitOnVisibilityChangeHidden": true,
             "_exitStateIfIncomplete": "auto",
-            "_exitStateIfComplete": "auto"
+            "_exitStateIfComplete": "auto",
+            "_setCompletedWhenFailed": true
         }
     }
 
