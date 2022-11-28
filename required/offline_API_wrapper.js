@@ -43,12 +43,14 @@ var GenericAPI = {
 
   createResetButton: function() {
     $('body').append($('<style id="spoor-clear-button">.spoor-reset-button { position:fixed; right:0px; bottom:0px; } </style>'));
-    var $button = $('<button class="spoor-reset-button">Reset</button>');
+    var $button = $('<button class="spoor-reset-button btn-text">Reset</button>');
     $('body').append($button);
-    $button.on('click', function() {
-      this.reset();
-      alert('SCORM tracking cookie has been deleted!');
-      window.location.reload();
+    $button.on('click', function(e) {
+      if (!e.shiftKey) {
+        this.reset();
+        alert('SCORM tracking cookie has been deleted! Tip: shift-click reset to preserve cookie.');
+      }
+      window.location = window.location.pathname;
     }.bind(this));
   },
 
@@ -72,7 +74,11 @@ var GenericAPI = {
 window.API = {
 
   LMSInitialize: function() {
-    // if (window.ISCOOKIELMS !== false) this.createResetButton();
+    const Adapt = require('core/js/adapt');
+    
+    if (window.ISCOOKIELMS !== false && Adapt?.config?.get('_spoor')?._showCookieLmsResetButton) {
+      this.createResetButton();
+    }
     if (!this.fetch()) {
       this.data['cmi.core.lesson_status'] = 'not attempted';
       this.data['cmi.suspend_data'] = '';
@@ -122,7 +128,11 @@ window.API = {
 window.API_1484_11 = {
 
   Initialize: function() {
-    // if (window.ISCOOKIELMS !== false) this.createResetButton();
+    const Adapt = require('core/js/adapt');
+
+    if (window.ISCOOKIELMS !== false && Adapt?.config?.get('_spoor')?._showCookieLmsResetButton) {
+      this.createResetButton();
+    }
     if (!this.fetch()) {
       this.data['cmi.completion_status'] = 'not attempted';
       this.data['cmi.suspend_data'] = '';
