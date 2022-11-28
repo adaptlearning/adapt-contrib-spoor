@@ -205,7 +205,7 @@ export default class StatefulSession extends Backbone.Controller {
     // If responseType doesn't contain any data, assume that the question
     // component hasn't been set up for cmi.interaction tracking
     if (_.isEmpty(responseType)) return;
-    const id = questionModel.get('_id');
+    const id = `${this.scorm.getInteractionCount()}-${questionModel.get('_id')}`;
     const response = (questionModel.getResponse ? questionModel.getResponse() : questionView.getResponse());
     const result = (questionModel.isCorrect ? questionModel.isCorrect() : questionView.isCorrect());
     const latency = (questionModel.getLatency ? questionModel.getLatency() : questionView.getLatency());
