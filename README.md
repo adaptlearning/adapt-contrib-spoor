@@ -131,6 +131,9 @@ Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2
 ##### \_setCompletedWhenFailed (boolean):
 Determines whether the `cmi.completion_status` is set to "completed" if the assessment is "failed". Only valid for SCORM 2004, where the logic for completion and success is separate. The default is `true`.
 
+#### \_showCookieLmsResetButton (boolean):
+Determines whether a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only). The default is `false`.
+
 <div float align=right><a href="#top">Back to Top</a></div>
 
 ## Notes
