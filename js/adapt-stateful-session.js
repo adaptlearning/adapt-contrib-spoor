@@ -79,6 +79,9 @@ export default class StatefulSession extends Backbone.Controller {
     if ('_exitStateIfComplete' in settings) {
       this.scorm.exitStateIfComplete = settings._exitStateIfComplete;
     }
+    if (_.isBoolean(settings._setCompletedWhenFailed)) {
+      this.scorm.setCompletedWhenFailed = settings._setCompletedWhenFailed;
+    }
     this.scorm.initialize();
   }
 
