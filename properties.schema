@@ -244,7 +244,7 @@
                       "title": "Completed when failed",
                       "inputType": "Checkbox",
                       "validators": [],
-                      "help": "If enabled, `cmi.completion_status` will be set to "completed" if the assessment is "failed". Only valid for SCORM 2004, where the logic for completion and success is separate."
+                      "help": "If enabled, `cmi.completion_status` will be set to \"completed\" if the assessment is \"failed\". Only valid for SCORM 2004, where the logic for completion and success is separate."
                     }
                   }
                 },
