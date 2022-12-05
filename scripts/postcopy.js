@@ -13,7 +13,6 @@ module.exports = async function(fs, path, log, options, done) {
     log(error);
   });
   if (!files) return done();
-  //log(`Adding SCORM ${scormVersion} files`);
   const promises = files.map(file => {
     return fs.promises.copyFile(`${scormPath}/${file}`, `${buildPath}/${file}`).catch(error => {
       log(error);
