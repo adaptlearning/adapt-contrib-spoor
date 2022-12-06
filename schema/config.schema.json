@@ -169,6 +169,12 @@
                   "_backboneForms": "Select"
                 }
               }
+            },
+            "_showCookieLmsResetButton": {
+              "type": "boolean",
+              "title": "Show reset button (scorm_test_harness.html only)",
+              "description": "If enabled, a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only).",
+              "default": false
             }
           }
         }

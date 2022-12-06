@@ -79,6 +79,9 @@ export default class StatefulSession extends Backbone.Controller {
     if ('_exitStateIfComplete' in settings) {
       this.scorm.exitStateIfComplete = settings._exitStateIfComplete;
     }
+    if (_.isBoolean(settings._setCompletedWhenFailed)) {
+      this.scorm.setCompletedWhenFailed = settings._setCompletedWhenFailed;
+    }
     this.scorm.initialize();
   }
 
@@ -205,7 +208,7 @@ export default class StatefulSession extends Backbone.Controller {
     // If responseType doesn't contain any data, assume that the question
     // component hasn't been set up for cmi.interaction tracking
     if (_.isEmpty(responseType)) return;
-    const id = questionModel.get('_id');
+    const id = `${this.scorm.getInteractionCount()}-${questionModel.get('_id')}`;
     const response = (questionModel.getResponse ? questionModel.getResponse() : questionView.getResponse());
     const result = (questionModel.isCorrect ? questionModel.isCorrect() : questionView.isCorrect());
     const latency = (questionModel.getLatency ? questionModel.getLatency() : questionView.getLatency());
