@@ -1,4 +1,3 @@
-
 module.exports = async function(fs, path, log, options, done) {
   try {
     const buildPath = options.outputdir;
