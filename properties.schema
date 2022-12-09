@@ -253,7 +253,7 @@
                     "_setCompletedWhenFailed": {
                       "type": "boolean",
                       "required": false,
-                      "default": false,
+                      "default": true,
                       "title": "Completed when failed",
                       "inputType": "Checkbox",
                       "validators": [],
