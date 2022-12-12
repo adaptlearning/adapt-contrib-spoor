@@ -7,7 +7,7 @@ This extension provides course tracking functionality (hence the name [spoor](ht
 **Spoor** makes use of the excellent [pipwerks SCORM API Wrapper](https://github.com/pipwerks/scorm-api-wrapper/).
 
 [Visit the **Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about its functionality and for explanations of key properties.
-
+ 
 ## Installation
 
 As one of Adapt's *[core extensions](https://github.com/adaptlearning/adapt_framework/wiki/Core-Plug-ins-in-the-Adapt-Learning-Framework#extensions),* **Spoor** is included with the [installation of the Adapt framework](https://github.com/adaptlearning/adapt_framework/wiki/Manual-installation-of-the-Adapt-framework#installation) and the [installation of the Adapt authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-Adapt-Origin).
