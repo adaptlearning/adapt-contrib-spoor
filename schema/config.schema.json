@@ -2,7 +2,7 @@
   "$anchor": "spoor-config",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "$merge": {
+  "$patch": {
     "source": {
       "$ref": "config"
     },
@@ -90,6 +90,17 @@
                 "_manifestIdentifier"
               ],
               "properties": {
+                "_scormVersion": {
+                  "type": "string",
+                  "title": "SCORM version",
+                  "description": "The SCORM standard to use - SCORM 1.2 or SCORM 2004 4th Edition",
+                  "default": "1.2",
+                  "enum": [
+                    "1.2",
+                    "2004"
+                  ],
+                  "_backboneForms": "Select"
+                },
                 "_showDebugWindow": {
                   "type": "boolean",
                   "title": "Enable SCORM debug window",
