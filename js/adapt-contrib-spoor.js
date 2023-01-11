@@ -3,11 +3,13 @@ import ScormWrapper from './scorm/wrapper';
 import StatefulSession from './adapt-stateful-session';
 import OfflineStorage from './adapt-offlineStorage-scorm';
 import offlineStorage from 'core/js/offlineStorage';
+import { shouldStartCookieLMS, startCookieLMS } from './scorm/cookieLMS';
 
 class Spoor extends Backbone.Controller {
 
   initialize() {
     this.config = null;
+    if (shouldStartCookieLMS) startCookieLMS();
     this.scorm = ScormWrapper.getInstance();
     this.listenToOnce(Adapt, 'offlineStorage:prepare', this._prepare);
   }

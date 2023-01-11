@@ -269,6 +269,15 @@
                   "inputType": "Checkbox",
                   "validators": [],
                   "help": "If enabled, a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only)."
+                },
+                "_shouldPersistCookieLMSData": {
+                  "type": "boolean",
+                  "required": false,
+                  "default": false,
+                  "title": "Persist cookie data (scorm_test_harness.html only)",
+                  "inputType": "Checkbox",
+                  "validators": [],
+                  "help": "If enabled, the course data will persist over browser sessions (scorm_test_harness.html only)."
                 }
               }
             }

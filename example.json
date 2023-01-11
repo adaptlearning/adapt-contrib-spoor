@@ -29,7 +29,8 @@
             "_exitStateIfComplete": "auto",
             "_setCompletedWhenFailed": true
         },
-        "_showCookieLmsResetButton": false
+        "_showCookieLmsResetButton": false,
+        "_shouldPersistCookieLMSData": false
     }
 
     // to be added to course/en/course.json (note: you only need to add the ones you want to change/translate)

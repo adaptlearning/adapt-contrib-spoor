@@ -192,6 +192,12 @@
               "title": "Show reset button (scorm_test_harness.html only)",
               "description": "If enabled, a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only).",
               "default": false
+            },
+            "_shouldPersistCookieLMSData": {
+              "type": "boolean",
+              "title": "Persist cookie data (scorm_test_harness.html only)",
+              "description": "If enabled, the course data will persist over browser sessions (scorm_test_harness.html only).",
+              "default": false
             }
           }
         }
