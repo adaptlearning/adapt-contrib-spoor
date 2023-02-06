@@ -273,7 +273,7 @@
                 "_shouldPersistCookieLMSData": {
                   "type": "boolean",
                   "required": false,
-                  "default": false,
+                  "default": true,
                   "title": "Persist cookie data (scorm_test_harness.html only)",
                   "inputType": "Checkbox",
                   "validators": [],
