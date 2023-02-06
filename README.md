@@ -135,7 +135,7 @@ Determines whether the `cmi.completion_status` is set to "completed" if the asse
 Determines whether a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only). The default is `false`.
 
 #### \_shouldPersistCookieLMSData (boolean):
-Determines whether to persist the cookie data over browser sessions (scorm_test_harness.html only). The default is `false`.
+Determines whether to persist the cookie data over browser sessions (scorm_test_harness.html only). The default is `true`.
 
 <div float align=right><a href="#top">Back to Top</a></div>
 

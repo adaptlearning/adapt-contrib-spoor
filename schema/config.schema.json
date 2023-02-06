@@ -197,7 +197,7 @@
               "type": "boolean",
               "title": "Persist cookie data (scorm_test_harness.html only)",
               "description": "If enabled, the course data will persist over browser sessions (scorm_test_harness.html only).",
-              "default": false
+              "default": true
             }
           }
         }

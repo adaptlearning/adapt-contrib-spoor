@@ -8,8 +8,10 @@ export const shouldStart = (Object.prototype.hasOwnProperty.call(window, 'ISCOOK
 export const isStoringData = (window.ISCOOKIELMS === true);
 
 export function createResetButton() {
-  $('body').append($('<style id="spoor-clear-button">.spoor-reset-button { position:fixed; right:0px; bottom:0px; } </style>'));
-  const $button = $('<button class="spoor-reset-button btn-text">Reset</button>');
+  const resetButtonStyle = '<style id="spoor-clear-button">.spoor-reset-button { position:fixed; right:0px; bottom:0px; } </style>';
+  const resetButton = '<button class="spoor-reset-button btn-text">Reset</button>';
+  $('body').append($(resetButtonStyle));
+  const $button = $(resetButton);
   $('body').append($button);
   $button.on('click', e => {
     if (!e.shiftKey) {

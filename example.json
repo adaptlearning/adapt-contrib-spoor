@@ -30,7 +30,7 @@
             "_setCompletedWhenFailed": true
         },
         "_showCookieLmsResetButton": false,
-        "_shouldPersistCookieLMSData": false
+        "_shouldPersistCookieLMSData": true
     }
 
     // to be added to course/en/course.json (note: you only need to add the ones you want to change/translate)
