@@ -214,19 +214,23 @@ class ScormWrapper {
 
   setScore(score, minScore = 0, maxScore = 100) {
     if (this.isSCORM2004()) {
+      // `raw`, `min`, `max` sum absolute values assigned to questions
       this.setValue('cmi.score.raw', score);
       this.setValue('cmi.score.min', minScore);
       this.setValue('cmi.score.max', maxScore);
-
-      const range = maxScore - minScore;
-      const scaledScore = ((score - minScore) / range).toFixed(7);
-      this.setValue('cmi.score.scaled', scaledScore);
-      return;
+      // range split into negative/positive ranges based on score, rather than minScore-maxScore
+      const range = (score < 0) ? Math.abs(minScore) : maxScore;
+      // `scaled` converted to -1-1 range to indicate negative/positive weighting now that negative values can be assigned to questions
+      const scaledScore = score / range;
+      this.setValue('cmi.score.scaled', scaledScore.toFixed(7));
+    } else {
+      // values will always be converted to 0-100 percentage
+      // negative scores are capped to 0 due to SCORM 1.2 limitations
+      const scaledScore = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
+      this.setValue('cmi.core.score.raw', scaledScore);
+      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', 0);
+      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', 100);
     }
-    // SCORM 1.2
-    this.setValue('cmi.core.score.raw', score);
-    if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', minScore);
-    if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', maxScore);
   }
 
   getLessonLocation() {
