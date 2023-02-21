@@ -212,24 +212,38 @@ class ScormWrapper {
     return this.getValue(this.isSCORM2004() ? 'cmi.score.raw' : 'cmi.core.score.raw');
   }
 
-  setScore(score, minScore = 0, maxScore = 100) {
+  setScore(score, minScore = 0, maxScore = 100, isPercentageBased = true) {
     if (this.isSCORM2004()) {
       // `raw`, `min`, `max` sum absolute values assigned to questions
       this.setValue('cmi.score.raw', score);
       this.setValue('cmi.score.min', minScore);
       this.setValue('cmi.score.max', maxScore);
-      // range split into negative/positive ranges based on score, rather than minScore-maxScore
+      // range split into negative/positive ranges (rather than minScore-maxScore) depending on score
       const range = (score < 0) ? Math.abs(minScore) : maxScore;
       // `scaled` converted to -1-1 range to indicate negative/positive weighting now that negative values can be assigned to questions
       const scaledScore = score / range;
       this.setValue('cmi.score.scaled', scaledScore.toFixed(7));
     } else {
-      // values will always be converted to 0-100 percentage
-      // negative scores are capped to 0 due to SCORM 1.2 limitations
-      const scaledScore = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
-      this.setValue('cmi.core.score.raw', scaledScore);
-      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', 0);
-      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', 100);
+      if (isPercentageBased) {
+        // convert values to 0-100 range
+        // negative scores are capped to 0 due to SCORM 1.2 limitations
+        score = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
+        minScore = 0;
+        maxScore = 100;
+      } else {
+        const validate = (attribute, value) => {
+          const isValid = value >= 0 && score <= 100;
+          if (!isValid) this.logger.warn(`${attribute} must be between 0-100.`);
+        }
+
+        validate('cmi.core.score.raw', score);
+        validate('cmi.core.score.min', minScore);
+        validate('cmi.core.score.max', maxScore);
+      }
+
+      this.setValue('cmi.core.score.raw', score);
+      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', minScore);
+      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', maxScore);
     }
   }
 
