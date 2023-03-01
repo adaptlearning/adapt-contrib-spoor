@@ -3,6 +3,7 @@ import notify from 'core/js/notify';
 import pipwerks from 'libraries/SCORM_API_wrapper';
 import Logger from './logger';
 import ScormError from './error';
+import Connection from './connection';
 
 const {
   CLIENT_COULD_NOT_CONNECT,
@@ -90,6 +91,13 @@ class ScormWrapper {
 
     if (!(window.API?.__offlineAPIWrapper && window?.API_1484_11?.__offlineAPIWrapper)) return;
     this.logger.error('Offline SCORM API is being used. No data will be reported to the LMS!');
+
+    this.connectionTest = {
+      _isEnabled: false,
+      _testOnSetValue: false
+    };
+
+    this._connection = null;
   }
 
   // ******************************* public methods *******************************
@@ -117,8 +125,11 @@ class ScormWrapper {
 
     if (!this.lmsConnected) {
       this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT));
+      this.handleInitializeError();
       return this.lmsConnected;
     }
+
+    if (this.connectionTest._isEnabled) this._connection = new Connection(this.connectionTest, ScormWrapper);
 
     this.startTime = new Date();
     this.initTimedCommit();
@@ -184,7 +195,7 @@ class ScormWrapper {
       case 'unknown': // the SCORM 2004 version of not attempted
         return status;
       default:
-        this.handleError(new ScormError(SERVER_STATUS_UNSUPPORTED, { status }));
+        this.handleDataError(new ScormError(SERVER_STATUS_UNSUPPORTED, { status }));
         return null;
     }
   }
@@ -204,7 +215,7 @@ class ScormWrapper {
         this.setFailed();
         break;
       default:
-        this.handleError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { status }));
+        this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { status }));
     }
   }
 
@@ -267,6 +278,7 @@ class ScormWrapper {
 
     if (!this.lmsConnected) {
       this.handleError(new ScormError(ScormError.CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
@@ -278,7 +290,9 @@ class ScormWrapper {
     if (this.scorm.save()) {
       this.commitRetries = 0;
       this.lastCommitSuccessTime = new Date();
-      Adapt.trigger('spoor:commit', this);
+      // if success, test the connection as the API usually returns true regardless of the ability to persist the data
+      if (this._connection) this._connection.test();
+      // Adapt.trigger('spoor:commit', this);
       return;
     }
 
@@ -289,7 +303,7 @@ class ScormWrapper {
     }
 
     const errorCode = this.scorm.debug.getCode();
-    this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
+    this.handleDataError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
       errorCode,
       errorInfo: this.scorm.debug.getInfo(errorCode),
       diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
@@ -300,11 +314,13 @@ class ScormWrapper {
     this.logger.debug('ScormWrapper::finish');
 
     if (!this.lmsConnected || this.finishCalled) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
     this.finishCalled = true;
+
+    if (this._connection) this._connection.reset();
 
     if (this.timedCommitIntervalID !== null) {
       window.clearInterval(this.timedCommitIntervalID);
@@ -334,7 +350,7 @@ class ScormWrapper {
 
     if (this.scorm.quit()) return;
     const errorCode = this.scorm.debug.getCode();
-    this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH, {
+    this.handleFinishError(new ScormError(CLIENT_COULD_NOT_FINISH, {
       errorCode,
       errorInfo: this.scorm.debug.getInfo(errorCode),
       diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
@@ -380,7 +396,7 @@ class ScormWrapper {
     }
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
@@ -396,7 +412,7 @@ class ScormWrapper {
         this.logger.warn('ScormWrapper::getValue: data model element not initialized');
         break;
       default:
-        this.handleError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
+        this.handleDataError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
           property,
           errorCode,
           errorInfo: this.scorm.debug.getInfo(errorCode),
@@ -416,17 +432,20 @@ class ScormWrapper {
     }
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
     const success = this.scorm.set(property, value);
     if (!success) {
+      // if success, test the connection as the API usually returns true regardless of the ability to persist the data
+      if (this._connection && this.connectionTest._testOnSetValue) this._connection.test();
+    } else {
       // Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
       // So we should only throw an error if there was a valid error code...
       const errorCode = this.scorm.debug.getCode();
       if (errorCode !== 0) {
-        this.handleError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
+        this.handleDataError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
           property,
           value,
           errorCode,
@@ -457,7 +476,7 @@ class ScormWrapper {
     }
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return false;
     }
 
@@ -491,12 +510,65 @@ class ScormWrapper {
     this.commit();
   }
 
-  handleError(error) {
+  handleInitializeError() {
+    // would rather do this without reference to Adapt.trackingErrors but spoor gets setup first
+    /*
+    const trackingErrors = Adapt.trackingErrors;
 
+    if (trackingErrors && !trackingErrors.isReady) {
+      trackingErrors.once('ready', this.handleInitializeError.bind(this));
+
+      return;
+    }
+    */
+    if (!Adapt.get('_isStarted')) {
+      // notifyView is closed if shown before and nothing left in Adapt.wait queue
+      Adapt.once('contentObjectView:ready', this.handleInitializeError.bind(this));
+      return;
+    }
+    /*
+    if (!Adapt.get('_isStarted')) {
+      Adapt.once('adapt:initialize', this.handleInitializeError.bind(this));
+      return;
+    }
+    */
+    /*
+    if (!Adapt.data.isReady) {
+      Adapt.data.once('ready', this.handleInitializeError.bind(this));
+      return;
+    }
+    */
+
+    Adapt.trigger('tracking:initializeError');
+
+    this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT));
+  }
+
+  handleConnectionError() {
+    Adapt.trigger('tracking:connectionError');
+
+    this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+  }
+
+  handleDataError(error) {
+    Adapt.trigger('tracking:dataError');
+
+    this.handleError(error);
+  }
+
+  handleFinishError(error) {
+    Adapt.trigger('tracking:terminatedError');
+
+    this.handleError(error);
+  }
+
+  handleError(error) {
+    /*
     if (!Adapt.get('_isStarted')) {
       Adapt.once('contentObjectView:ready', this.handleError.bind(this, error));
       return;
     }
+    */
 
     if ('value' in error.data) {
       // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
@@ -509,6 +581,7 @@ class ScormWrapper {
     const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
     const message = Handlebars.compile(messages[error.name])(error.data);
 
+    /*
     switch (error.name) {
       case CLIENT_COULD_NOT_CONNECT:
         notify.popup({
@@ -518,6 +591,7 @@ class ScormWrapper {
         });
         return;
     }
+    */
 
     this.logger.error(message);
 
