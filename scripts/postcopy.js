@@ -1,7 +1,7 @@
 module.exports = async function(fs, path, log, options, done) {
   try {
     const buildPath = options.outputdir;
-    const coursePath = `${buildPath}course`;
+    const coursePath = `${buildPath}${options.coursedir}`;
     const data = await fs.promises.readFile(`${coursePath}/config.json`);
     if (!data) return done();
     const config = JSON.parse(data.toString());
