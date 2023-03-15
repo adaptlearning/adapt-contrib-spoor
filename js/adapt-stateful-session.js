@@ -82,6 +82,8 @@ export default class StatefulSession extends Backbone.Controller {
     if (_.isBoolean(settings._setCompletedWhenFailed)) {
       this.scorm.setCompletedWhenFailed = settings._setCompletedWhenFailed;
     }
+    const connectionTest = settings._connectionTest;
+    if (connectionTest) Object.assign(this.scorm.connectionTest, connectionTest);
     this.scorm.initialize();
   }
 

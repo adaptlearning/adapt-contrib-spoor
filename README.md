@@ -7,7 +7,7 @@ This extension provides course tracking functionality (hence the name [spoor](ht
 **Spoor** makes use of the excellent [pipwerks SCORM API Wrapper](https://github.com/pipwerks/scorm-api-wrapper/).
 
 [Visit the **Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about its functionality and for explanations of key properties.
- 
+
 ## Installation
 
 As one of Adapt's *[core extensions](https://github.com/adaptlearning/adapt_framework/wiki/Core-Plug-ins-in-the-Adapt-Learning-Framework#extensions),* **Spoor** is included with the [installation of the Adapt framework](https://github.com/adaptlearning/adapt_framework/wiki/Manual-installation-of-the-Adapt-framework#installation) and the [installation of the Adapt authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-Adapt-Origin).
@@ -130,6 +130,17 @@ Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2
 
 ##### \_setCompletedWhenFailed (boolean):
 Determines whether the `cmi.completion_status` is set to "completed" if the assessment is "failed". Only valid for SCORM 2004, where the logic for completion and success is separate. The default is `true`.
+
+##### \_connectionTest (object):
+The settings used to configure the connection test when committing data to the LMS. The LMS API usually returns true for each data transmission regardless of the ability to persist the data. Contains the following attributes:
+
+ * **\_isEnabled** (boolean): Determines whether the connection should be tested. The default is `true`.
+
+ * **\_testOnSetValue** (boolean): Determines whether the connection should be tested for each call to set data on the LMS. The default is `true`.
+
+   * **_silentRetryLimit** (number): The limit for silent retry attempts to establish a connection before raising an error. The default is `0`.
+
+   * **_silentRetryDelay** (number): The interval in milliseconds between silent connection retries. The default is `2000`.
 
 #### \_showCookieLmsResetButton (boolean):
 Determines whether a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only). The default is `false`.
