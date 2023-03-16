@@ -223,28 +223,26 @@ class ScormWrapper {
       // `scaled` converted to -1-1 range to indicate negative/positive weighting now that negative values can be assigned to questions
       const scaledScore = score / range;
       this.setValue('cmi.score.scaled', scaledScore.toFixed(7));
-    } else {
-      if (isPercentageBased) {
-        // convert values to 0-100 range
-        // negative scores are capped to 0 due to SCORM 1.2 limitations
-        score = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
-        minScore = 0;
-        maxScore = 100;
-      } else {
-        const validate = (attribute, value) => {
-          const isValid = value >= 0 && score <= 100;
-          if (!isValid) this.logger.warn(`${attribute} must be between 0-100.`);
-        }
-
-        validate('cmi.core.score.raw', score);
-        validate('cmi.core.score.min', minScore);
-        validate('cmi.core.score.max', maxScore);
-      }
-
-      this.setValue('cmi.core.score.raw', score);
-      if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', minScore);
-      if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', maxScore);
+      return;
     }
+    if (isPercentageBased) {
+      // convert values to 0-100 range
+      // negative scores are capped to 0 due to SCORM 1.2 limitations
+      score = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
+      minScore = 0;
+      maxScore = 100;
+    } else {
+      const validate = (attribute, value) => {
+        const isValid = value >= 0 && score <= 100;
+        if (!isValid) this.logger.warn(`${attribute} must be between 0-100.`);
+      }
+      validate('cmi.core.score.raw', score);
+      validate('cmi.core.score.min', minScore);
+      validate('cmi.core.score.max', maxScore);
+    }
+    this.setValue('cmi.core.score.raw', score);
+    if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', minScore);
+    if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', maxScore);
   }
 
   getLessonLocation() {
