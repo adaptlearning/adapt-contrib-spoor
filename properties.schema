@@ -258,6 +258,47 @@
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, `cmi.completion_status` will be set to \"completed\" if the assessment is \"failed\". Only valid for SCORM 2004, where the logic for completion and success is separate."
+                    },
+                    "_connectionTest": {
+                      "type": "object",
+                      "required": true,
+                      "title": "Connection Test",
+                      "properties": {
+                        "_isEnabled": {
+                          "type": "boolean",
+                          "default": true,
+                          "title": "Is Enabled",
+                          "inputType": "Checkbox",
+                          "validators": [],
+                          "help": "Determines whether the connection should be tested."
+                        },
+                        "_testOnSetValue": {
+                          "type": "boolean",
+                          "default": true,
+                          "title": "Test on set value",
+                          "inputType": "Checkbox",
+                          "validators": [],
+                          "help": "Determines whether the connection should be tested for each call to set data on the LMS."
+                        },
+                        "_timedCommitFrequency": {
+                          "type": "number",
+                          "required": false,
+                          "default": "0",
+                          "title": "Timed commit frequency",
+                          "inputType": "Number",
+                          "validators": ["number"],
+                          "help": "The limit for silent retry attempts to establish a connection before raising an error."
+                        },
+                        "_silentRetryDelay": {
+                          "type": "number",
+                          "required": false,
+                          "default": "2000",
+                          "title": "Silent Retry Delay",
+                          "inputType": "Number",
+                          "validators": ["number"],
+                          "help": "The interval in milliseconds between silent connection retries."
+                        }
+                      }
                     }
                   }
                 },
