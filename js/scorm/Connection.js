@@ -22,23 +22,20 @@ export default class Connection {
     if (!this._isEnabled || this._isInProgress) return;
     this._isInProgress = true;
 
-    fetch(`connection.json?nocache=${Date.now()}`)
-    .then(response => {
-      (response?.ok) ? this.onConnectionSuccess() : this.onConnectionError();
-    })
-    .catch(error => {
-      this.onConnectionError();
-    });
+    try {
+      const response = await fetch(`connection.json?nocache=${Date.now()}`);
+      if (response?.ok) return this.onConnectionSuccess();
+    } catch (err) {}
+    this.onConnectionError();
   }
 
   reset() {
     this._silentRetryCount = 0;
     this._isSilentDisconnection = false;
 
-    if (this._silentRetryTimeout !== null) {
-      window.clearTimeout(this._silentRetryTimeout);
-      this._silentRetryTimeout = null;
-    }
+    if (this._silentRetryTimeout === null) return;
+    window.clearTimeout(this._silentRetryTimeout);
+    this._silentRetryTimeout = null;
   }
 
   stop() {
@@ -69,10 +66,10 @@ export default class Connection {
       this._isSilentDisconnection = true;
       this._silentRetryCount++;
       this._silentRetryTimeout = window.setTimeout(this.test.bind(this), this._silentRetryDelay);
-    } else {
-      this.reset();
-      Adapt.trigger('tracking:connectionError', this.test.bind(this));
+      return;
     }
+    this.reset();
+    Adapt.trigger('tracking:connectionError', this.test.bind(this));
   }
 
 }
