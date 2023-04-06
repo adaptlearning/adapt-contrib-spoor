@@ -89,8 +89,8 @@ class ScormWrapper {
     this._connection = null;
 
     this.connectionTest = {
-      _isEnabled: false,
-      _testOnSetValue: false
+      _isEnabled: true,
+      _testOnSetValue: true
     };
 
     if (!(window.API?.__offlineAPIWrapper && window?.API_1484_11?.__offlineAPIWrapper)) return;

@@ -202,17 +202,17 @@
                       "description": "Determines whether the connection should be tested for each call to set data on the LMS.",
                       "default": true
                     },
-                    "_timedCommitFrequency": {
+                    "_silentRetryLimit": {
                       "type": "number",
-                      "title": "Timed commit frequency",
+                      "title": "Silent Retry Limit",
                       "description": "The limit for silent retry attempts to establish a connection before raising an error.",
-                      "default": 0
+                      "default": 2
                     },
-                    "_commitOnAnyChange": {
+                    "_silentRetryDelay": {
                       "type": "number",
                       "title": "Silent Retry Delay",
                       "description": "The interval in milliseconds between silent connection retries.",
-                      "default": 0
+                      "default": 1000
                     }
                   }
                 }

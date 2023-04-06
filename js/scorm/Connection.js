@@ -3,9 +3,9 @@ import Adapt from 'core/js/adapt';
 export default class Connection {
 
   constructor({
-    _isEnabled = false,
-    _silentRetryLimit = 0,
-    _silentRetryDelay = 2000
+    _isEnabled = true,
+    _silentRetryLimit = 2,
+    _silentRetryDelay = 1000
   } = {}, ScormWrapper) {
     this._isEnabled = _isEnabled;
     this._isInProgress = false;

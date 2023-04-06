@@ -138,9 +138,9 @@ The settings used to configure the connection test when committing data to the L
 
  * **\_testOnSetValue** (boolean): Determines whether the connection should be tested for each call to set data on the LMS. The default is `true`.
 
-   * **_silentRetryLimit** (number): The limit for silent retry attempts to establish a connection before raising an error. The default is `0`.
+   * **_silentRetryLimit** (number): The limit for silent retry attempts to establish a connection before raising an error. The default is `2`.
 
-   * **_silentRetryDelay** (number): The interval in milliseconds between silent connection retries. The default is `2000`.
+   * **_silentRetryDelay** (number): The interval in milliseconds between silent connection retries. The default is `1000`.
 
 #### \_showCookieLmsResetButton (boolean):
 Determines whether a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only). The default is `false`.

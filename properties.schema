@@ -280,11 +280,11 @@
                           "validators": [],
                           "help": "Determines whether the connection should be tested for each call to set data on the LMS."
                         },
-                        "_timedCommitFrequency": {
+                        "_silentRetryLimit": {
                           "type": "number",
                           "required": false,
-                          "default": "0",
-                          "title": "Timed commit frequency",
+                          "default": "2",
+                          "title": "Silent Retry Limit",
                           "inputType": "Number",
                           "validators": ["number"],
                           "help": "The limit for silent retry attempts to establish a connection before raising an error."
@@ -292,7 +292,7 @@
                         "_silentRetryDelay": {
                           "type": "number",
                           "required": false,
-                          "default": "2000",
+                          "default": "1000",
                           "title": "Silent Retry Delay",
                           "inputType": "Number",
                           "validators": ["number"],
