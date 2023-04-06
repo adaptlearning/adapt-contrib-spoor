@@ -125,7 +125,11 @@ class ScormWrapper {
       return this.lmsConnected;
     }
 
-    if (this.connectionTest._isEnabled) this._connection = new Connection(this.connectionTest, ScormWrapper.getInstance());
+    if (this.connectionTest._isEnabled) {
+      Adapt.on('tracking:connectionError', () => this.handleConnectionError(false));
+      this._connection = new Connection(this.connectionTest, ScormWrapper.getInstance());
+    }
+
     this.startTime = new Date();
     this.initTimedCommit();
     return this.lmsConnected;
@@ -511,8 +515,8 @@ class ScormWrapper {
     _.defer(() => this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT)));
   }
 
-  handleConnectionError() {
-    Adapt.trigger('tracking:connectionError');
+  handleConnectionError(triggerError = true) {
+    if (triggerError) Adapt.trigger('tracking:connectionError');
     this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
   }
 
