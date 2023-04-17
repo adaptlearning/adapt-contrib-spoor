@@ -84,14 +84,11 @@ class ScormWrapper {
     this.scorm.handleExitMode = false;
 
     this.suppressErrors = false;
-    this.debouncedCommit = _.debounce(this.commit.bind(this), 100);
+    this.commit = this.commit.bind(this);
+    this.doRetryCommit = this.doRetryCommit.bind(this);
+    this.debouncedCommit = _.debounce(this.commit, 100);
     if (window.__debug) this.showDebugWindow();
     this._connection = null;
-
-    this.connectionTest = {
-      _isEnabled: true,
-      _testOnSetValue: true
-    };
 
     if (!(window.API?.__offlineAPIWrapper && window?.API_1484_11?.__offlineAPIWrapper)) return;
     this.logger.error('Offline SCORM API is being used. No data will be reported to the LMS!');
@@ -116,7 +113,41 @@ class ScormWrapper {
     this.scorm.version = value;
   }
 
-  initialize() {
+  initialize(settings) {
+    if (settings) {
+      if (settings._showDebugWindow) {
+        this.showDebugWindow();
+      }
+      this.setVersion(settings._scormVersion || '1.2');
+      if (_.isBoolean(settings._suppressErrors)) {
+        this.suppressErrors = settings._suppressErrors;
+      }
+      if (_.isBoolean(settings._commitOnStatusChange)) {
+        this.commitOnStatusChange = settings._commitOnStatusChange;
+      }
+      if (_.isBoolean(settings._commitOnAnyChange)) {
+        this.commitOnAnyChange = settings._commitOnAnyChange;
+      }
+      if (_.isFinite(settings._timedCommitFrequency)) {
+        this.timedCommitFrequency = settings._timedCommitFrequency;
+      }
+      if (_.isFinite(settings._maxCommitRetries)) {
+        this.maxCommitRetries = settings._maxCommitRetries;
+      }
+      if (_.isFinite(settings._commitRetryDelay)) {
+        this.commitRetryDelay = settings._commitRetryDelay;
+      }
+      if ('_exitStateIfIncomplete' in settings) {
+        this.exitStateIfIncomplete = settings._exitStateIfIncomplete;
+      }
+      if ('_exitStateIfComplete' in settings) {
+        this.exitStateIfComplete = settings._exitStateIfComplete;
+      }
+      if (_.isBoolean(settings._setCompletedWhenFailed)) {
+        this.setCompletedWhenFailed = settings._setCompletedWhenFailed;
+      }
+    }
+
     this.logger.debug('ScormWrapper::initialize');
     this.lmsConnected = this.scorm.init();
 
@@ -125,9 +156,8 @@ class ScormWrapper {
       return this.lmsConnected;
     }
 
-    if (this.connectionTest._isEnabled) {
-      Adapt.on('tracking:connectionError', () => this.handleConnectionError(false));
-      this._connection = new Connection(this.connectionTest, ScormWrapper.getInstance());
+    if (settings?._connectionTest?._isEnabled !== false) {
+      this._connection = new Connection(settings._connectionTest, this);
     }
 
     this.startTime = new Date();
@@ -439,7 +469,7 @@ class ScormWrapper {
     const success = this.scorm.set(property, value);
     if (success) {
       // if success, test the connection as the API usually returns true regardless of the ability to persist the data
-      if (this._connection && this.connectionTest._testOnSetValue) this._connection.test();
+      this._connection?.testOnSetValue?.();
     } else {
       // Some LMSs have an annoying tendency to return false from a set call even when it actually worked fine.
       // So we should only throw an error if there was a valid error code...
@@ -488,7 +518,7 @@ class ScormWrapper {
 
     if (!this.commitOnAnyChange && this.timedCommitFrequency > 0) {
       const delay = this.timedCommitFrequency * (60 * 1000);
-      this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
+      this.timedCommitIntervalID = window.setInterval(this.commit, delay);
     }
   }
 
@@ -497,7 +527,7 @@ class ScormWrapper {
 
     this.commitRetryPending = true;// stop anything else from calling commit until this is done
 
-    this.retryCommitTimeoutID = window.setTimeout(this.doRetryCommit.bind(this), this.commitRetryDelay);
+    this.retryCommitTimeoutID = window.setTimeout(this.doRetryCommit, this.commitRetryDelay);
   }
 
   doRetryCommit() {
@@ -515,8 +545,8 @@ class ScormWrapper {
     _.defer(() => this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT)));
   }
 
-  handleConnectionError(triggerError = true) {
-    if (triggerError) Adapt.trigger('tracking:connectionError');
+  handleConnectionError(callback = null) {
+    Adapt.trigger('tracking:connectionError', callback);
     this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
   }
 
