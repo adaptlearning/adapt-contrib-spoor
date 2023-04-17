@@ -21,9 +21,8 @@ export default class Connection {
   async test() {
     if (!this._isEnabled || this._isInProgress) return;
     this._isInProgress = true;
-
     try {
-      const response = await fetch(`connection.json?nocache=${Date.now()}`);
+      const response = await fetch(`connection.txt?nocache=${Date.now()}`);
       if (response?.ok) return this.onConnectionSuccess();
     } catch (err) {}
     this.onConnectionError();
@@ -32,7 +31,6 @@ export default class Connection {
   reset() {
     this._silentRetryCount = 0;
     this._isSilentDisconnection = false;
-
     if (this._silentRetryTimeout === null) return;
     window.clearTimeout(this._silentRetryTimeout);
     this._silentRetryTimeout = null;
@@ -51,7 +49,6 @@ export default class Connection {
       this._scorm.commit();
       if (!this._isSilentDisconnection) Adapt.trigger('tracking:connectionSuccess');
     }
-
     this._isInProgress = false;
     this._isDisconnected = false;
     this.reset();
@@ -61,7 +58,6 @@ export default class Connection {
     if (!this._isEnabled) return;
     this._isInProgress = false;
     this._isDisconnected = true;
-
     if (this._silentRetryCount < this._silentRetryLimit) {
       this._isSilentDisconnection = true;
       this._silentRetryCount++;
