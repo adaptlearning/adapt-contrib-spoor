@@ -469,7 +469,7 @@ class ScormWrapper {
     const success = this.scorm.set(property, value);
     if (success) {
       // if success, test the connection as the API usually returns true regardless of the ability to persist the data
-      this._connection?.testOnSetValue?.();
+      this._connection?.testOnSetValue();
     } else {
       // Some LMSs have an annoying tendency to return false from a set call even when it actually worked fine.
       // So we should only throw an error if there was a valid error code...
