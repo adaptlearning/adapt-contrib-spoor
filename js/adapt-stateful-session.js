@@ -51,40 +51,7 @@ export default class StatefulSession extends Backbone.Controller {
       this.scorm.initialize();
       return;
     }
-    if (settings._showDebugWindow) {
-      this.scorm.showDebugWindow();
-    }
-    this.scorm.setVersion(settings._scormVersion || '1.2');
-    if (_.isBoolean(settings._suppressErrors)) {
-      this.scorm.suppressErrors = settings._suppressErrors;
-    }
-    if (_.isBoolean(settings._commitOnStatusChange)) {
-      this.scorm.commitOnStatusChange = settings._commitOnStatusChange;
-    }
-    if (_.isBoolean(settings._commitOnAnyChange)) {
-      this.scorm.commitOnAnyChange = settings._commitOnAnyChange;
-    }
-    if (_.isFinite(settings._timedCommitFrequency)) {
-      this.scorm.timedCommitFrequency = settings._timedCommitFrequency;
-    }
-    if (_.isFinite(settings._maxCommitRetries)) {
-      this.scorm.maxCommitRetries = settings._maxCommitRetries;
-    }
-    if (_.isFinite(settings._commitRetryDelay)) {
-      this.scorm.commitRetryDelay = settings._commitRetryDelay;
-    }
-    if ('_exitStateIfIncomplete' in settings) {
-      this.scorm.exitStateIfIncomplete = settings._exitStateIfIncomplete;
-    }
-    if ('_exitStateIfComplete' in settings) {
-      this.scorm.exitStateIfComplete = settings._exitStateIfComplete;
-    }
-    if (_.isBoolean(settings._setCompletedWhenFailed)) {
-      this.scorm.setCompletedWhenFailed = settings._setCompletedWhenFailed;
-    }
-    const connectionTest = settings._connectionTest;
-    if (connectionTest) Object.assign(this.scorm.connectionTest, connectionTest);
-    this.scorm.initialize();
+    this.scorm.initialize(settings);
   }
 
   restoreSession() {
