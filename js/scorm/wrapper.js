@@ -1,8 +1,11 @@
 import Adapt from 'core/js/adapt';
-import notify from 'core/js/notify';
+import Data from 'core/js/data';
+import Wait from 'core/js/wait';
+import Notify from 'core/js/notify';
 import pipwerks from 'libraries/SCORM_API_wrapper';
 import Logger from './logger';
 import ScormError from './error';
+import Connection from './Connection';
 
 const {
   CLIENT_COULD_NOT_CONNECT,
@@ -71,10 +74,8 @@ class ScormWrapper {
     this.logOutputWin = null;
     this.startTime = null;
     this.endTime = null;
-
     this.lmsConnected = false;
     this.finishCalled = false;
-
     this.logger = Logger.getInstance();
     this.scorm = pipwerks.SCORM;
     /**
@@ -83,10 +84,11 @@ class ScormWrapper {
     this.scorm.handleExitMode = false;
 
     this.suppressErrors = false;
-    this.debouncedCommit = _.debounce(this.commit.bind(this), 100);
-    if (window.__debug) {
-      this.showDebugWindow();
-    }
+    this.commit = this.commit.bind(this);
+    this.doRetryCommit = this.doRetryCommit.bind(this);
+    this.debouncedCommit = _.debounce(this.commit, 100);
+    if (window.__debug) this.showDebugWindow();
+    this._connection = null;
 
     if (!(window.API?.__offlineAPIWrapper && window?.API_1484_11?.__offlineAPIWrapper)) return;
     this.logger.error('Offline SCORM API is being used. No data will be reported to the LMS!');
@@ -111,18 +113,55 @@ class ScormWrapper {
     this.scorm.version = value;
   }
 
-  initialize() {
+  initialize(settings) {
+    if (settings) {
+      if (settings._showDebugWindow) {
+        this.showDebugWindow();
+      }
+      this.setVersion(settings._scormVersion || '1.2');
+      if (_.isBoolean(settings._suppressErrors)) {
+        this.suppressErrors = settings._suppressErrors;
+      }
+      if (_.isBoolean(settings._commitOnStatusChange)) {
+        this.commitOnStatusChange = settings._commitOnStatusChange;
+      }
+      if (_.isBoolean(settings._commitOnAnyChange)) {
+        this.commitOnAnyChange = settings._commitOnAnyChange;
+      }
+      if (_.isFinite(settings._timedCommitFrequency)) {
+        this.timedCommitFrequency = settings._timedCommitFrequency;
+      }
+      if (_.isFinite(settings._maxCommitRetries)) {
+        this.maxCommitRetries = settings._maxCommitRetries;
+      }
+      if (_.isFinite(settings._commitRetryDelay)) {
+        this.commitRetryDelay = settings._commitRetryDelay;
+      }
+      if ('_exitStateIfIncomplete' in settings) {
+        this.exitStateIfIncomplete = settings._exitStateIfIncomplete;
+      }
+      if ('_exitStateIfComplete' in settings) {
+        this.exitStateIfComplete = settings._exitStateIfComplete;
+      }
+      if (_.isBoolean(settings._setCompletedWhenFailed)) {
+        this.setCompletedWhenFailed = settings._setCompletedWhenFailed;
+      }
+    }
+
     this.logger.debug('ScormWrapper::initialize');
     this.lmsConnected = this.scorm.init();
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT));
+      this.handleInitializeError();
       return this.lmsConnected;
+    }
+
+    if (settings?._connectionTest?._isEnabled !== false) {
+      this._connection = new Connection(settings._connectionTest, this);
     }
 
     this.startTime = new Date();
     this.initTimedCommit();
-
     return this.lmsConnected;
   }
 
@@ -184,7 +223,7 @@ class ScormWrapper {
       case 'unknown': // the SCORM 2004 version of not attempted
         return status;
       default:
-        this.handleError(new ScormError(SERVER_STATUS_UNSUPPORTED, { status }));
+        this.handleDataError(new ScormError(SERVER_STATUS_UNSUPPORTED, { status }));
         return null;
     }
   }
@@ -204,7 +243,7 @@ class ScormWrapper {
         this.setFailed();
         break;
       default:
-        this.handleError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { status }));
+        this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { status }));
     }
   }
 
@@ -282,7 +321,7 @@ class ScormWrapper {
     this.logger.debug('ScormWrapper::commit');
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(ScormError.CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
@@ -294,6 +333,8 @@ class ScormWrapper {
     if (this.scorm.save()) {
       this.commitRetries = 0;
       this.lastCommitSuccessTime = new Date();
+      // if success, test the connection as the API usually returns true regardless of the ability to persist the data
+      if (this._connection) this._connection.test();
       Adapt.trigger('spoor:commit', this);
       return;
     }
@@ -305,7 +346,7 @@ class ScormWrapper {
     }
 
     const errorCode = this.scorm.debug.getCode();
-    this.handleError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
+    this.handleDataError(new ScormError(CLIENT_COULD_NOT_COMMIT, {
       errorCode,
       errorInfo: this.scorm.debug.getInfo(errorCode),
       diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
@@ -316,7 +357,7 @@ class ScormWrapper {
     this.logger.debug('ScormWrapper::finish');
 
     if (!this.lmsConnected || this.finishCalled) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
@@ -345,12 +386,17 @@ class ScormWrapper {
       this.scorm.set('cmi.core.exit', this.getExitState());
     }
 
+    if (this._connection) {
+      this._connection.stop();
+      this._connection = null;
+    }
+
     // api no longer available from this point
     this.lmsConnected = false;
-
     if (this.scorm.quit()) return;
     const errorCode = this.scorm.debug.getCode();
-    this.handleError(new ScormError(CLIENT_COULD_NOT_FINISH, {
+
+    this.handleFinishError(new ScormError(CLIENT_COULD_NOT_FINISH, {
       errorCode,
       errorInfo: this.scorm.debug.getInfo(errorCode),
       diagnosticInfo: this.scorm.debug.getDiagnosticInfo(errorCode)
@@ -396,7 +442,7 @@ class ScormWrapper {
     }
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
@@ -412,7 +458,7 @@ class ScormWrapper {
         this.logger.warn('ScormWrapper::getValue: data model element not initialized');
         break;
       default:
-        this.handleError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
+        this.handleDataError(new ScormError(CLIENT_COULD_NOT_GET_PROPERTY, {
           property,
           errorCode,
           errorInfo: this.scorm.debug.getInfo(errorCode),
@@ -432,17 +478,20 @@ class ScormWrapper {
     }
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return;
     }
 
     const success = this.scorm.set(property, value);
-    if (!success) {
-      // Some LMSes have an annoying tendency to return false from a set call even when it actually worked fine.
+    if (success) {
+      // if success, test the connection as the API usually returns true regardless of the ability to persist the data
+      this._connection?.testOnSetValue();
+    } else {
+      // Some LMSs have an annoying tendency to return false from a set call even when it actually worked fine.
       // So we should only throw an error if there was a valid error code...
       const errorCode = this.scorm.debug.getCode();
       if (errorCode !== 0) {
-        this.handleError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
+        this.handleDataError(new ScormError(CLIENT_COULD_NOT_SET_PROPERTY, {
           property,
           value,
           errorCode,
@@ -455,7 +504,6 @@ class ScormWrapper {
     }
 
     if (this.commitOnAnyChange) this.debouncedCommit();
-
     return success;
   }
 
@@ -473,12 +521,11 @@ class ScormWrapper {
     }
 
     if (!this.lmsConnected) {
-      this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+      this.handleConnectionError();
       return false;
     }
 
     this.scorm.get(property);
-
     return (this.scorm.debug.getCode() !== 401); // 401 is the 'not implemented' error code
   }
 
@@ -487,7 +534,7 @@ class ScormWrapper {
 
     if (!this.commitOnAnyChange && this.timedCommitFrequency > 0) {
       const delay = this.timedCommitFrequency * (60 * 1000);
-      this.timedCommitIntervalID = window.setInterval(this.commit.bind(this), delay);
+      this.timedCommitIntervalID = window.setInterval(this.commit, delay);
     }
   }
 
@@ -496,7 +543,7 @@ class ScormWrapper {
 
     this.commitRetryPending = true;// stop anything else from calling commit until this is done
 
-    this.retryCommitTimeoutID = window.setTimeout(this.doRetryCommit.bind(this), this.commitRetryDelay);
+    this.retryCommitTimeoutID = window.setTimeout(this.doRetryCommit, this.commitRetryDelay);
   }
 
   doRetryCommit() {
@@ -507,13 +554,29 @@ class ScormWrapper {
     this.commit();
   }
 
+  async handleInitializeError() {
+    if (!Data.isReady) await Data.whenReady();
+    Adapt.trigger('tracking:initializeError');
+    // defer error to allow other plugins which may be handling errors to execute
+    _.defer(() => this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT)));
+  }
+
+  handleConnectionError(callback = null) {
+    Adapt.trigger('tracking:connectionError', callback);
+    this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
+  }
+
+  handleDataError(error) {
+    Adapt.trigger('tracking:dataError');
+    this.handleError(error);
+  }
+
+  handleFinishError(error) {
+    Adapt.trigger('tracking:terminationError');
+    this.handleError(error);
+  }
+
   handleError(error) {
-
-    if (!Adapt.get('_isStarted')) {
-      Adapt.once('contentObjectView:ready', this.handleError.bind(this, error));
-      return;
-    }
-
     if ('value' in error.data) {
       // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
       if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
@@ -527,12 +590,18 @@ class ScormWrapper {
 
     switch (error.name) {
       case CLIENT_COULD_NOT_CONNECT:
-        notify.popup({
-          _isCancellable: false,
-          title: messages.title,
-          body: message
-        });
-        return;
+        // don't show if error notification already handled by other plugins
+        if (!Notify.isOpen) {
+          // prevent course load execution
+          Wait.begin();
+          $('.js-loading').hide();
+
+          Notify.popup({
+            _isCancellable: false,
+            title: messages.title,
+            body: message
+          });
+        }
     }
 
     this.logger.error(message);

@@ -27,7 +27,13 @@
             "_commitOnVisibilityChangeHidden": true,
             "_exitStateIfIncomplete": "auto",
             "_exitStateIfComplete": "auto",
-            "_setCompletedWhenFailed": true
+            "_setCompletedWhenFailed": true,
+            "_connectionTest": {
+              "_isEnabled": true,
+              "_testOnSetValue": true,
+              "_silentRetryLimit": 0,
+              "_silentRetryDelay": 2000
+            }
         },
         "_showCookieLmsResetButton": false,
         "_shouldPersistCookieLMSData": true

@@ -184,6 +184,37 @@
                   "title": "Completed when failed",
                   "description": "If enabled, `cmi.completion_status` will be set to \"completed\" if the assessment is \"failed\". Only valid for SCORM 2004, where the logic for completion and success is separate.",
                   "default": true
+                },
+                "_connectionTest": {
+                  "type": "object",
+                  "title": "Connection Test",
+                  "default": {},
+                  "properties": {
+                    "_isEnabled": {
+                      "type": "boolean",
+                      "title": "Enable connection test",
+                      "description": "Determines whether the connection should be tested.",
+                      "default": true
+                    },
+                    "_testOnSetValue": {
+                      "type": "boolean",
+                      "title": "Test on set value",
+                      "description": "Determines whether the connection should be tested for each call to set data on the LMS.",
+                      "default": true
+                    },
+                    "_silentRetryLimit": {
+                      "type": "number",
+                      "title": "Silent Retry Limit",
+                      "description": "The limit for silent retry attempts to establish a connection before raising an error.",
+                      "default": 2
+                    },
+                    "_silentRetryDelay": {
+                      "type": "number",
+                      "title": "Silent Retry Delay",
+                      "description": "The interval in milliseconds between silent connection retries.",
+                      "default": 1000
+                    }
+                  }
                 }
               }
             },
