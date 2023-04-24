@@ -157,7 +157,7 @@ class ScormWrapper {
     }
 
     if (settings?._connectionTest?._isEnabled !== false) {
-      this._connection = new Connection(settings._connectionTest, this);
+      this._connection = new Connection(settings?._connectionTest, this);
     }
 
     this.startTime = new Date();
