@@ -155,7 +155,7 @@ export default class StatefulSession extends Backbone.Controller {
         mark :
         '0';
       return markers;
-    }, (new Array(max + 1).join('-').split(''))).join('');
+    }, new Array(max + 1).fill('-')).join('');
     logging.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completionString}`);
   }
 
