@@ -7,6 +7,12 @@ export const shouldStart = (Object.prototype.hasOwnProperty.call(window, 'ISCOOK
 /** Store the data in a cookie if window.ISCOOKIELMS is true, otherwise setup the API without storing data. */
 export const isStoringData = (window.ISCOOKIELMS === true);
 
+/**
+ * Store value nested inside object at given path
+ * @param {Object} object Root of hierarchy
+ * @param {string} path Period separated key names
+ * @param {*} value Value to store at final path
+ */
 export const set = (object, path, value) => {
   const keys = path.split('.');
   const initialKeys = keys.slice(0, -1);
@@ -17,6 +23,12 @@ export const set = (object, path, value) => {
   finalObject[lastKey] = value;
 };
 
+/**
+ * Fetch value nested inside object at given path
+ * @param {Object} object
+ * @param {string} path  Period separated key names
+ * @returns
+ */
 export const get = (object, path) => {
   const keys = path.split('.');
   return keys.reduce((object, key) => object?.[key], object);
@@ -138,6 +150,7 @@ export function start () {
       const value = get(this.data, key);
       const parts = key.split('.');
       if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        // Treat requests for cmi.*._count as an array length query
         return get(this.data, parts.slice(0, -1).join('.'))?.length ?? 0;
       }
       return value;
@@ -146,6 +159,7 @@ export function start () {
     LMSSetValue: function(key, value) {
       const parts = key.split('.');
       if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        // Fail silently
         return 'true';
       }
       set(this.data, key, value);
@@ -194,6 +208,7 @@ export function start () {
     GetValue: function(key) {
       const parts = key.split('.');
       if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        // Treat requests for cmi.*._count as an array length query
         return get(this.data, parts.slice(0, -1).join('.'))?.length ?? 0;
       }
       return get(this.data, key);
@@ -202,6 +217,7 @@ export function start () {
     SetValue: function(key, value) {
       const parts = key.split('.');
       if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        // Fail silently
         return 'true';
       }
       set(this.data, key, value);
