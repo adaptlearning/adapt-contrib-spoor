@@ -94,6 +94,7 @@ export function start () {
     initialize: function(defaults = {}) {
       if (!isStoringData) {
         this.data = {};
+        Object.entries(defaults).forEach(([path, value]) => set(this.data, path, value));
         return;
       }
 
