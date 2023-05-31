@@ -148,6 +148,9 @@ Determines whether a reset button will be available to relaunch the course and o
 #### \_shouldPersistCookieLMSData (boolean):
 Determines whether to persist the cookie data over browser sessions (scorm_test_harness.html only). The default is `true`.
 
+#### \_uniqueInteractionIds (boolean):
+Determines whether `cmi.interactions.n.id` will be prepended with an index, making the id unique. Some LMSes require unique ids, this will inhibit the grouping of interactions by id on the server-side.
+
 <div float align=right><a href="#top">Back to Top</a></div>
 
 ## Notes
