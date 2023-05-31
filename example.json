@@ -33,7 +33,8 @@
               "_testOnSetValue": true,
               "_silentRetryLimit": 0,
               "_silentRetryDelay": 2000
-            }
+            },
+            "_uniqueInteractionIds": false
         },
         "_showCookieLmsResetButton": false,
         "_shouldPersistCookieLMSData": true

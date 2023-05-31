@@ -7,6 +7,21 @@ export const shouldStart = (Object.prototype.hasOwnProperty.call(window, 'ISCOOK
 /** Store the data in a cookie if window.ISCOOKIELMS is true, otherwise setup the API without storing data. */
 export const isStoringData = (window.ISCOOKIELMS === true);
 
+export const set = (object, path, value) => {
+  const keys = path.split('.');
+  const initialKeys = keys.slice(0, -1);
+  const lastKey = keys[keys.length - 1];
+  const finalObject = initialKeys.reduce((object, key) => {
+    return (object[key] = object?.[key] || {});
+  }, object);
+  finalObject[lastKey] = value;
+};
+
+export const get = (object, path) => {
+  const keys = path.split('.');
+  return keys.reduce((object, key) => object?.[key], object);
+};
+
 export function createResetButton() {
   const resetButtonStyle = '<style id="spoor-clear-button">.spoor-reset-button { position:fixed; right:0px; bottom:0px; } </style>';
   const resetButton = '<button class="spoor-reset-button btn-text">Reset</button>';
@@ -64,7 +79,7 @@ export function start () {
       if (Cookies.get('_spoor').length !== JSON.stringify(this.data).length) postStorageWarning();
     },
 
-    fetch: function() {
+    initialize: function(defaults = {}) {
       if (!isStoringData) {
         this.data = {};
         return;
@@ -72,8 +87,24 @@ export function start () {
 
       this.data = Cookies.getJSON('_spoor');
 
+      const entries = Object.entries(this.data);
+      const isUsingLegacyKeys = (entries[0][0].includes('.'));
+      if (isUsingLegacyKeys) {
+        /**
+         * convert from: cmi.student_name = ''
+         * to: { cmi: { student_name: '' } }
+         */
+        const reworked = {};
+        Object.entries(defaults).forEach(([name, value]) => set(reworked, name, value));
+        Object.entries(entries).forEach(([name, value]) => set(reworked, name, value));
+        this.data = reworked;
+        this.store(true);
+      }
+
       if (!this.data) {
         this.data = {};
+        Object.entries(defaults).forEach(([name, value]) => set(this.data, name, value));
+        this.store(true);
         return false;
       }
 
@@ -89,13 +120,13 @@ export function start () {
 
     LMSInitialize: function() {
       configure();
-      if (!this.fetch()) {
-        this.data['cmi.core.lesson_status'] = 'not attempted';
-        this.data['cmi.suspend_data'] = '';
-        this.data['cmi.core.student_name'] = 'Surname, Sam';
-        this.data['cmi.core.student_id'] = 'sam.surname@example.org';
-        this.store(true);
-      }
+      this.initialize({
+        'cmi.interactions': [],
+        'cmi.core.lesson_status': 'not attempted',
+        'cmi.suspend_data': '',
+        'cmi.core.student_name': 'Surname, Sam',
+        'cmi.core.student_id': 'sam.surname@example.org'
+      });
       return 'true';
     },
 
@@ -104,15 +135,20 @@ export function start () {
     },
 
     LMSGetValue: function(key) {
-      return this.data[key];
+      const value = get(this.data, key);
+      const parts = key.split('.');
+      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        return get(this.data, parts.slice(0, -1).join('.'))?.length ?? 0;
+      }
+      return value;
     },
 
     LMSSetValue: function(key, value) {
-      const str = 'cmi.interactions.';
-      if (key.indexOf(str) !== -1) return 'true';
-
-      this.data[key] = value;
-
+      const parts = key.split('.');
+      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        return 'true';
+      }
+      set(this.data, key, value);
       this.store();
       return 'true';
     },
@@ -141,13 +177,13 @@ export function start () {
 
     Initialize: function() {
       configure();
-      if (!this.fetch()) {
-        this.data['cmi.completion_status'] = 'not attempted';
-        this.data['cmi.suspend_data'] = '';
-        this.data['cmi.learner_name'] = 'Surname, Sam';
-        this.data['cmi.learner_id'] = 'sam.surname@example.org';
-        this.store(true);
-      }
+      this.initialize({
+        'cmi.interactions': [],
+        'cmi.completion_status': 'not attempted',
+        'cmi.suspend_data': '',
+        'cmi.learner_name': 'Surname, Sam',
+        'cmi.learner_id': 'sam.surname@example.org'
+      });
       return 'true';
     },
 
@@ -156,15 +192,19 @@ export function start () {
     },
 
     GetValue: function(key) {
-      return this.data[key];
+      const parts = key.split('.');
+      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        return get(this.data, parts.slice(0, -1).join('.'))?.length ?? 0;
+      }
+      return get(this.data, key);
     },
 
     SetValue: function(key, value) {
-      const str = 'cmi.interactions.';
-      if (key.indexOf(str) !== -1) return 'true';
-
-      this.data[key] = value;
-
+      const parts = key.split('.');
+      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+        return 'true';
+      }
+      set(this.data, key, value);
       this.store();
       return 'true';
     },
