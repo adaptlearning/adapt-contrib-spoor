@@ -99,6 +99,13 @@ export function start () {
 
       this.data = Cookies.getJSON('_spoor');
 
+      if (!this.data) {
+        this.data = {};
+        Object.entries(defaults).forEach(([name, value]) => set(this.data, name, value));
+        this.store(true);
+        return false;
+      }
+
       const entries = Object.entries(this.data);
       const isUsingLegacyKeys = (entries[0][0].includes('.'));
       if (isUsingLegacyKeys) {
@@ -111,13 +118,6 @@ export function start () {
         Object.entries(entries).forEach(([name, value]) => set(reworked, name, value));
         this.data = reworked;
         this.store(true);
-      }
-
-      if (!this.data) {
-        this.data = {};
-        Object.entries(defaults).forEach(([name, value]) => set(this.data, name, value));
-        this.store(true);
-        return false;
       }
 
       return true;
