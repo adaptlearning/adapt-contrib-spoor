@@ -101,7 +101,7 @@ export function start () {
 
       if (!this.data) {
         this.data = {};
-        Object.entries(defaults).forEach(([name, value]) => set(this.data, name, value));
+        Object.entries(defaults).forEach(([path, value]) => set(this.data, path, value));
         this.store(true);
         return false;
       }
@@ -114,8 +114,8 @@ export function start () {
          * to: { cmi: { student_name: '' } }
          */
         const reworked = {};
-        Object.entries(defaults).forEach(([name, value]) => set(reworked, name, value));
-        Object.entries(entries).forEach(([name, value]) => set(reworked, name, value));
+        Object.entries(defaults).forEach(([path, value]) => set(reworked, path, value));
+        Object.entries(entries).forEach(([path, value]) => set(reworked, path, value));
         this.data = reworked;
         this.store(true);
       }
@@ -146,23 +146,28 @@ export function start () {
       return 'true';
     },
 
-    LMSGetValue: function(key) {
-      const value = get(this.data, key);
-      const parts = key.split('.');
-      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+    LMSGetValue: function(path) {
+      const value = get(this.data, path);
+      const keys = path.split('.');
+      const firstKey = keys[0];
+      const lastKey = keys[keys.length - 1];
+      if (firstKey === 'cmi' && lastKey === '_count') {
         // Treat requests for cmi.*._count as an array length query
-        return get(this.data, parts.slice(0, -1).join('.'))?.length ?? 0;
+        const arrayPath = keys.slice(0, -1).join('.');
+        return get(this.data, arrayPath)?.length ?? 0;
       }
       return value;
     },
 
-    LMSSetValue: function(key, value) {
-      const parts = key.split('.');
-      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+    LMSSetValue: function(path, value) {
+      const keys = path.split('.');
+      const firstKey = keys[0];
+      const lastKey = keys[keys.length - 1];
+      if (firstKey === 'cmi' && lastKey === '_count') {
         // Fail silently
         return 'true';
       }
-      set(this.data, key, value);
+      set(this.data, path, value);
       this.store();
       return 'true';
     },
@@ -205,22 +210,28 @@ export function start () {
       return 'true';
     },
 
-    GetValue: function(key) {
-      const parts = key.split('.');
-      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+    GetValue: function(path) {
+      const value = get(this.data, path);
+      const keys = path.split('.');
+      const firstKey = keys[0];
+      const lastKey = keys[keys.length - 1];
+      if (firstKey === 'cmi' && lastKey === '_count') {
         // Treat requests for cmi.*._count as an array length query
-        return get(this.data, parts.slice(0, -1).join('.'))?.length ?? 0;
+        const arrayPath = keys.slice(0, -1).join('.');
+        return get(this.data, arrayPath)?.length ?? 0;
       }
-      return get(this.data, key);
+      return value;
     },
 
-    SetValue: function(key, value) {
-      const parts = key.split('.');
-      if (parts[0] === 'cmi' && parts[parts.length - 1] === '_count') {
+    SetValue: function(path, value) {
+      const keys = path.split('.');
+      const firstKey = keys[0];
+      const lastKey = keys[keys.length - 1];
+      if (firstKey === 'cmi' && lastKey === '_count') {
         // Fail silently
         return 'true';
       }
-      set(this.data, key, value);
+      set(this.data, path, value);
       this.store();
       return 'true';
     },
