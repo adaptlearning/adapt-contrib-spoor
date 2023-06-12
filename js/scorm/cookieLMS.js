@@ -80,7 +80,7 @@ export function start () {
 
     __offlineAPIWrapper: true,
 
-    store: function(force) {
+    store(force) {
       if (!isStoringData) return;
 
       if (!force && Cookies.get('_spoor') === undefined) return;
@@ -91,7 +91,7 @@ export function start () {
       if (Cookies.get('_spoor').length !== JSON.stringify(this.data).length) postStorageWarning();
     },
 
-    initialize: function(defaults = {}) {
+    initialize(defaults = {}) {
       if (!isStoringData) {
         this.data = {};
         Object.entries(defaults).forEach(([path, value]) => set(this.data, path, value));
@@ -127,11 +127,11 @@ export function start () {
   };
 
   // SCORM 1.2 API
-  window.API = {
+  const SCORM1_2 = window.API = {
 
     ...GenericAPI,
 
-    LMSInitialize: function() {
+    LMSInitialize() {
       configure();
       this.initialize({
         'cmi.interactions': [],
@@ -143,11 +143,11 @@ export function start () {
       return 'true';
     },
 
-    LMSFinish: function() {
+    LMSFinish() {
       return 'true';
     },
 
-    LMSGetValue: function(path) {
+    LMSGetValue(path) {
       const value = get(this.data, path);
       const keys = path.split('.');
       const firstKey = keys[0];
@@ -160,7 +160,7 @@ export function start () {
       return value;
     },
 
-    LMSSetValue: function(path, value) {
+    LMSSetValue(path, value) {
       const keys = path.split('.');
       const firstKey = keys[0];
       const lastKey = keys[keys.length - 1];
@@ -173,19 +173,19 @@ export function start () {
       return 'true';
     },
 
-    LMSCommit: function() {
+    LMSCommit() {
       return 'true';
     },
 
-    LMSGetLastError: function() {
+    LMSGetLastError() {
       return 0;
     },
 
-    LMSGetErrorString: function() {
+    LMSGetErrorString() {
       return 'Fake error string.';
     },
 
-    LMSGetDiagnostic: function() {
+    LMSGetDiagnostic() {
       return 'Fake diagnostic information.';
     }
   };
@@ -195,7 +195,7 @@ export function start () {
 
     ...GenericAPI,
 
-    Initialize: function() {
+    Initialize() {
       configure();
       this.initialize({
         'cmi.interactions': [],
@@ -207,51 +207,13 @@ export function start () {
       return 'true';
     },
 
-    Terminate: function() {
-      return 'true';
-    },
-
-    GetValue: function(path) {
-      const value = get(this.data, path);
-      const keys = path.split('.');
-      const firstKey = keys[0];
-      const lastKey = keys[keys.length - 1];
-      if (firstKey === 'cmi' && lastKey === '_count') {
-        // Treat requests for cmi.*._count as an array length query
-        const arrayPath = keys.slice(0, -1).join('.');
-        return get(this.data, arrayPath)?.length ?? 0;
-      }
-      return value;
-    },
-
-    SetValue: function(path, value) {
-      const keys = path.split('.');
-      const firstKey = keys[0];
-      const lastKey = keys[keys.length - 1];
-      if (firstKey === 'cmi' && lastKey === '_count') {
-        // Fail silently
-        return 'true';
-      }
-      set(this.data, path, value);
-      this.store();
-      return 'true';
-    },
-
-    Commit: function() {
-      return 'true';
-    },
-
-    GetLastError: function() {
-      return 0;
-    },
-
-    GetErrorString: function() {
-      return 'Fake error string.';
-    },
-
-    GetDiagnostic: function() {
-      return 'Fake diagnostic information.';
-    }
+    Terminate: SCORM1_2.LMSFinish,
+    GetValue: SCORM1_2.LMSGetValue,
+    SetValue: SCORM1_2.LMSSetValue,
+    Commit: SCORM1_2.LMSCommit,
+    GetLastError: SCORM1_2.LMSGetLastError,
+    GetErrorString: SCORM1_2.LMSGetErrorString,
+    GetDiagnostic: SCORM1_2.LMSGetDiagnostic
 
   };
 }
