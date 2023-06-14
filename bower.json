@@ -1,6 +1,6 @@
 {
   "name": "adapt-contrib-spoor",
-  "version": "5.6.2",
+  "version": "5.7.0",
   "framework": ">=5.28.1",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-spoor",
   "bugs": "https://github.com/adaptlearning/adapt-contrib-spoor/issues",
@@ -22,7 +22,7 @@
     "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "conventional-changelog-eslint": "^3.0.9",
-    "semantic-release": "^19.0.3"
+    "semantic-release": "^21.0.1"
   },
   "scripts": {
     "postversion": "cp package.json bower.json",
