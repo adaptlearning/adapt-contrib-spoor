@@ -7,6 +7,33 @@ export const shouldStart = (Object.prototype.hasOwnProperty.call(window, 'ISCOOK
 /** Store the data in a cookie if window.ISCOOKIELMS is true, otherwise setup the API without storing data. */
 export const isStoringData = (window.ISCOOKIELMS === true);
 
+/**
+ * Store value nested inside object at given path
+ * @param {Object} object Root of hierarchy
+ * @param {string} path Period separated key names
+ * @param {*} value Value to store at final path
+ */
+export const set = (object, path, value) => {
+  const keys = path.split('.');
+  const initialKeys = keys.slice(0, -1);
+  const lastKey = keys[keys.length - 1];
+  const finalObject = initialKeys.reduce((object, key) => {
+    return (object[key] = object?.[key] || {});
+  }, object);
+  finalObject[lastKey] = value;
+};
+
+/**
+ * Fetch value nested inside object at given path
+ * @param {Object} object
+ * @param {string} path  Period separated key names
+ * @returns
+ */
+export const get = (object, path) => {
+  const keys = path.split('.');
+  return keys.reduce((object, key) => object?.[key], object);
+};
+
 export function createResetButton() {
   const resetButtonStyle = '<style id="spoor-clear-button">.spoor-reset-button { position:fixed; right:0px; bottom:0px; } </style>';
   const resetButton = '<button class="spoor-reset-button btn-text">Reset</button>';
@@ -53,7 +80,7 @@ export function start () {
 
     __offlineAPIWrapper: true,
 
-    store: function(force) {
+    store(force) {
       if (!isStoringData) return;
 
       if (!force && Cookies.get('_spoor') === undefined) return;
@@ -64,9 +91,10 @@ export function start () {
       if (Cookies.get('_spoor').length !== JSON.stringify(this.data).length) postStorageWarning();
     },
 
-    fetch: function() {
+    initialize(defaults = {}) {
       if (!isStoringData) {
         this.data = {};
+        Object.entries(defaults).forEach(([path, value]) => set(this.data, path, value));
         return;
       }
 
@@ -74,7 +102,23 @@ export function start () {
 
       if (!this.data) {
         this.data = {};
+        Object.entries(defaults).forEach(([path, value]) => set(this.data, path, value));
+        this.store(true);
         return false;
+      }
+
+      const entries = Object.entries(this.data);
+      const isUsingLegacyKeys = (entries[0][0].includes('.'));
+      if (isUsingLegacyKeys) {
+        /**
+         * convert from: cmi.student_name = ''
+         * to: { cmi: { student_name: '' } }
+         */
+        const reworked = {};
+        Object.entries(defaults).forEach(([path, value]) => set(reworked, path, value));
+        Object.entries(entries).forEach(([path, value]) => set(reworked, path, value));
+        this.data = reworked;
+        this.store(true);
       }
 
       return true;
@@ -83,53 +127,65 @@ export function start () {
   };
 
   // SCORM 1.2 API
-  window.API = {
+  const SCORM1_2 = window.API = {
 
     ...GenericAPI,
 
-    LMSInitialize: function() {
+    LMSInitialize() {
       configure();
-      if (!this.fetch()) {
-        this.data['cmi.core.lesson_status'] = 'not attempted';
-        this.data['cmi.suspend_data'] = '';
-        this.data['cmi.core.student_name'] = 'Surname, Sam';
-        this.data['cmi.core.student_id'] = 'sam.surname@example.org';
-        this.store(true);
+      this.initialize({
+        'cmi.interactions': [],
+        'cmi.core.lesson_status': 'not attempted',
+        'cmi.suspend_data': '',
+        'cmi.core.student_name': 'Surname, Sam',
+        'cmi.core.student_id': 'sam.surname@example.org'
+      });
+      return 'true';
+    },
+
+    LMSFinish() {
+      return 'true';
+    },
+
+    LMSGetValue(path) {
+      const value = get(this.data, path);
+      const keys = path.split('.');
+      const firstKey = keys[0];
+      const lastKey = keys[keys.length - 1];
+      if (firstKey === 'cmi' && lastKey === '_count') {
+        // Treat requests for cmi.*._count as an array length query
+        const arrayPath = keys.slice(0, -1).join('.');
+        return get(this.data, arrayPath)?.length ?? 0;
       }
-      return 'true';
+      return value;
     },
 
-    LMSFinish: function() {
-      return 'true';
-    },
-
-    LMSGetValue: function(key) {
-      return this.data[key];
-    },
-
-    LMSSetValue: function(key, value) {
-      const str = 'cmi.interactions.';
-      if (key.indexOf(str) !== -1) return 'true';
-
-      this.data[key] = value;
-
+    LMSSetValue(path, value) {
+      const keys = path.split('.');
+      const firstKey = keys[0];
+      const lastKey = keys[keys.length - 1];
+      if (firstKey === 'cmi' && lastKey === '_count') {
+        // Fail silently
+        return 'true';
+      }
+      set(this.data, path, value);
       this.store();
       return 'true';
     },
 
-    LMSCommit: function() {
+    LMSCommit() {
       return 'true';
     },
 
-    LMSGetLastError: function() {
+    LMSGetLastError() {
       return 0;
     },
 
-    LMSGetErrorString: function() {
+    LMSGetErrorString() {
       return 'Fake error string.';
     },
 
-    LMSGetDiagnostic: function() {
+    LMSGetDiagnostic() {
       return 'Fake diagnostic information.';
     }
   };
@@ -139,51 +195,25 @@ export function start () {
 
     ...GenericAPI,
 
-    Initialize: function() {
+    Initialize() {
       configure();
-      if (!this.fetch()) {
-        this.data['cmi.completion_status'] = 'not attempted';
-        this.data['cmi.suspend_data'] = '';
-        this.data['cmi.learner_name'] = 'Surname, Sam';
-        this.data['cmi.learner_id'] = 'sam.surname@example.org';
-        this.store(true);
-      }
+      this.initialize({
+        'cmi.interactions': [],
+        'cmi.completion_status': 'not attempted',
+        'cmi.suspend_data': '',
+        'cmi.learner_name': 'Surname, Sam',
+        'cmi.learner_id': 'sam.surname@example.org'
+      });
       return 'true';
     },
 
-    Terminate: function() {
-      return 'true';
-    },
-
-    GetValue: function(key) {
-      return this.data[key];
-    },
-
-    SetValue: function(key, value) {
-      const str = 'cmi.interactions.';
-      if (key.indexOf(str) !== -1) return 'true';
-
-      this.data[key] = value;
-
-      this.store();
-      return 'true';
-    },
-
-    Commit: function() {
-      return 'true';
-    },
-
-    GetLastError: function() {
-      return 0;
-    },
-
-    GetErrorString: function() {
-      return 'Fake error string.';
-    },
-
-    GetDiagnostic: function() {
-      return 'Fake diagnostic information.';
-    }
+    Terminate: SCORM1_2.LMSFinish,
+    GetValue: SCORM1_2.LMSGetValue,
+    SetValue: SCORM1_2.LMSSetValue,
+    Commit: SCORM1_2.LMSCommit,
+    GetLastError: SCORM1_2.LMSGetLastError,
+    GetErrorString: SCORM1_2.LMSGetErrorString,
+    GetDiagnostic: SCORM1_2.LMSGetDiagnostic
 
   };
 }

@@ -299,6 +299,15 @@
                           "help": "The interval in milliseconds between silent connection retries."
                         }
                       }
+                    },
+                    "_uniqueInteractionIds": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Unique Interaction Ids",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, `cmi.interactions.n.id` will be prepended with an index, making the id unique. Some LMSes require unique ids, this will inhibit the grouping of interactions by id on the server-side."
                     }
                   }
                 },
