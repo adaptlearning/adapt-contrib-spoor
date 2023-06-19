@@ -24,7 +24,10 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   beginSession() {
-    this.listenTo(Adapt, 'app:dataReady', this.restoreSession);
+    this.listenTo(Adapt, {
+      'app:dataReady': this.restoreSession,
+      'adapt:start': this.onAdaptStart
+    });
     this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
     // suppress SCORM errors if 'nolmserrors' is found in the querystring
     if (window.location.search.indexOf('nolmserrors') !== -1) {
@@ -59,8 +62,6 @@ export default class StatefulSession extends Backbone.Controller {
   restoreSession() {
     this.setupLearnerInfo();
     this.restoreSessionState();
-    // defer call because AdaptModel.check*Status functions are asynchronous
-    _.defer(this.setupEventListeners.bind(this));
   }
 
   setupLearnerInfo() {
@@ -93,13 +94,16 @@ export default class StatefulSession extends Backbone.Controller {
   setupEventListeners() {
     this.removeEventListeners();
     this.listenTo(Adapt.components, 'change:_isComplete', this.debouncedSaveSession);
+    this.listenTo(Adapt.contentObjects, 'change:_isComplete', this.onContentObjectCompleteChange);
     this.listenTo(Adapt.course, 'change:_isComplete', this.debouncedSaveSession);
     if (this._shouldStoreResponses) {
       this.listenTo(data, 'change:_isSubmitted change:_userAnswer', this.debouncedSaveSession);
     }
     this.listenTo(Adapt, {
       'app:dataReady': this.restoreSession,
+      'adapt:start': this.onAdaptStart,
       'app:languageChanged': this.onLanguageChanged,
+      'pageView:ready': this.onPageViewReady,
       'questionView:recordInteraction': this.onQuestionRecordInteraction,
       'tracking:complete': this.onTrackingComplete
     });
@@ -161,7 +165,25 @@ export default class StatefulSession extends Backbone.Controller {
     logging.info(`course._isComplete: ${courseComplete}, course._isAssessmentPassed: ${assessmentPassed}, ${this._trackingIdType} completion: ${completionString}`);
   }
 
+  initializeContentObjectives() {
+    Adapt.contentObjects.forEach(model => {
+      if (model.isTypeGroup('course')) return;
+      const id = model.get('_id');
+      const description = model.get('title') || model.get('displayTitle');
+      offlineStorage.set('objectiveDescription', id, description);
+      if (model.get('_isVisited')) return;
+      const completionStatus = 'not attempted';
+      offlineStorage.set('objectiveStatus', id, completionStatus);
+    });
+  }
+
+  onAdaptStart() {
+    this.setupEventListeners();
+    this.initializeContentObjectives();
+  }
+
   onLanguageChanged() {
+    this.stopListening(Adapt.contentObjects, 'change:_isComplete', this.onContentObjectCompleteChange);
     const config = Adapt.spoor.config;
     if (config?._reporting?._resetStatusOnLanguageChange !== true) return;
     offlineStorage.set('status', 'incomplete');
@@ -169,6 +191,14 @@ export default class StatefulSession extends Backbone.Controller {
 
   onVisibilityChange() {
     if (document.visibilityState === 'hidden') this.scorm.commit();
+  }
+
+  onPageViewReady(view) {
+    const model = view.model;
+    if (model.get('_isComplete')) return;
+    const id = model.get('_id');
+    const completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
+    offlineStorage.set('objectiveStatus', id, completionStatus);
   }
 
   onQuestionRecordInteraction(questionView) {
@@ -186,6 +216,13 @@ export default class StatefulSession extends Backbone.Controller {
     const result = (questionModel.isCorrect ? questionModel.isCorrect() : questionView.isCorrect());
     const latency = (questionModel.getLatency ? questionModel.getLatency() : questionView.getLatency());
     offlineStorage.set('interaction', id, response, result, latency, responseType);
+  }
+
+  onContentObjectCompleteChange(model) {
+    if (model.isTypeGroup('course')) return;
+    const id = model.get('_id');
+    const completionStatus = (model.get('_isComplete') ? COMPLETION_STATE.COMPLETED : COMPLETION_STATE.INCOMPLETE).asLowerCase;
+    offlineStorage.set('objectiveStatus', id, completionStatus);
   }
 
   onTrackingComplete(completionData) {

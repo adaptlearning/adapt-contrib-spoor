@@ -211,21 +211,9 @@ class ScormWrapper {
 
   getStatus() {
     const status = this.getValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status');
-
-    switch (status.toLowerCase()) { // workaround for some LMSes (e.g. Arena) not adhering to the all-lowercase rule
-      case 'passed':
-      case 'completed':
-      case 'incomplete':
-      case 'failed':
-      case 'browsed':
-      case 'not attempted':
-      case 'not_attempted': // mentioned in SCORM 2004 docs but not sure it ever gets used
-      case 'unknown': // the SCORM 2004 version of not attempted
-        return status;
-      default:
-        this.handleDataError(new ScormError(SERVER_STATUS_UNSUPPORTED, { status }));
-        return null;
-    }
+    if (this.isValidCompletionStatus(status)) return status;
+    this.handleDataError(new ScormError(SERVER_STATUS_UNSUPPORTED, { status }));
+    return null;
   }
 
   setStatus(status) {
@@ -252,36 +240,8 @@ class ScormWrapper {
   }
 
   setScore(score, minScore = 0, maxScore = 100, isPercentageBased = true) {
-    if (this.isSCORM2004()) {
-      // `raw`, `min`, `max` sum absolute values assigned to questions
-      this.setValue('cmi.score.raw', score);
-      this.setValue('cmi.score.min', minScore);
-      this.setValue('cmi.score.max', maxScore);
-      // range split into negative/positive ranges (rather than minScore-maxScore) depending on score
-      const range = (score < 0) ? Math.abs(minScore) : maxScore;
-      // `scaled` converted to -1-1 range to indicate negative/positive weighting now that negative values can be assigned to questions
-      const scaledScore = score / range;
-      this.setValue('cmi.score.scaled', scaledScore.toFixed(7));
-      return;
-    }
-    if (isPercentageBased) {
-      // convert values to 0-100 range
-      // negative scores are capped to 0 due to SCORM 1.2 limitations
-      score = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
-      minScore = 0;
-      maxScore = 100;
-    } else {
-      const validate = (attribute, value) => {
-        const isValid = value >= 0 && score <= 100;
-        if (!isValid) this.logger.warn(`${attribute} must be between 0-100.`);
-      }
-      validate('cmi.core.score.raw', score);
-      validate('cmi.core.score.min', minScore);
-      validate('cmi.core.score.max', maxScore);
-    }
-    this.setValue('cmi.core.score.raw', score);
-    if (this.isSupported('cmi.core.score.min')) this.setValue('cmi.core.score.min', minScore);
-    if (this.isSupported('cmi.core.score.max')) this.setValue('cmi.core.score.max', maxScore);
+    const cmiPrefix = this.isSCORM2004() ? 'cmi' : 'cmi.core';
+    this.recordScore(cmiPrefix, ...arguments);
   }
 
   getLessonLocation() {
@@ -612,6 +572,33 @@ class ScormWrapper {
 
   }
 
+  recordScore(cmiPrefix, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
+    if (this.isSCORM2004()) {
+      // range split into negative/positive ranges (rather than minScore-maxScore) depending on score
+      const range = (score < 0) ? Math.abs(minScore) : maxScore;
+      // `scaled` converted to -1-1 range to indicate negative/positive weighting now that negative values can be assigned to questions
+      const scaledScore = score / range;
+      this.setValue(`${cmiPrefix}.score.scaled`, parseFloat(scaledScore.toFixed(7)));
+    } else if (isPercentageBased) {
+      // convert values to 0-100 range
+      // negative scores are capped to 0 due to SCORM 1.2 limitations
+      score = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
+      minScore = 0;
+      maxScore = 100;
+    } else {
+      const validate = (attribute, value) => {
+        const isValid = value >= 0 && score <= 100;
+        if (!isValid) this.logger.warn(`${attribute} must be between 0-100.`);
+      }
+      validate(`${cmiPrefix}.score.raw`, score);
+      validate(`${cmiPrefix}.score.min`, minScore);
+      validate(`${cmiPrefix}.score.max`, maxScore);
+    }
+    this.setValue(`${cmiPrefix}.score.raw`, score);
+    if (this.isSupported(`${cmiPrefix}.score.min`)) this.setValue(`${cmiPrefix}.score.min`, minScore);
+    if (this.isSupported(`${cmiPrefix}.score.max`)) this.setValue(`${cmiPrefix}.score.max`, maxScore);
+  }
+
   getInteractionCount() {
     const count = this.getValue('cmi.interactions._count');
     return count === '' ? 0 : count;
@@ -688,6 +675,105 @@ class ScormWrapper {
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
 
     scormRecordInteraction.call(this, id, response, correct, latency, type);
+  }
+
+  getObjectiveCount() {
+    const count = this.getValue('cmi.objectives._count');
+    return count === '' ? 0 : count;
+  }
+
+  getObjectiveIndexById(id) {
+    const count = this.getObjectiveCount();
+    for (let i = 0; i < count; i++) {
+      const storedId = this.getValue(`cmi.objectives.${i}.id`);
+      if (storedId === id) return i;
+    }
+    return count;
+  }
+
+  recordObjectiveDescription(id, description) {
+    if (!this.isSCORM2004() || !description) return;
+    id = id.trim();
+    const index = this.getObjectiveIndexById(id);
+    const cmiPrefix = `cmi.objectives.${index}`;
+    this.setValue(`${cmiPrefix}.id`, id);
+    this.setValue(`${cmiPrefix}.description`, description);
+  }
+
+  recordObjectiveScore(id, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
+    if (!this.isSupported('cmi.objectives._count')) {
+      this.logger.info('ScormWrapper::recordObjectiveScore: cmi.objectives are not supported by this LMS...');
+      return;
+    }
+    id = id.trim();
+    const index = this.getObjectiveIndexById(id);
+    const cmiPrefix = `cmi.objectives.${index}`;
+    this.setValue(`${cmiPrefix}.id`, id);
+    this.recordScore(cmiPrefix, score, minScore, maxScore, isPercentageBased);
+  }
+
+  recordObjectiveStatus(id, completionStatus, successStatus = 'unknown') {
+    if (!this.isSupported('cmi.objectives._count')) {
+      this.logger.info('ScormWrapper::recordObjectiveStatus: cmi.objectives are not supported by this LMS...');
+      return;
+    }
+    if (!this.isValidCompletionStatus(completionStatus)) {
+      this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { completionStatus }));
+      return;
+    }
+    if (this.isSCORM2004() && !this.isValidSuccessStatus(successStatus)) {
+      this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { successStatus }));
+      return;
+    }
+    id = id.trim();
+    const index = this.getObjectiveIndexById(id);
+    const cmiPrefix = `cmi.objectives.${index}`;
+    this.setValue(`${cmiPrefix}.id`, id);
+    if (this.isSCORM2004()) {
+      this.setValue(`${cmiPrefix}.completion_status`, completionStatus);
+      this.setValue(`${cmiPrefix}.success_status`, successStatus);
+      return;
+    }
+    if (completionStatus === 'completed' && successStatus !== 'unknown') completionStatus = successStatus;
+    this.setValue(`${cmiPrefix}.status`, completionStatus);
+  }
+
+  isValidCompletionStatus(status) {
+    status = status.toLowerCase(); // workaround for some LMSs (e.g. Arena) not adhering to the all-lowercase rule
+    if (this.isSCORM2004()) {
+      switch(status) {
+        case 'completed':
+        case 'incomplete':
+        case 'not attempted':
+        case 'not_attempted': // mentioned in SCORM 2004 spec - mapped to 'not attempted'
+        case 'unknown':
+          return true;
+      }
+    } else {
+      switch(status) {
+        case 'passed':
+        case 'completed':
+        case 'incomplete':
+        case 'failed':
+        case 'browsed':
+        case 'not attempted':
+          return true;
+      }
+    }
+    return false;
+  }
+
+  isValidSuccessStatus(status) {
+    status = status.toLowerCase(); // workaround for some LMSs (e.g. Arena) not adhering to the all-lowercase rule
+    if (this.isSCORM2004()) {
+      switch(status) {
+        case 'passed':
+        case 'failed':
+        case 'unknown':
+          return true;
+      }
+    }
+    return false;
   }
 
   showDebugWindow() {
