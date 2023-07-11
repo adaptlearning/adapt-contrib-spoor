@@ -15,7 +15,7 @@ function AICC_LMS() {
 
     self.Id = "";
     self.LmsUrl = "";
-    self.Version = "4.1"; // aicc version started at 4.1
+    self.Version = "4.0"; 
     self.LmsResponse = "";
     self.SuspendData = "";
     self.MasteryScore = 0;
