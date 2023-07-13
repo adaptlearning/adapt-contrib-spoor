@@ -120,13 +120,13 @@
                       "required": false,
                       "default": "1.2",
                       "title": "SCORM version",
-                      "enum": ["1.2", "2004"],
+                      "enum": ["1.2"],
                       "inputType": {
                         "type": "Select",
-                        "options": ["1.2", "2004"]
+                        "options": ["1.2"]
                       },
                       "validators": [],
-                      "help": "What SCORM standard to use - SCORM 1.2 or SCORM 2004 4th Edition."
+                      "help": "What SCORM standard to use - SCORM 1.2 is the only option"
                     },
                     "_showDebugWindow": {
                       "type": "boolean",
@@ -327,10 +327,10 @@
         "course": {
           "type":"object",
           "properties": {
-            "_spoor": {
+            "_elfh_spoor": {
               "type": "object",
               "required": false,
-              "legend": "Spoor (SCORM)",
+              "legend": "e-LfH Spoor (SCORM)",
               "properties": {
                 "_messages": {
                   "type": "object",
