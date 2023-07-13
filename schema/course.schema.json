@@ -8,9 +8,9 @@
     },
     "with": {
       "properties": {
-        "_spoor": {
+        "_elfh_spoor": {
           "type": "object",
-          "title": "Spoor (SCORM)",
+          "title": "e-LfH Spoor (SCORM)",
           "default": {},
           "properties": {
             "_messages": {
