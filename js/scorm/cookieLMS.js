@@ -15,7 +15,7 @@ export function createResetButton() {
   $('body').append($button);
   $button.on('click', e => {
     if (!e.shiftKey) {
-      Cookies.remove('_spoor');
+      Cookies.remove('_elfh_spoor');
       alert('SCORM tracking cookie has been deleted! Tip: shift-click reset to preserve cookie.');
     }
     window.location = window.location.pathname;
@@ -24,7 +24,7 @@ export function createResetButton() {
 
 export function configure() {
   if (!isStoringData) return;
-  const spoorConfig = Adapt.config.get('_spoor');
+  const spoorConfig = Adapt.config.get('_elfh_spoor');
   if (spoorConfig?._showCookieLmsResetButton) createResetButton();
   if (!spoorConfig?._shouldPersistCookieLMSData) {
     Cookies.defaults = {
@@ -39,7 +39,7 @@ export function configure() {
 export function postStorageWarning() {
   if (postStorageWarning.__storageWarningTimeoutId !== null) return;
   postStorageWarning.__storageWarningTimeoutId = setTimeout(() => {
-    const notificationMethod = (Adapt.config.get('_spoor')?._advancedSettings?._suppressErrors === true)
+    const notificationMethod = (Adapt.config.get('_elfh_spoor')?._advancedSettings?._suppressErrors === true)
       ? console.error
       : alert;
     postStorageWarning.__storageWarningTimeoutId = null;
@@ -56,12 +56,12 @@ export function start () {
     store: function(force) {
       if (!isStoringData) return;
 
-      if (!force && Cookies.get('_spoor') === undefined) return;
+      if (!force && Cookies.get('_elfh_spoor') === undefined) return;
 
-      Cookies.set('_spoor', this.data);
+      Cookies.set('_elfh_spoor', this.data);
 
       // a length mismatch will most likely indicate cookie storage limit exceeded
-      if (Cookies.get('_spoor').length !== JSON.stringify(this.data).length) postStorageWarning();
+      if (Cookies.get('_elfh_spoor').length !== JSON.stringify(this.data).length) postStorageWarning();
     },
 
     fetch: function() {
@@ -70,7 +70,7 @@ export function start () {
         return;
       }
 
-      this.data = Cookies.getJSON('_spoor');
+      this.data = Cookies.getJSON('_elfh_spoor');
 
       if (!this.data) {
         this.data = {};
