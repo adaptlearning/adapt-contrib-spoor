@@ -30,15 +30,6 @@
                   "required": false,
                   "title": "Tracking",
                   "properties": {
-                    "_shouldSubmitScore": {
-                      "type": "boolean",
-                      "required": false,
-                      "default": false,
-                      "title": "Submit score",
-                      "inputType": "Checkbox",
-                      "validators": [],
-                      "help": "If enabled, the score attained in any assessment will be reported back to the LMS (regardless of whether the user passes or fails the assessment)."
-                    },
                     "_shouldStoreResponses": {
                       "type": "boolean",
                       "required": false,
@@ -65,6 +56,15 @@
                       "inputType": "Checkbox",
                       "validators": [],
                       "help": "If enabled, the course will record the user's responses to questions to the cmi.interactions SCORM data fields."
+                    },
+                    "_shouldCompress": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Should compress data",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, the data stored at the lms will be further compressed."
                     }
                   }
                 },
@@ -115,6 +115,19 @@
                   "required": false,
                   "title": "Advanced Settings",
                   "properties": {
+                    "_scormVersion": {
+                      "type": "string",
+                      "required": false,
+                      "default": "1.2",
+                      "title": "SCORM version",
+                      "enum": ["1.2", "2004"],
+                      "inputType": {
+                        "type": "Select",
+                        "options": ["1.2", "2004"]
+                      },
+                      "validators": [],
+                      "help": "What SCORM standard to use - SCORM 1.2 or SCORM 2004 4th Edition."
+                    },
                     "_showDebugWindow": {
                       "type": "boolean",
                       "required": false,
@@ -236,15 +249,103 @@
                       },
                       "validators": [],
                       "help": "What exit status to use if the course is complete."
+                    },
+                    "_setCompletedWhenFailed": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": true,
+                      "title": "Completed when failed",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, `cmi.completion_status` will be set to \"completed\" if the assessment is \"failed\". Only valid for SCORM 2004, where the logic for completion and success is separate."
+                    },
+                    "_connectionTest": {
+                      "type": "object",
+                      "required": true,
+                      "title": "Connection Test",
+                      "properties": {
+                        "_isEnabled": {
+                          "type": "boolean",
+                          "default": true,
+                          "title": "Is Enabled",
+                          "inputType": "Checkbox",
+                          "validators": [],
+                          "help": "Determines whether the connection should be tested."
+                        },
+                        "_testOnSetValue": {
+                          "type": "boolean",
+                          "default": true,
+                          "title": "Test on set value",
+                          "inputType": "Checkbox",
+                          "validators": [],
+                          "help": "Determines whether the connection should be tested for each call to set data on the LMS."
+                        },
+                        "_silentRetryLimit": {
+                          "type": "number",
+                          "required": false,
+                          "default": "2",
+                          "title": "Silent Retry Limit",
+                          "inputType": "Number",
+                          "validators": ["number"],
+                          "help": "The limit for silent retry attempts to establish a connection before raising an error."
+                        },
+                        "_silentRetryDelay": {
+                          "type": "number",
+                          "required": false,
+                          "default": "1000",
+                          "title": "Silent Retry Delay",
+                          "inputType": "Number",
+                          "validators": ["number"],
+                          "help": "The interval in milliseconds between silent connection retries."
+                        }
+                      }
                     }
                   }
+                },
+                "_showCookieLmsResetButton": {
+                  "type": "boolean",
+                  "required": false,
+                  "default": false,
+                  "title": "Show reset button (scorm_test_harness.html only)",
+                  "inputType": "Checkbox",
+                  "validators": [],
+                  "help": "If enabled, a reset button will be available to relaunch the course and optionally clear tracking data (scorm_test_harness.html only)."
+                },
+                "_shouldPersistCookieLMSData": {
+                  "type": "boolean",
+                  "required": false,
+                  "default": true,
+                  "title": "Persist cookie data (scorm_test_harness.html only)",
+                  "inputType": "Checkbox",
+                  "validators": [],
+                  "help": "If enabled, the course data will persist over browser sessions (scorm_test_harness.html only)."
                 }
               }
             }
           }
         },
         "course": {
-          "type":"object"
+          "type":"object",
+          "properties": {
+            "_spoor": {
+              "type": "object",
+              "required": false,
+              "legend": "Spoor (SCORM)",
+              "properties": {
+                "_messages": {
+                  "type": "object",
+                  "default": {},
+                  "title": "Error messages",
+                  "inputType": {
+                    "type": "CodeEditor",
+                    "mode": "json"
+                  },
+                  "validators": [],
+                  "help": "Optional object that can be used to amend/translate the error messages shown by the spoor extension"
+                }
+              }
+            }
+          }
         },
         "contentobject": {
           "type":"object"

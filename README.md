@@ -1,4 +1,4 @@
-# adapt-elfh-spoor  
+# adapt-elfh-spoor
 <a id="top" style="display:none"></a>
 
 The **e-LfH Spoor** *extension* is for use with the the [Adapt framework](https://github.com/adaptlearning/adapt_framework).  It is based on the [adapt-contrib-spoor](https://github.com/adaptlearning/adapt-contrib-spoor) extension, which adds SCORM 1.2 tracking functionality to Adapt courses.  The e-LfH Spoor plugin adds **AICC HACP (HTTP-based AICC/CMI protocol)** tracking functionality, on top of existing SCORM tracking made available inside the adapt-contrib-spoor extension.
@@ -33,13 +33,13 @@ If you are creating your course using the Adapt framework directly and outside o
 1. `adapt uninstall adapt-contrib-spoor`
 2. `adapt install adapt-elfh-spoor`
 
-### Configure *config.json*  
+### Configure *config.json*
 **NOTE:**  as of Adapt/Spoor v3 you will first need to configure the settings in the **_completionCriteria** object in config.json to specify whether you want course completion to be based on content completion, assessment completion, or both. (In earlier versions of Spoor these settings were part of the spoor configuration - but were moved to the core of Adapt so that they could be used by other tracking extensions such as xAPI.)
 
-The attributes listed below are used in *config.json* to configure **Spoor**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json). Visit the [**Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).  
+The attributes listed below are used in *config.json* to configure **Spoor**, and are properly formatted as JSON in [*example.json*](https://github.com/adaptlearning/adapt-contrib-spoor/blob/master/example.json). Visit the [**Spoor** wiki](https://github.com/adaptlearning/adapt-contrib-spoor/wiki) for more information about how they appear in the [authoring tool](https://github.com/adaptlearning/adapt_authoring/wiki).
 
 ## Limitations
- 
+
 Supports SCORM 1.2, but in AICC mode only the following fields from the specification are available and are tracked:
 
 * Core.StudentId
@@ -53,13 +53,14 @@ Supports SCORM 1.2, but in AICC mode only the following fields from the specific
 * Core.TotalTime
 * SuspendData
 
-<div float align=right><a href="#top">Back to Top</a></div>  
+##### \_commitRetryDelay (number):
+Specifies the interval in milliseconds between commit retries. The default is `2000`.
 
 ----------------------------
-<a href="https://community.adaptlearning.org/" target="_blank"><img alt="@e-LfH" class="TableObject-item avatar" height="100" itemprop="image" src="https://avatars2.githubusercontent.com/u/30687181?v=4&amp;s=200" align="right"/></a> 
-**Version number:**  see bower.json  
+<a href="https://community.adaptlearning.org/" target="_blank"><img alt="@e-LfH" class="TableObject-item avatar" height="100" itemprop="image" src="https://avatars2.githubusercontent.com/u/30687181?v=4&amp;s=200" align="right"/></a>
+**Version number:**  see bower.json
 **Framework versions:** 5.0.0+
-**Author / maintainer:** e-Learning For Healthcare with [contributors](https://github.com/e-LfH/adapt-elfh-spoor/graphs/contributors) 
+**Author / maintainer:** e-Learning For Healthcare with [contributors](https://github.com/e-LfH/adapt-elfh-spoor/graphs/contributors)
 **Accessibility support:** n/a
 **RTL support:** n/a
 **Cross-platform coverage:** Chrome, Chrome for Android, Firefox (latest version), Edge, IE11, Safari 10+11 for macOS+iOS

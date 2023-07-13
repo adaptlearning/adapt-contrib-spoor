@@ -5,42 +5,53 @@
 			"_shouldSubmitScore": false,
             "_shouldStoreResponses": true,
             "_shouldStoreAttempts": false,
-			"_shouldRecordInteractions": true
-		},
-		"_reporting": {
-			"_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
-			"_onTrackingCriteriaMet": "completed",
-			"_onAssessmentFailure": "incomplete",
-			"_resetStatusOnLanguageChange": false
-		},
-		"_advancedSettings": {
-			"_comment": "Only include this section if you want to change any of the default values. You only need include settings you want to change.",
-			"_scormVersion": "1.2",
-			"_showDebugWindow": false,
-			"_suppressErrors": false,
-			"_commitOnStatusChange": true,
+            "_shouldRecordInteractions": true,
+            "_shouldCompress": false
+        },
+        "_reporting": {
+            "_comment": "Your options here are 'completed', 'passed', 'failed', and 'incomplete'",
+            "_onTrackingCriteriaMet": "completed",
+            "_onAssessmentFailure": "incomplete",
+            "_resetStatusOnLanguageChange": false
+        },
+        "_advancedSettings": {
+            "_comment": "Only include this section if you want to change any of the default values. You only need include settings you want to change.",
+            "_scormVersion": "1.2",
+            "_showDebugWindow": false,
+            "_suppressErrors": false,
+            "_commitOnStatusChange": true,
             "_commitOnAnyChange": false,
 			"_timedCommitFrequency": 10,
 			"_maxCommitRetries": 5,
 			"_commitRetryDelay": 2000,
             "_commitOnVisibilityChangeHidden": true,
             "_exitStateIfIncomplete": "auto",
-            "_exitStateIfComplete": "auto"
-		}
-	}
+            "_exitStateIfComplete": "auto",
+            "_setCompletedWhenFailed": true,
+            "_connectionTest": {
+              "_isEnabled": true,
+              "_testOnSetValue": true,
+              "_silentRetryLimit": 0,
+              "_silentRetryDelay": 2000
+            }
+        },
+        "_showCookieLmsResetButton": false,
+        "_shouldPersistCookieLMSData": true
+    }
 
-    // to be added to course/en/course.json
-    "_spoor": {
+    // to be added to course/en/course.json (note: you only need to add the ones you want to change/translate)
+    "_elfh_spoor": {
         "_messages": {
-          "title": "WARNING",
-          "CLIENT_COULD_NOT_CONNECT": "Course could not connect to the LMS",
-          "SERVER_STATUS_UNSUPPORTED": "ScormWrapper::getStatus: invalid lesson status '{{status}}' received from LMS",
-          "CLIENT_STATUS_UNSUPPORTED": "ScormWrapper::setStatus: the status '{{status}}' is not supported.",
-          "CLIENT_COULD_NOT_COMMIT": "Course could not commit data to the LMS\nError {{code}}: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
-          "CLIENT_NOT_CONNECTED": "Course is not connected to the LMS",
-          "CLIENT_COULD_NOT_FINISH": "Course could not finish",
-          "CLIENT_COULD_NOT_GET_PROPERTY": "Course could not get {{property}}\nError Info: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
-          "CLIENT_COULD_NOT_SET_PROPERTY": "Course could not set {{property}} to {{value}}\nError Info: {{info}}\nLMS Error Info: {{diagnosticInfo}}",
-          "CLIENT_INVALID_CHOICE_VALUE": "Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2: {{value}}"
+            "title": "An error has occurred",
+            "pressOk": "Press 'OK' to view detailed debug information to send to technical support.",
+            "CLIENT_COULD_NOT_CONNECT": "The course could not connect to the Learning Management System",
+            "SERVER_STATUS_UNSUPPORTED": "An invalid lesson status of '{{{status}}}' was received from Learning Management System",
+            "CLIENT_STATUS_UNSUPPORTED": "The status '{{{status}}}' is not supported.",
+            "CLIENT_COULD_NOT_COMMIT": "There was a problem saving data to the Learning Management System\n\nError: {{errorCode}} - {{{errorInfo}}}\nLMS Error Info: {{{diagnosticInfo}}}",
+            "CLIENT_NOT_CONNECTED": "The course is not connected to the Learning Management System",
+            "CLIENT_COULD_NOT_FINISH": "The course was unable to terminate the learning session\n\nError: {{errorCode}} - {{{errorInfo}}}\nLMS Error Info: {{{diagnosticInfo}}}",
+            "CLIENT_COULD_NOT_GET_PROPERTY": "Unable to get the value of {{property}} from the Learning Management System\n\nError: {{errorCode}} - {{{errorInfo}}}\nLMS Error Info: {{{diagnosticInfo}}}",
+            "CLIENT_COULD_NOT_SET_PROPERTY": "Unable to set {{property}} to: {{{value}}}\n\nError: {{errorCode}} - {{{errorInfo}}}\nLMS Error Info: {{{diagnosticInfo}}}",
+            "CLIENT_INVALID_CHOICE_VALUE": "Numeric choice/matching response elements must use a value from 0 to 35 in SCORM 1.2"
         }
-      }
+    }
