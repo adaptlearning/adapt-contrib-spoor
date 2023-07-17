@@ -178,10 +178,35 @@ export default class StatefulSession extends Backbone.Controller {
     // component hasn't been set up for cmi.interaction tracking
     if (_.isEmpty(responseType)) return;
     const id = `${this.scorm.getInteractionCount()}-${questionModel.get('_id')}`;
+
+    let questionText = questionView.model.get('body');
+
+    // If body is empty then instead capture the question title
+    if (questionText.length == 0) {
+      questionText = questionView.model.get('title');
+    }
+
+    // Remove any leading or trailing spaces
+    questionText = questionText.trim();
+
+    // Replace any spaces with underscores as SCORM 1.2 standard does not permit spaces
+    questionText = questionText.replace(/ /g, '_');
+
+    // Strip out HTML tags from questionText
+    questionText = questionText.replace(/<\/?[^>]+(>|$)/g, "");
+
+
+    // Ensure length of questionText is within limits
+    // The interactionsId property we are setting will be an amalgamation of
+    // the questionText and the id being the last 16 characters
+    // This string cannot exceed 255 characters (SCORM 1.2 standard)
+
+    const interactionsId = id + "|" + questionText.substring(0, 255 - (id.length + 1));
+
     const response = (questionModel.getResponse ? questionModel.getResponse() : questionView.getResponse());
     const result = (questionModel.isCorrect ? questionModel.isCorrect() : questionView.isCorrect());
     const latency = (questionModel.getLatency ? questionModel.getLatency() : questionView.getLatency());
-    offlineStorage.set('interaction', id, response, result, latency, responseType);
+    offlineStorage.set('interaction', interactionsId, response, result, latency, responseType);
   }
 
   onTrackingComplete(completionData) {
