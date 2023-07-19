@@ -584,6 +584,8 @@ class ScormWrapper {
       if (error.data.value === '') error.data.value = '\'\'';
     }
 
+    if (!Adapt.course) return;
+
     const config = Adapt.course.get('_spoor');
     const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
     const message = Handlebars.compile(messages[error.name])(error.data);

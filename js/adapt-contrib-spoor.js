@@ -4,6 +4,7 @@ import StatefulSession from './adapt-stateful-session';
 import OfflineStorage from './adapt-offlineStorage-scorm';
 import offlineStorage from 'core/js/offlineStorage';
 import { shouldStart as shouldStartCookieLMS, start as startCookieLMS } from './scorm/cookieLMS';
+import { onKeyCombo } from './../libraries/jquery.keycombo';
 
 class Spoor extends Backbone.Controller {
 
@@ -27,12 +28,10 @@ class Spoor extends Backbone.Controller {
     // of the course data loads
     offlineStorage.get();
     offlineStorage.setReadyStatus();
+
     // setup debug window keyboard shortcut
-    require(['libraries/jquery.keycombo'], () => {
-      // listen for user holding 'd', 'e', 'v' keys together
-      $.onKeyCombo([68, 69, 86], () => {
-        Adapt.spoor.scorm.showDebugWindow();
-      });
+    $.onKeyCombo([68, 69, 86], () => {
+      Adapt.spoor.scorm.showDebugWindow();
     });
   }
 
