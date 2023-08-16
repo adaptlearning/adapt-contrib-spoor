@@ -147,7 +147,7 @@ class ScormWrapper {
       if (_.isBoolean(settings._setCompletedWhenFailed)) {
         this.setCompletedWhenFailed = settings._setCompletedWhenFailed;
       }
-      if (_.isFinite(settings._maxCharLimitOverride)) {
+      if (!_.isNaN(settings._maxCharLimitOverride) && settings._maxCharLimitOverride > 0) {
         this.maxCharLimitOverride = settings._maxCharLimitOverride;
       }
     }
