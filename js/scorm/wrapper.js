@@ -78,6 +78,7 @@ class ScormWrapper {
     this.finishCalled = false;
     this.logger = Logger.getInstance();
     this.scorm = pipwerks.SCORM;
+    this.maxCharLimitOverride = null
     /**
      * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
      */
@@ -145,6 +146,9 @@ class ScormWrapper {
       }
       if (_.isBoolean(settings._setCompletedWhenFailed)) {
         this.setCompletedWhenFailed = settings._setCompletedWhenFailed;
+      }
+      if (!_.isNaN(settings._maxCharLimitOverride) && settings._maxCharLimitOverride > 0) {
+        this.maxCharLimitOverride = settings._maxCharLimitOverride;
       }
     }
 
@@ -679,7 +683,7 @@ class ScormWrapper {
 
   recordInteractionFillIn(id, response, correct, latency, type) {
 
-    const maxLength = this.isSCORM2004() ? 250 : 255;
+    const maxLength = this.maxCharLimitOverride ?? this.isSCORM2004() ? 250 : 255;
 
     if (response.length > maxLength) {
       response = response.substr(0, maxLength);

@@ -259,6 +259,15 @@
                       "validators": [],
                       "help": "If enabled, `cmi.completion_status` will be set to \"completed\" if the assessment is \"failed\". Only valid for SCORM 2004, where the logic for completion and success is separate."
                     },
+                    "_maxCharLimitOverride": {
+                      "type": "number",
+                      "required": false,
+                      "default": "0",
+                      "title": "Override value for maximum character limit on fill-in type answers",
+                      "inputType": "Number",
+                      "validators": ["number"],
+                      "help": "If your LMS allows it, you may set a value to override the default character limit for fill-in answers (250 for SCORM2004, 255 for SCORM1.2)."
+                    },
                     "_connectionTest": {
                       "type": "object",
                       "required": true,
