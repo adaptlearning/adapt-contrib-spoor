@@ -683,7 +683,8 @@ class ScormWrapper {
 
   recordInteractionFillIn(id, response, correct, latency, type) {
 
-    const maxLength = this.maxCharLimitOverride ?? this.isSCORM2004() ? 250 : 255;
+    let maxLength = this.isSCORM2004() ? 250 : 255;
+    maxLength = this.maxCharLimitOverride ?? maxLength;
 
     if (response.length > maxLength) {
       response = response.substr(0, maxLength);
