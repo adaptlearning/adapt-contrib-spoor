@@ -6,6 +6,7 @@ import pipwerks from 'libraries/SCORM_API_wrapper';
 import Logger from './logger';
 import ScormError from './error';
 import Connection from './Connection';
+import router from 'core/js/router';
 
 const {
   CLIENT_COULD_NOT_CONNECT,
@@ -600,7 +601,7 @@ class ScormWrapper {
         if (!Notify.isOpen) {
           // prevent course load execution
           Wait.begin();
-          $('.js-loading').hide();
+          router.hideLoading();
 
           Notify.popup({
             _isCancellable: false,
