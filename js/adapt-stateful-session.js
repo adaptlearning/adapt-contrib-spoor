@@ -172,7 +172,7 @@ export default class StatefulSession extends Backbone.Controller {
       const description = model.get('title') || model.get('displayTitle');
       offlineStorage.set('objectiveDescription', id, description);
       if (model.get('_isVisited')) return;
-      const completionStatus = 'not attempted';
+      const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
       offlineStorage.set('objectiveStatus', id, completionStatus);
     });
   }
@@ -186,7 +186,8 @@ export default class StatefulSession extends Backbone.Controller {
     this.stopListening(Adapt.contentObjects, 'change:_isComplete', this.onContentObjectCompleteChange);
     const config = Adapt.spoor.config;
     if (config?._reporting?._resetStatusOnLanguageChange !== true) return;
-    offlineStorage.set('status', 'incomplete');
+    const completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
+    offlineStorage.set('status', completionStatus);
   }
 
   onVisibilityChange() {

@@ -2,6 +2,8 @@ import Adapt from 'core/js/adapt';
 import Data from 'core/js/data';
 import Wait from 'core/js/wait';
 import Notify from 'core/js/notify';
+import COMPLETION_STATE from '../enums/completionStateEnum';
+import SUCCESS_STATE from '../enums/successStateEnum';
 import pipwerks from 'libraries/SCORM_API_wrapper';
 import Logger from './logger';
 import ScormError from './error';
@@ -173,39 +175,32 @@ class ScormWrapper {
   }
 
   setIncomplete() {
-    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', 'incomplete');
-
+    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', COMPLETION_STATE.INCOMPLETE.asLowerCase);
     if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   }
 
   setCompleted() {
-    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', 'completed');
-
+    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', COMPLETION_STATE.COMPLETED.asLowerCase);
     if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   }
 
   setPassed() {
     if (this.isSCORM2004()) {
-      this.setValue('cmi.completion_status', 'completed');
-      this.setValue('cmi.success_status', 'passed');
+      this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase);
+      this.setValue('cmi.success_status', SUCCESS_STATE.PASSED.asLowerCase);
     } else {
-      this.setValue('cmi.core.lesson_status', 'passed');
+      this.setValue('cmi.core.lesson_status', SUCCESS_STATE.PASSED.asLowerCase);
     }
-
     if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   }
 
   setFailed() {
     if (this.isSCORM2004()) {
-      this.setValue('cmi.success_status', 'failed');
-
-      if (this.setCompletedWhenFailed) {
-        this.setValue('cmi.completion_status', 'completed');
-      }
+      this.setValue('cmi.success_status', SUCCESS_STATE.FAILED.asLowerCase);
+      if (this.setCompletedWhenFailed) this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase);
     } else {
-      this.setValue('cmi.core.lesson_status', 'failed');
+      this.setValue('cmi.core.lesson_status', SUCCESS_STATE.FAILED.asLowerCase);
     }
-
     if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
   }
 
@@ -218,16 +213,16 @@ class ScormWrapper {
 
   setStatus(status) {
     switch (status.toLowerCase()) {
-      case 'incomplete':
+      case COMPLETION_STATE.INCOMPLETE.asLowerCase:
         this.setIncomplete();
         break;
-      case 'completed':
+      case COMPLETION_STATE.COMPLETED.asLowerCase:
         this.setCompleted();
         break;
-      case 'passed':
+      case SUCCESS_STATE.PASSED.asLowerCase:
         this.setPassed();
         break;
-      case 'failed':
+      case SUCCESS_STATE.FAILED.asLowerCase:
         this.setFailed();
         break;
       default:
@@ -712,7 +707,7 @@ class ScormWrapper {
     this.recordScore(cmiPrefix, score, minScore, maxScore, isPercentageBased);
   }
 
-  recordObjectiveStatus(id, completionStatus, successStatus = 'unknown') {
+  recordObjectiveStatus(id, completionStatus, successStatus = SUCCESS_STATE.UNKNOWN.asLowerCase) {
     if (!this.isSupported('cmi.objectives._count')) {
       this.logger.info('ScormWrapper::recordObjectiveStatus: cmi.objectives are not supported by this LMS...');
       return;
@@ -734,7 +729,7 @@ class ScormWrapper {
       this.setValue(`${cmiPrefix}.success_status`, successStatus);
       return;
     }
-    if (completionStatus === 'completed' && successStatus !== 'unknown') completionStatus = successStatus;
+    if (completionStatus === COMPLETION_STATE.COMPLETED.asLowerCase && successStatus !== SUCCESS_STATE.UNKNOWN.asLowerCase) completionStatus = successStatus;
     this.setValue(`${cmiPrefix}.status`, completionStatus);
   }
 
@@ -742,21 +737,21 @@ class ScormWrapper {
     status = status.toLowerCase(); // workaround for some LMSs (e.g. Arena) not adhering to the all-lowercase rule
     if (this.isSCORM2004()) {
       switch(status) {
-        case 'completed':
-        case 'incomplete':
-        case 'not attempted':
-        case 'not_attempted': // mentioned in SCORM 2004 spec - mapped to 'not attempted'
-        case 'unknown':
+        case COMPLETION_STATE.UNKNOWN.asLowerCase:
+        case COMPLETION_STATE.NOTATTEMPTED.asLowerCase:
+        case COMPLETION_STATE.NOT_ATTEMPTED.asLowerCase: // mentioned in SCORM 2004 spec - mapped to 'not attempted'
+        case COMPLETION_STATE.INCOMPLETE.asLowerCase:
+        case COMPLETION_STATE.COMPLETED.asLowerCase:
           return true;
       }
     } else {
       switch(status) {
-        case 'passed':
-        case 'completed':
-        case 'incomplete':
-        case 'failed':
-        case 'browsed':
-        case 'not attempted':
+        case COMPLETION_STATE.NOTATTEMPTED.asLowerCase:
+        case COMPLETION_STATE.BROWSED.asLowerCase:
+        case COMPLETION_STATE.INCOMPLETE.asLowerCase:
+        case COMPLETION_STATE.COMPLETED.asLowerCase:
+        case SUCCESS_STATE.PASSED.asLowerCase:
+        case SUCCESS_STATE.FAILED.asLowerCase:
           return true;
       }
     }
@@ -767,9 +762,9 @@ class ScormWrapper {
     status = status.toLowerCase(); // workaround for some LMSs (e.g. Arena) not adhering to the all-lowercase rule
     if (this.isSCORM2004()) {
       switch(status) {
-        case 'passed':
-        case 'failed':
-        case 'unknown':
+        case SUCCESS_STATE.UNKNOWN.asLowerCase:
+        case SUCCESS_STATE.PASSED.asLowerCase:
+        case SUCCESS_STATE.FAILED.asLowerCase:
           return true;
       }
     }
@@ -930,13 +925,10 @@ class ScormWrapper {
 
   getExitState() {
     const completionStatus = this.scorm.data.completionStatus;
-    const isIncomplete = completionStatus === 'incomplete' || completionStatus === 'not attempted';
+    const isIncomplete = completionStatus === COMPLETION_STATE.INCOMPLETE.asLowerCase || completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase;
     const exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
-
     if (exitState !== 'auto') return exitState;
-
     if (this.isSCORM2004()) return (isIncomplete ? 'suspend' : 'normal');
-
     return '';
   }
 
