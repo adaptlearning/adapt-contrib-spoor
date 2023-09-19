@@ -4,18 +4,18 @@
 //*********************************************
 //**
 //** 30 July 2017   Ian Robinson  Class changed from e-LfH original to accomodate integration with the Adapt framwework and the file aicc-api.js which replaces the normal Adapt API.js file.
-//**                              Added self.ExitValue property and assignment  to cmi.core.exit in LMSSetValue.  
+//**                              Added self.ExitValue property and assignment  to cmi.core.exit in LMSSetValue.
 //**
 //*********************************************
 function AICC_LMS() {
-    
+
     var self = this;
 
     self.Connected = false;
 
     self.Id = "";
     self.LmsUrl = "";
-    self.Version = "4.0"; 
+    self.Version = "4.0";
     self.LmsResponse = "";
     self.SuspendData = "";
     self.MasteryScore = 0;
@@ -30,7 +30,7 @@ function AICC_LMS() {
     self.ExitValue = "";
     self.LmsResponseError = 0;
     self.LmsResponseErrorText = "";
-    
+
     self.Reset = function () {
         self.Id = "";
         self.LmsUrl = "";
@@ -47,13 +47,13 @@ function AICC_LMS() {
         self.SessionTime = 0;
         self.TotalTime = 0;
     };
-    
+
     self.LMSInitialize = function () {
 
         var result = false;
 
         try {
-           
+
             var sSend = "command=GetParam&version=" + escape(self.Version) + "&session_id=" + escape(self.Id);
 
             $.ajax({
@@ -75,7 +75,7 @@ function AICC_LMS() {
                 // response from LMS, i.e. error_text=Successful if connected, student id, name, lesson location etc.
                 self.ProcessResponse(response);
 
-                // IR 06 July 2016 - added additional check for Rustici SCORM engine, which doesn't return 'successful' in the response error text, but 
+                // IR 06 July 2016 - added additional check for Rustici SCORM engine, which doesn't return 'successful' in the response error text, but
                 // returns a zero error code only
                 if (self.LmsResponseErrorText.toLowerCase() == "successful" || (self.LmsResponseErrorText.toLowerCase() == "" && self.LmsResponseError == 0))
                 {
@@ -88,7 +88,7 @@ function AICC_LMS() {
 
         }
         catch (e) {
-            
+
             throw e;
         }
 
@@ -126,7 +126,7 @@ function AICC_LMS() {
 
                 if (element.length == 2 && element[1].length > 0) {
 
-                    var key = element[0].toLowerCase();
+                    var key = element[0].toLowerCase().trim();
                     var value = element[1].replace(/^\s+|\s+$/g, '');
 
                     if (value == undefined || value == null)
@@ -158,10 +158,10 @@ function AICC_LMS() {
                         {
                             // split up lesson status and entry value
                             var temp = value.split(",");
-                            
+
                             self.LessonStatus = self.UnAbbreviateCompletionStatus(temp[0]);
                             self.EntryValue = self.UnAbbreviateEntry(temp[1]);
-                            
+
                         }
                         else
                         {
@@ -217,7 +217,7 @@ function AICC_LMS() {
             for (var i = 0; i < oGroup.arVars.length; i++) {
                 var sPair = oGroup.arVars[i];
                 if (sPair.length > 0) {
-                    
+
                     var nBegin = sPair.search("=");
                     var sName = sPair.substring(0, nBegin);
                     var sValue = sPair.substring(nBegin + 1);
@@ -238,7 +238,7 @@ function AICC_LMS() {
                                     var sFlag = "r";
                                     if (arValues.length > 1)
                                         sFlag = arValues[1];
-        
+
                                     if (sFlag == "r" || sFlag == "resume")
                                         g_sLmsCmiEntry = "resume";
                                     */
@@ -267,7 +267,7 @@ function AICC_LMS() {
     };
 
     self.UnAbbreviateEntry = function(s) {
-        
+
         var entry = s.trim().toLowerCase();
 
         switch (entry) {
@@ -328,7 +328,7 @@ function AICC_LMS() {
         sData += "Score=" + self.Score + sCRLF;
         sData += "Time=" + self.SessionTime + sCRLF;
         //sData += "Exit=" + self.ExitValue + sCRLF;
-        
+
 
         sData += "[CORE_LESSON]" + sCRLF;
         sData += "Suspend_Data=" + self.SuspendData + sCRLF;
@@ -340,18 +340,18 @@ function AICC_LMS() {
     };
 
     self.LMSFinish = function () {
-        
+
         var result = false;
 
         try {
             var sAiccData = self.PrepareData();
 
             if (navigator.sendBeacon !== undefined) {
-                
+
                 var fd = new FormData();
                 fd.append("command", "ExitParam"); // AICC command should be ExitAU but we have created a customised one for e-LfH
                 fd.append("version", self.Version);
-                fd.append("session_id", self.Id);                
+                fd.append("session_id", self.Id);
                 fd.append("AICC_Data", sAiccData); // normal ExitAU command would not include an AICC_Data param.
 
                 result = navigator.sendBeacon(self.LmsUrl, fd);
@@ -360,7 +360,7 @@ function AICC_LMS() {
 
                 // make sure any outstanding data is saved (syncronous call)
                 self.LMSCommit();
-                
+
                 // do another call to exit the AU now
                 var exitData = "command=ExitAU&version=" + escape(self.Version) + "&session_id=" + escape(self.Id);
 
@@ -384,7 +384,7 @@ function AICC_LMS() {
                     result = true;
                 });
 
-                
+
             }
 
         }
@@ -403,7 +403,7 @@ function AICC_LMS() {
         {
             var sAiccData = self.PrepareData();
             var sSend = "command=PutParam&version=" + escape(self.Version) + "&session_id=" + escape(self.Id) + "&AICC_Data=" + escape(sAiccData);
-                
+
             $.ajax({
                 method: "POST",
                 async: false,
@@ -419,12 +419,12 @@ function AICC_LMS() {
                 throw error;
             })
             .done(function( response ) {
-            
+
                 self.LmsResponse = response;
-                
+
                 self.ProcessResponse(response);
 
-                
+
                 result = true;
             });
 
@@ -475,7 +475,7 @@ function AICC_LMS() {
                 default: // for any other values, don't set anything
                     break;
             }
-            
+
             return true;
 
         } catch (e) {
@@ -535,7 +535,7 @@ function AICC_LMS() {
                 case "cmi.core.total_time":
                     return self.TotalTime();
                     break;
-                    
+
                 default: // no match
                     return "";
                     break;
@@ -548,12 +548,12 @@ function AICC_LMS() {
 
     };
 
-    
+
     self.LMSGetLastError = function (parameter) {
         return self.LmsResponseError;
     };
 
-    
+
     self.LMSGetErrorString = function (parameter) {
 
         return self.LmsResponseErrorText;
@@ -585,7 +585,7 @@ function SCORM_Error(errorCode, errorMsg) {
 // End of SCORM_Error definition
 //*********************************************
 
-var SCORM_Error_Enum = { 
+var SCORM_Error_Enum = {
     CONST_LMSInitialise_ERROR: 100,
     CONST_LMSDisconnect_ERROR: 200,
     CONST_LMSSetValue_ERROR: 300,
