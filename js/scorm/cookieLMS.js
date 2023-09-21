@@ -135,6 +135,7 @@ export function start () {
       configure();
       this.initialize({
         'cmi.interactions': [],
+        'cmi.objectives': [],
         'cmi.core.lesson_status': 'not attempted',
         'cmi.suspend_data': '',
         'cmi.core.student_name': 'Surname, Sam',
@@ -199,6 +200,7 @@ export function start () {
       configure();
       this.initialize({
         'cmi.interactions': [],
+        'cmi.objectives': [],
         'cmi.completion_status': 'not attempted',
         'cmi.suspend_data': '',
         'cmi.learner_name': 'Surname, Sam',

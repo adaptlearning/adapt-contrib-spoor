@@ -1,6 +1,6 @@
 # adapt-contrib-spoor
 
-**Spoor** is an *extension* bundled with the [Adapt framework](https://github.com/adaptlearning/adapt_framework). 
+**Spoor** is an *extension* bundled with the [Adapt framework](https://github.com/adaptlearning/adapt_framework).
 
 This extension provides course tracking functionality (hence the name [spoor](https://en.wikipedia.org/wiki/Spoor_(animal))) via [SCORM](https://en.wikipedia.org/wiki/Sharable_Content_Object_Reference_Model) standards for compliant [Learning Management Systems (LMS)](https://en.wikipedia.org/wiki/Learning_management_system). As default, only SCORM 1.2 or SCORM 2004 4th Edition files are included. See [_scormVersion](https://github.com/adaptlearning/adapt-contrib-spoor#_scormVersion) for details on how to configure this accordingly.
 
@@ -202,4 +202,4 @@ Currently (officially) only supports SCORM 1.2
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-spoor/graphs/contributors)
 **Accessibility support:** n/a
 **RTL support:** n/a
-**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge, IE11, Safari 14 for macOS/iOS/iPadOS, Opera
+**Cross-platform coverage:** Chrome, Chrome for Android, Firefox (ESR + latest version), Edge, Safari 14 for macOS/iOS/iPadOS, Opera
