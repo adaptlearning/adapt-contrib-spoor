@@ -8,6 +8,7 @@ import pipwerks from 'libraries/SCORM_API_wrapper';
 import Logger from './logger';
 import ScormError from './error';
 import Connection from './Connection';
+import router from 'core/js/router';
 
 const {
   CLIENT_COULD_NOT_CONNECT,
@@ -80,6 +81,7 @@ class ScormWrapper {
     this.finishCalled = false;
     this.logger = Logger.getInstance();
     this.scorm = pipwerks.SCORM;
+    this.maxCharLimitOverride = null
     /**
      * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
      */
@@ -147,6 +149,9 @@ class ScormWrapper {
       }
       if (_.isBoolean(settings._setCompletedWhenFailed)) {
         this.setCompletedWhenFailed = settings._setCompletedWhenFailed;
+      }
+      if (!_.isNaN(settings._maxCharLimitOverride) && settings._maxCharLimitOverride > 0) {
+        this.maxCharLimitOverride = settings._maxCharLimitOverride;
       }
     }
 
@@ -539,6 +544,8 @@ class ScormWrapper {
       if (error.data.value === '') error.data.value = '\'\'';
     }
 
+    if (!Adapt.course) return;
+
     const config = Adapt.course.get('_spoor');
     const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
     const message = Handlebars.compile(messages[error.name])(error.data);
@@ -549,7 +556,7 @@ class ScormWrapper {
         if (!Notify.isOpen) {
           // prevent course load execution
           Wait.begin();
-          $('.js-loading').hide();
+          router.hideLoading();
 
           Notify.popup({
             _isCancellable: false,
@@ -659,7 +666,8 @@ class ScormWrapper {
 
   recordInteractionFillIn(id, response, correct, latency, type) {
 
-    const maxLength = this.isSCORM2004() ? 250 : 255;
+    let maxLength = this.isSCORM2004() ? 250 : 255;
+    maxLength = this.maxCharLimitOverride ?? maxLength;
 
     if (response.length > maxLength) {
       response = response.substr(0, maxLength);
