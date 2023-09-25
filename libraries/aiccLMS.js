@@ -95,176 +95,84 @@ function AICC_LMS() {
         return result;
     };
 
-    self.ProcessResponse = function (sResponse) {
+  self.ProcessResponse = function (sResponse) {
 
-        var sCRLF = String.fromCharCode(13, 10);
-        var sCR = String.fromCharCode(10);
+      const lines = sResponse.split("\n");
+      const re = /^\[(\w+)\]$/m;
+      let aiccSection = "none";
 
-        var sSrc = unescape(sResponse);
+      for (let x in lines) {
+        console.log("####"+lines[x]+"##");
+        let line = lines[x];
+        if (line.search(re) > -1) {                                 //single line section eg [Student_Data]
+            console.log(line);
+            console.log(line.replace(re,"$1"));
+            aiccSection = line.replace(re,"$1").toLowerCase();      //set value for current aiccSeciton
+            console.log("**"+aiccSection);
+        } else if (line.search("=") > -1) {                         //key=value pair
+          let elements = line.split("=");
+          let key = elements[0].trim().toLowerCase();
+          let value = elements[1].trim();
 
-        // Remove comments
-        sSrc = sSrc.replace(/^;.*$/gm, "");
-
-        var re = /^\[(\w+)\]$/m;
-        var sNameSeparator = " ";
-
-        var pGroups = null;
-
-        for (; ;) {
-            if (sSrc.length == 0)
-                break;
-
-            var nGroupBegin = sSrc.search(re);
-
-            //top section
-            var top_section = sSrc.substr(0, nGroupBegin - 1);
-            var elements = top_section.split(sCR);
-
-            for (var i = 0; i < elements.length; i++) {
-
-                var element = elements[i].split("=");
-
-                if (element.length == 2 && element[1].length > 0) {
-
-                    var key = element[0].toLowerCase().trim();
-                    var value = element[1].replace(/^\s+|\s+$/g, '');
-
-                    if (value == undefined || value == null)
-                    {
-                        value = '';
+          if (value.length > 0) {
+            console.log("+"+value+"+");
+            if (value.search(re) > -1) {                            //value is in []s probably aicc_data=[Core]
+              console.log("FOUND HIM");
+              aiccSection = value.replace(re,"$1").toLowerCase(); //set value for current aiccSection
+              console.log("**"+aiccSection);
+            } else {
+              switch (aiccSection) {
+                case "none":                                    //opening section
+                  if (key == "error") {
+                    self.LmsResponseError = parseInt(value, 10);
+                  } else if (key == "error_text") {
+                    self.LmsResponseErrorText = value;
+                  }
+                  break;
+                case "core":
+                  if (key == "student_id") {
+                    self.StudentId = value;
+                  } else if (key == "student_name") {
+                    self.StudentName = value;
+                  } else if (key == "lesson_location") {
+                    self.LessonLocation = value;
+                  } else if (key == "lesson_status") {
+                    // this contains a comma, then this field contains both the lesson_status and the core.entry value
+                    // otherwise it contains on the lesson_status
+                    if (value.indexOf(",") > -1) {
+                      // split up lesson status and entry value
+                      let temp = value.split(",");
+                      self.LessonStatus = self.UnAbbreviateCompletionStatus(temp[0]);
+                      self.EntryValue = self.UnAbbreviateEntry(temp[1]);
+                    } else {
+                      self.LessonStatus = self.UnAbbreviateCompletionStatus(value);
                     }
-
-                    if (key == "error") {
-                        self.LmsResponseError = value;
-                    }
-                    else if (key == "error_text") {
-                        self.LmsResponseErrorText = value;
-                    }
-                    else if (key == "student_id") {
-                        self.StudentId = value;
-                    }
-                    else if (key == "student_name") {
-                        self.StudentName = value;
-                    }
-                    else if (key == "lesson_location") {
-                        self.LessonLocation = value;
-                    }
-                    else if (key == "lesson_status") {
-
-
-                        // this contains a comma, then this field contains both the lesson_status and the core.entry value
-                        // otherwise it contains on the lesson_status
-                        if (value.indexOf(",") > -1)
-                        {
-                            // split up lesson status and entry value
-                            var temp = value.split(",");
-
-                            self.LessonStatus = self.UnAbbreviateCompletionStatus(temp[0]);
-                            self.EntryValue = self.UnAbbreviateEntry(temp[1]);
-
-                        }
-                        else
-                        {
-                            self.LessonStatus = self.UnAbbreviateCompletionStatus(value);
-                        }
-                    }
-                    else if (key == "score") {
-
-                        if (value == '')
-                        {
-                            self.Score = '';
-                        }
-                        else
-                        {
-                            self.Score = parseInt(value, 10);
-                        }
-
-                    }
-                    else if (key == "time") {
-                        self.TotalTime = value;
-                    }
-
-                }
-
-            };
-
-            // bottom section
-            sSrc = sSrc.substr(nGroupBegin);
-
-            var sGroup = sSrc.replace(re, "$1" + sNameSeparator);
-            var sGroupName = sGroup.substr(0, sGroup.search(sNameSeparator));
-            sGroup = sGroup.substr(sGroupName.length + 1);
-
-            var nNextGroupBegin = sGroup.search(re);
-            if (nNextGroupBegin == -1)
-                nNextGroupBegin = sGroup.length;
-
-            sSrc = sGroup.substr(nNextGroupBegin);
-            sGroup = sGroup.substr(0, nNextGroupBegin);
-
-            // Remove extra line breaks
-            sGroup = sGroup.replace(/[\n\r]+/gm, sCR);
-            sGroup = sGroup.replace(/^[\n]+/gm, "");
-
-            var oGroup = new Object;
-            oGroup.sName = sGroupName.toLowerCase();
-            oGroup.arVars = sGroup.split(sCR);
-            oGroup.pNext = pGroups;
-            pGroups = oGroup;
-        }
-
-        for (var oGroup = pGroups; oGroup != null; oGroup = oGroup.pNext) {
-            for (var i = 0; i < oGroup.arVars.length; i++) {
-                var sPair = oGroup.arVars[i];
-                if (sPair.length > 0) {
-
-                    var nBegin = sPair.search("=");
-                    var sName = sPair.substring(0, nBegin);
-                    var sValue = sPair.substring(nBegin + 1);
-
-                    sName = sName.toLowerCase();
-
-                    if (oGroup.sName == "core") {
-                        switch (sName) {
-                            case "lesson_status":
-                                {
-
-                                    sValue = sValue.toLowerCase();
-                                    var arValues = sValue.split(",");
-
-                                    self.LessonStatus = arValues[0];
-
-                                    /*  IR - entry value isn't needed for aicc sessions.
-                                    var sFlag = "r";
-                                    if (arValues.length > 1)
-                                        sFlag = arValues[1];
-
-                                    if (sFlag == "r" || sFlag == "resume")
-                                        g_sLmsCmiEntry = "resume";
-                                    */
-                                    break;
-                                }
-
-                        }
-                    }
-                    else if (oGroup.sName == "core_lesson") {
-                        switch (sName) {
-                            case "suspend_data":
-                                self.SuspendData = sValue;
-                                break;
-                        }
-                    }
-                    else if (oGroup.sName == "student_data") {
-                        switch (sName) {
-                            case "mastery_score":
-                                self.MasteryScore = sValue;
-                                break;
-                        }
-                    }
-                }
+                  } else if (key == "score") {
+                      if (value == "") {
+                          self.Score = 0;
+                      } else {
+                          self.Score = parseInt(value, 10);
+                      }
+                  } else if (key == "time") {
+                      self.TotalTime = parseFloat(value);
+                  }
+                  break;
+                case "core_lesson":
+                  if (key == "suspend_data") {
+                    self.SuspendData = value;
+                  }
+                  break;
+                case "student_data":
+                  if (key == "mastery_score") {
+                      self.MasteryScore = value;
+                  }
+                  break;
+              }
             }
+          }
         }
-    };
+      }
+    }
 
     self.UnAbbreviateEntry = function(s) {
 
