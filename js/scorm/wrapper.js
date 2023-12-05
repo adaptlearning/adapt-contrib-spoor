@@ -273,7 +273,6 @@ class ScormWrapper {
       this.setValue('cmi.learner_preference.language', lang);
       return;
     }
-    if (!this.isSupported('cmi.student_preference.language')) return;
     this.setValue('cmi.student_preference.language', lang);
   }
 
@@ -364,28 +363,19 @@ class ScormWrapper {
   }
 
   recordInteraction(id, response, correct, latency, type) {
-    if (!this.isSupported('cmi.interactions._count')) {
-      this.logger.info('ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...');
-      return;
-    }
-
     switch (type) {
       case 'choice':
         this.recordInteractionMultipleChoice.apply(this, arguments);
         break;
-
       case 'matching':
         this.recordInteractionMatching.apply(this, arguments);
         break;
-
       case 'numeric':
         this.isSCORM2004() ? this.recordInteractionScorm2004.apply(this, arguments) : this.recordInteractionScorm12.apply(this, arguments);
         break;
-
       case 'fill-in':
         this.recordInteractionFillIn.apply(this, arguments);
         break;
-
       default:
         console.error(`ScormWrapper.recordInteraction: unknown interaction type of '${type}' encountered...`);
     }
@@ -474,19 +464,20 @@ class ScormWrapper {
    */
   isSupported(property) {
     this.logger.debug(`ScormWrapper::isSupported: _property=${property}`);
-
     if (this.finishCalled) {
       this.logger.debug('ScormWrapper::isSupported: ignoring request as \'finish\' has been called');
       return;
     }
-
     if (!this.lmsConnected) {
       this.handleConnectionError();
       return false;
     }
-
     this.scorm.get(property);
-    return (this.scorm.debug.getCode() !== 401); // 401 is the 'not implemented' error code
+    return !this.isUnsupportedErrorCode(this.scorm.debug.getCode());
+  }
+
+  isUnsupportedErrorCode(code) {
+    return code === 401;
   }
 
   initTimedCommit() {
@@ -517,61 +508,60 @@ class ScormWrapper {
   async handleInitializeError() {
     if (!Data.isReady) await Data.whenReady();
     Adapt.trigger('tracking:initializeError');
-    // defer error to allow other plugins which may be handling errors to execute
-    _.defer(() => this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT)));
+    this.handleError(new ScormError(CLIENT_COULD_NOT_CONNECT));
   }
 
-  handleConnectionError(callback = null) {
+  async handleConnectionError(callback = null) {
+    if (!Data.isReady) await Data.whenReady();
     Adapt.trigger('tracking:connectionError', callback);
     this.handleError(new ScormError(CLIENT_NOT_CONNECTED));
   }
 
-  handleDataError(error) {
-    Adapt.trigger('tracking:dataError');
+  async handleDataError(error) {
+    if (!Data.isReady) await Data.whenReady();
+    if (!this.isUnsupportedErrorCode(error.data.errorCode)) Adapt.trigger('tracking:dataError');
     this.handleError(error);
   }
 
-  handleFinishError(error) {
+  async handleFinishError(error) {
+    if (!Data.isReady) await Data.whenReady();
     Adapt.trigger('tracking:terminationError');
     this.handleError(error);
   }
 
-  handleError(error) {
+  async handleError(error) {
+    if (!Data.isReady) await Data.whenReady();
     if ('value' in error.data) {
       // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
       if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
       // if the value being set is an empty string, ensure it displays in the error as ''
       if (error.data.value === '') error.data.value = '\'\'';
     }
-
-    if (!Adapt.course) return;
-
     const config = Adapt.course.get('_spoor');
     const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
     const message = Handlebars.compile(messages[error.name])(error.data);
-
+    this.logger.error(message);
+    if (this.isUnsupportedErrorCode(error.data.errorCode)) return;
     switch (error.name) {
       case CLIENT_COULD_NOT_CONNECT:
-        // don't show if error notification already handled by other plugins
-        if (!Notify.isOpen) {
-          // prevent course load execution
-          Wait.begin();
-          router.hideLoading();
-
-          Notify.popup({
-            _isCancellable: false,
-            title: messages.title,
-            body: message
-          });
-        }
+        // defer error to allow other plugins which may be handling errors to execute first
+        _.defer(() => {
+          // don't show if error notification already handled by other plugins
+          if (!Notify.isOpen) {
+            // prevent course load execution
+            Wait.begin();
+            router.hideLoading();
+            Notify.popup({
+              _isCancellable: false,
+              title: messages.title,
+              body: message
+            });
+          }
+        });
     }
-
-    this.logger.error(message);
-
     if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
       this.showDebugWindow();
     }
-
   }
 
   recordScore(cmiPrefix, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
@@ -597,8 +587,8 @@ class ScormWrapper {
       validate(`${cmiPrefix}.score.max`, maxScore);
     }
     this.setValue(`${cmiPrefix}.score.raw`, score);
-    if (this.isSupported(`${cmiPrefix}.score.min`)) this.setValue(`${cmiPrefix}.score.min`, minScore);
-    if (this.isSupported(`${cmiPrefix}.score.max`)) this.setValue(`${cmiPrefix}.score.max`, maxScore);
+    this.setValue(`${cmiPrefix}.score.min`, minScore);
+    this.setValue(`${cmiPrefix}.score.max`, maxScore);
   }
 
   getInteractionCount() {
@@ -704,10 +694,6 @@ class ScormWrapper {
   }
 
   recordObjectiveScore(id, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
-    if (!this.isSupported('cmi.objectives._count')) {
-      this.logger.info('ScormWrapper::recordObjectiveScore: cmi.objectives are not supported by this LMS...');
-      return;
-    }
     id = id.trim();
     const index = this.getObjectiveIndexById(id);
     const cmiPrefix = `cmi.objectives.${index}`;
@@ -716,10 +702,6 @@ class ScormWrapper {
   }
 
   recordObjectiveStatus(id, completionStatus, successStatus = SUCCESS_STATE.UNKNOWN.asLowerCase) {
-    if (!this.isSupported('cmi.objectives._count')) {
-      this.logger.info('ScormWrapper::recordObjectiveStatus: cmi.objectives are not supported by this LMS...');
-      return;
-    }
     if (!this.isValidCompletionStatus(completionStatus)) {
       this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { completionStatus }));
       return;
