@@ -273,6 +273,7 @@ class ScormWrapper {
       this.setValue('cmi.learner_preference.language', lang);
       return;
     }
+    if (!this.isSupported('cmi.student_preference.language')) return;
     this.setValue('cmi.student_preference.language', lang);
   }
 
@@ -363,6 +364,10 @@ class ScormWrapper {
   }
 
   recordInteraction(id, response, correct, latency, type) {
+    if (!this.isSupported('cmi.interactions._count')) {
+      this.logger.info('ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...');
+      return;
+    }
     switch (type) {
       case 'choice':
         this.recordInteractionMultipleChoice.apply(this, arguments);
@@ -587,8 +592,8 @@ class ScormWrapper {
       validate(`${cmiPrefix}.score.max`, maxScore);
     }
     this.setValue(`${cmiPrefix}.score.raw`, score);
-    this.setValue(`${cmiPrefix}.score.min`, minScore);
-    this.setValue(`${cmiPrefix}.score.max`, maxScore);
+    if (this.isSupported(`${cmiPrefix}.score.min`)) this.setValue(`${cmiPrefix}.score.min`, minScore);
+    if (this.isSupported(`${cmiPrefix}.score.max`)) this.setValue(`${cmiPrefix}.score.max`, maxScore);
   }
 
   getInteractionCount() {
@@ -694,6 +699,10 @@ class ScormWrapper {
   }
 
   recordObjectiveScore(id, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
+    if (!this.isSupported('cmi.objectives._count')) {
+      this.logger.info('ScormWrapper::recordObjectiveScore: cmi.objectives are not supported by this LMS...');
+      return;
+    }
     id = id.trim();
     const index = this.getObjectiveIndexById(id);
     const cmiPrefix = `cmi.objectives.${index}`;
@@ -702,6 +711,10 @@ class ScormWrapper {
   }
 
   recordObjectiveStatus(id, completionStatus, successStatus = SUCCESS_STATE.UNKNOWN.asLowerCase) {
+    if (!this.isSupported('cmi.objectives._count')) {
+      this.logger.info('ScormWrapper::recordObjectiveStatus: cmi.objectives are not supported by this LMS...');
+      return;
+    }
     if (!this.isValidCompletionStatus(completionStatus)) {
       this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { completionStatus }));
       return;
