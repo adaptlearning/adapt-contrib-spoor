@@ -114,7 +114,7 @@ export default class StatefulSession extends Backbone.Controller {
     if (shouldCommitOnVisibilityChange) {
       document.addEventListener('visibilitychange', this.onVisibilityChange);
     }
-    $(window).on('beforeunload unload', this.endSession);
+    $(window).on('beforeunload unload pagehide', this.endSession);
   }
 
   async saveSessionState() {
@@ -204,6 +204,7 @@ export default class StatefulSession extends Backbone.Controller {
 
   onQuestionRecordInteraction(questionView) {
     if (!this._shouldRecordInteractions) return;
+    if (!this.scorm.isSupported('cmi.interactions._count')) return;
     // View functions are deprecated: getResponseType, getResponse, isCorrect, getLatency
     const questionModel = questionView.model;
     const responseType = (questionModel.getResponseType ? questionModel.getResponseType() : questionView.getResponseType());
@@ -261,7 +262,7 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   removeEventListeners() {
-    $(window).off('beforeunload unload', this.endSession);
+    $(window).off('beforeunload unload pagehide', this.endSession);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.stopListening();
   }
