@@ -273,7 +273,11 @@ class ScormWrapper {
       this.setValue('cmi.learner_preference.language', lang);
       return;
     }
-    if (!this.isSupported('cmi.student_preference.language')) return;
+    const children = this.getValue('cmi.student_preference._children');
+    if (this.isUnsupportedLastError() || !children.includes('language')) {
+      this.logUnsupported('cmi.student_preference.language');
+      return;
+    }
     this.setValue('cmi.student_preference.language', lang);
   }
 
@@ -364,28 +368,19 @@ class ScormWrapper {
   }
 
   recordInteraction(id, response, correct, latency, type) {
-    if (!this.isSupported('cmi.interactions._count')) {
-      this.logger.info('ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...');
-      return;
-    }
-
     switch (type) {
       case 'choice':
-        this.recordInteractionMultipleChoice.apply(this, arguments);
+        this.recordInteractionMultipleChoice(...arguments);
         break;
-
       case 'matching':
-        this.recordInteractionMatching.apply(this, arguments);
+        this.recordInteractionMatching(...arguments);
         break;
-
       case 'numeric':
-        this.isSCORM2004() ? this.recordInteractionScorm2004.apply(this, arguments) : this.recordInteractionScorm12.apply(this, arguments);
+        this.isSCORM2004() ? this.recordInteractionScorm2004(...arguments) : this.recordInteractionScorm12(...arguments);
         break;
-
       case 'fill-in':
-        this.recordInteractionFillIn.apply(this, arguments);
+        this.recordInteractionFillIn(...arguments);
         break;
-
       default:
         console.error(`ScormWrapper.recordInteraction: unknown interaction type of '${type}' encountered...`);
     }
@@ -395,20 +390,16 @@ class ScormWrapper {
 
   getValue(property) {
     this.logger.debug(`ScormWrapper::getValue: _property=${property}`);
-
     if (this.finishCalled) {
       this.logger.debug('ScormWrapper::getValue: ignoring request as \'finish\' has been called');
       return;
     }
-
     if (!this.lmsConnected) {
       this.handleConnectionError();
       return;
     }
-
     const value = this.scorm.get(property);
     const errorCode = this.scorm.debug.getCode();
-
     switch (errorCode) {
       case 0:
         break;
@@ -431,17 +422,14 @@ class ScormWrapper {
 
   setValue(property, value) {
     this.logger.debug(`ScormWrapper::setValue: _property=${property} _value=${value}`);
-
     if (this.finishCalled) {
       this.logger.debug('ScormWrapper::setValue: ignoring request as \'finish\' has been called');
       return;
     }
-
     if (!this.lmsConnected) {
       this.handleConnectionError();
       return;
     }
-
     const success = this.scorm.set(property, value);
     if (success) {
       // if success, test the connection as the API usually returns true regardless of the ability to persist the data
@@ -462,7 +450,6 @@ class ScormWrapper {
       }
       this.logger.warn('ScormWrapper::setValue: LMS reported that the \'set\' call failed but then said there was no error!');
     }
-
     if (this.commitOnAnyChange) this.debouncedCommit();
     return success;
   }
@@ -474,19 +461,29 @@ class ScormWrapper {
    */
   isSupported(property) {
     this.logger.debug(`ScormWrapper::isSupported: _property=${property}`);
-
     if (this.finishCalled) {
       this.logger.debug('ScormWrapper::isSupported: ignoring request as \'finish\' has been called');
       return;
     }
-
     if (!this.lmsConnected) {
       this.handleConnectionError();
       return false;
     }
-
     this.scorm.get(property);
-    return (this.scorm.debug.getCode() !== 401); // 401 is the 'not implemented' error code
+    return !this.isUnsupportedLastError();
+  }
+
+  isUnsupportedErrorCode(code) {
+    return code === 401;
+  }
+
+  isUnsupportedLastError() {
+    return this.isUnsupportedErrorCode(this.scorm.debug.getCode());
+  }
+
+  logUnsupported(property) {
+    property = property.replace(/.[0-9]/g, '');
+    this.logger.info(`ScormWrapper::${property} not supported by this LMS...`);
   }
 
   initTimedCommit() {
@@ -528,7 +525,7 @@ class ScormWrapper {
 
   async handleDataError(error) {
     if (!Data.isReady) await Data.whenReady();
-    Adapt.trigger('tracking:dataError');
+    if (!this.isUnsupportedErrorCode(error.data.errorCode)) Adapt.trigger('tracking:dataError');
     this.handleError(error);
   }
 
@@ -540,19 +537,21 @@ class ScormWrapper {
 
   async handleError(error) {
     if (!Data.isReady) await Data.whenReady();
-    // defer error to allow other plugins which may be handling errors to execute first
-    _.defer(() => {
-      if ('value' in error.data) {
-        // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
-        if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
-        // if the value being set is an empty string, ensure it displays in the error as ''
-        if (error.data.value === '') error.data.value = '\'\'';
-      }
-      const config = Adapt.course.get('_spoor');
-      const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
-      const message = Handlebars.compile(messages[error.name])(error.data);
-      switch (error.name) {
-        case CLIENT_COULD_NOT_CONNECT:
+    if ('value' in error.data) {
+      // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
+      if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
+      // if the value being set is an empty string, ensure it displays in the error as ''
+      if (error.data.value === '') error.data.value = '\'\'';
+    }
+    const config = Adapt.course.get('_spoor');
+    const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
+    const message = Handlebars.compile(messages[error.name])(error.data);
+    this.logger.error(message);
+    if (this.isUnsupportedErrorCode(error.data.errorCode)) return;
+    switch (error.name) {
+      case CLIENT_COULD_NOT_CONNECT:
+        // defer error to allow other plugins which may be handling errors to execute first
+        _.defer(() => {
           // don't show if error notification already handled by other plugins
           if (!Notify.isOpen) {
             // prevent course load execution
@@ -564,12 +563,11 @@ class ScormWrapper {
               body: message
             });
           }
-      }
-      this.logger.error(message);
-      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
-        this.showDebugWindow();
-      }
-    });
+        });
+    }
+    if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
+      this.showDebugWindow();
+    }
   }
 
   recordScore(cmiPrefix, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
@@ -595,8 +593,10 @@ class ScormWrapper {
       validate(`${cmiPrefix}.score.max`, maxScore);
     }
     this.setValue(`${cmiPrefix}.score.raw`, score);
-    if (this.isSupported(`${cmiPrefix}.score.min`)) this.setValue(`${cmiPrefix}.score.min`, minScore);
-    if (this.isSupported(`${cmiPrefix}.score.max`)) this.setValue(`${cmiPrefix}.score.max`, maxScore);
+    const children = this.getValue(`${cmiPrefix}.score._children`);
+    if (this.isUnsupportedLastError()) return;
+    children.includes('min') ? this.setValue(`${cmiPrefix}.score.min`, minScore) : this.logUnsupported(`${cmiPrefix}.score.min`);
+    children.includes('max') ? this.setValue(`${cmiPrefix}.score.max`, maxScore) : this.logUnsupported(`${cmiPrefix}.score.max`);
   }
 
   getInteractionCount() {
@@ -605,77 +605,60 @@ class ScormWrapper {
   }
 
   recordInteractionScorm12(id, response, correct, latency, type) {
-
+    const children = this.getValue('cmi.interactions._children');
+    if (this.isUnsupportedLastError() || !children.includes('id') || !this.isSupported('cmi.interactions._count')) {
+      this.logUnsupported('cmi.interactions');
+      return;
+    }
     id = id.trim();
-
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
-
     this.setValue(`${cmiPrefix}.id`, id);
-    this.setValue(`${cmiPrefix}.type`, type);
-    this.setValue(`${cmiPrefix}.student_response`, response);
-    this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong');
-    if (latency !== null && latency !== undefined) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency));
-    this.setValue(`${cmiPrefix}.time`, this.getCMITime());
+    children.includes('type') ? this.setValue(`${cmiPrefix}.type`, type) : this.logUnsupported(`${cmiPrefix}.type`);
+    children.includes('student_response') ? this.setValue(`${cmiPrefix}.student_response`, response) : this.logUnsupported(`${cmiPrefix}.student_response`);
+    children.includes('result') ? this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong') : this.logUnsupported(`${cmiPrefix}.result`);
+    children.includes('latency') && latency != null ? this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency)) : this.logUnsupported(`${cmiPrefix}.latency`);
+    children.includes('time') ? this.setValue(`${cmiPrefix}.time`, this.getCMITime()) : this.logUnsupported(`${cmiPrefix}.time`);
   }
 
   recordInteractionScorm2004(id, response, correct, latency, type) {
-
     id = id.trim();
-
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
-
     this.setValue(`${cmiPrefix}.id`, id);
     this.setValue(`${cmiPrefix}.type`, type);
     this.setValue(`${cmiPrefix}.learner_response`, response);
     this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'incorrect');
-    if (latency !== null && latency !== undefined) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM2004Time(latency));
+    if (latency != null) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM2004Time(latency));
     this.setValue(`${cmiPrefix}.timestamp`, this.getISO8601Timestamp());
   }
 
   recordInteractionMultipleChoice(id, response, correct, latency, type) {
-
     if (this.isSCORM2004()) {
       response = response.replace(/,|#/g, '[,]');
     } else {
       response = response.replace(/#/g, ',');
       response = this.checkResponse(response, 'choice');
     }
-
-    const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    this.isSCORM2004() ? this.recordInteractionScorm2004(...arguments) : this.recordInteractionScorm12(...arguments);
   }
 
   recordInteractionMatching(id, response, correct, latency, type) {
-
     response = response.replace(/#/g, ',');
-
     if (this.isSCORM2004()) {
-      response = response.replace(/,/g, '[,]');
-      response = response.replace(/\./g, '[.]');
+      response = response.replace(/,/g, '[,]').replace(/\./g, '[.]');
     } else {
       response = this.checkResponse(response, 'matching');
     }
-
-    const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    this.isSCORM2004() ? this.recordInteractionScorm2004(...arguments) : this.recordInteractionScorm12(...arguments);
   }
 
   recordInteractionFillIn(id, response, correct, latency, type) {
-
     let maxLength = this.isSCORM2004() ? 250 : 255;
     maxLength = this.maxCharLimitOverride ?? maxLength;
-
     if (response.length > maxLength) {
       response = response.substr(0, maxLength);
-
       this.logger.warn(`ScormWrapper::recordInteractionFillIn: response data for ${id} is longer than the maximum allowed length of ${maxLength} characters; data will be truncated to avoid an error.`);
     }
-
-    const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    this.isSCORM2004() ? this.recordInteractionScorm2004(...arguments) : this.recordInteractionScorm12(...arguments);
   }
 
   getObjectiveCount() {
@@ -702,8 +685,9 @@ class ScormWrapper {
   }
 
   recordObjectiveScore(id, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
-    if (!this.isSupported('cmi.objectives._count')) {
-      this.logger.info('ScormWrapper::recordObjectiveScore: cmi.objectives are not supported by this LMS...');
+    const children = this.getValue('cmi.objectives._children');
+    if (this.isUnsupportedLastError() || !children.includes('id') || !this.isSupported('cmi.objectives._count')) {
+      this.logUnsupported('cmi.objectives');
       return;
     }
     id = id.trim();
@@ -714,8 +698,9 @@ class ScormWrapper {
   }
 
   recordObjectiveStatus(id, completionStatus, successStatus = SUCCESS_STATE.UNKNOWN.asLowerCase) {
-    if (!this.isSupported('cmi.objectives._count')) {
-      this.logger.info('ScormWrapper::recordObjectiveStatus: cmi.objectives are not supported by this LMS...');
+    const children = this.getValue('cmi.objectives._children');
+    if (this.isUnsupportedLastError() || !children.includes('id') || !this.isSupported('cmi.objectives._count')) {
+      this.logUnsupported('cmi.objectives');
       return;
     }
     if (!this.isValidCompletionStatus(completionStatus)) {
@@ -733,6 +718,10 @@ class ScormWrapper {
     if (this.isSCORM2004()) {
       this.setValue(`${cmiPrefix}.completion_status`, completionStatus);
       this.setValue(`${cmiPrefix}.success_status`, successStatus);
+      return;
+    }
+    if (!children.includes('status')) {
+      this.logUnsupported(`${cmiPrefix}.status`);
       return;
     }
     if (completionStatus === COMPLETION_STATE.COMPLETED.asLowerCase && successStatus !== SUCCESS_STATE.UNKNOWN.asLowerCase) completionStatus = successStatus;
