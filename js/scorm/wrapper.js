@@ -482,7 +482,7 @@ class ScormWrapper {
   }
 
   logUnsupported(property) {
-    property = property.replace(/.[0-9]/g, '');
+    property = property.replace(/[0-9]/g, 'n');
     this.logger.info(`ScormWrapper::${property} not supported by this LMS...`);
   }
 
@@ -595,8 +595,10 @@ class ScormWrapper {
     this.setValue(`${cmiPrefix}.score.raw`, score);
     const children = this.getValue(`${cmiPrefix}.score._children`);
     if (this.isUnsupportedLastError()) return;
-    children.includes('min') ? this.setValue(`${cmiPrefix}.score.min`, minScore) : this.logUnsupported(`${cmiPrefix}.score.min`);
-    children.includes('max') ? this.setValue(`${cmiPrefix}.score.max`, maxScore) : this.logUnsupported(`${cmiPrefix}.score.max`);
+    children.includes('min') ? this.setValue(`${cmiPrefix}.score.min`, minScore)
+      : this.logUnsupported(`${cmiPrefix}.score.min`);
+    children.includes('max') ? this.setValue(`${cmiPrefix}.score.max`, maxScore)
+      : this.logUnsupported(`${cmiPrefix}.score.max`);
   }
 
   getInteractionCount() {
@@ -613,11 +615,16 @@ class ScormWrapper {
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
-    children.includes('type') ? this.setValue(`${cmiPrefix}.type`, type) : this.logUnsupported(`${cmiPrefix}.type`);
-    children.includes('student_response') ? this.setValue(`${cmiPrefix}.student_response`, response) : this.logUnsupported(`${cmiPrefix}.student_response`);
-    children.includes('result') ? this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong') : this.logUnsupported(`${cmiPrefix}.result`);
-    children.includes('latency') && latency != null ? this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency)) : this.logUnsupported(`${cmiPrefix}.latency`);
-    children.includes('time') ? this.setValue(`${cmiPrefix}.time`, this.getCMITime()) : this.logUnsupported(`${cmiPrefix}.time`);
+    children.includes('type') ? this.setValue(`${cmiPrefix}.type`, type)
+      : this.logUnsupported(`${cmiPrefix}.type`);
+    children.includes('student_response') ? this.setValue(`${cmiPrefix}.student_response`, response)
+      : this.logUnsupported(`${cmiPrefix}.student_response`);
+    children.includes('result') ? this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong')
+      : this.logUnsupported(`${cmiPrefix}.result`);
+    children.includes('latency') && latency != null ? this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency))
+      : this.logUnsupported(`${cmiPrefix}.latency`);
+    children.includes('time') ? this.setValue(`${cmiPrefix}.time`, this.getCMITime())
+      : this.logUnsupported(`${cmiPrefix}.time`);
   }
 
   recordInteractionScorm2004(id, response, correct, latency, type) {
