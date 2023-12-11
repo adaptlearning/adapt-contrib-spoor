@@ -482,7 +482,7 @@ class ScormWrapper {
   }
 
   logUnsupported(property) {
-    property = property.replace(/[0-9]/g, 'n');
+    property = property.replace(/[0-9]+/g, 'n');
     this.logger.info(`ScormWrapper::${property} not supported by this LMS...`);
   }
 
