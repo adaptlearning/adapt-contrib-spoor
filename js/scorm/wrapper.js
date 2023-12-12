@@ -548,7 +548,7 @@ class ScormWrapper {
         // if the value being set is an empty string, ensure it displays in the error as ''
         if (error.data.value === '') error.data.value = '\'\'';
       }
-      const config = Adapt.course.get('_spoor');
+      const config = Adapt.course.get('_elfh_spoor') || {};
       const defaultMessages = ScormError.defaultMessages;
       const configMessages = config?.['_messages'] || {};
       const messages = Object.assign({}, defaultMessages, configMessages);
