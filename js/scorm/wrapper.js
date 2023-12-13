@@ -621,8 +621,10 @@ class ScormWrapper {
       : this.logUnsupported(`${cmiPrefix}.student_response`);
     children.includes('result') ? this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong')
       : this.logUnsupported(`${cmiPrefix}.result`);
-    children.includes('latency') && latency != null ? this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency))
+    if (latency != null) {
+      children.includes('latency') ? this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency))
       : this.logUnsupported(`${cmiPrefix}.latency`);
+    }
     children.includes('time') ? this.setValue(`${cmiPrefix}.time`, this.getCMITime())
       : this.logUnsupported(`${cmiPrefix}.time`);
   }
@@ -645,7 +647,8 @@ class ScormWrapper {
       response = response.replace(/#/g, ',');
       response = this.checkResponse(response, 'choice');
     }
-    this.isSCORM2004() ? this.recordInteractionScorm2004(...arguments) : this.recordInteractionScorm12(...arguments);
+    const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+    scormRecordInteraction.call(this, id, response, correct, latency, type);
   }
 
   recordInteractionMatching(id, response, correct, latency, type) {
@@ -655,7 +658,8 @@ class ScormWrapper {
     } else {
       response = this.checkResponse(response, 'matching');
     }
-    this.isSCORM2004() ? this.recordInteractionScorm2004(...arguments) : this.recordInteractionScorm12(...arguments);
+    const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+    scormRecordInteraction.call(this, id, response, correct, latency, type);
   }
 
   recordInteractionFillIn(id, response, correct, latency, type) {
@@ -665,7 +669,8 @@ class ScormWrapper {
       response = response.substr(0, maxLength);
       this.logger.warn(`ScormWrapper::recordInteractionFillIn: response data for ${id} is longer than the maximum allowed length of ${maxLength} characters; data will be truncated to avoid an error.`);
     }
-    this.isSCORM2004() ? this.recordInteractionScorm2004(...arguments) : this.recordInteractionScorm12(...arguments);
+    const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
+    scormRecordInteraction.call(this, id, response, correct, latency, type);
   }
 
   getObjectiveCount() {
