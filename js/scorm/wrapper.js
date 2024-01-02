@@ -536,21 +536,21 @@ class ScormWrapper {
 
   async handleError(error) {
     if (!Data.isReady) await Data.whenReady();
-    if ('value' in error.data) {
-      // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
-      if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
-      // if the value being set is an empty string, ensure it displays in the error as ''
-      if (error.data.value === '') error.data.value = '\'\'';
-    }
-    const config = Adapt.course.get('_spoor');
-    const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
-    const message = Handlebars.compile(messages[error.name])(error.data);
-    this.logger.error(message);
-    if (this.isUnsupportedErrorCode(error.data.errorCode)) return;
-    switch (error.name) {
-      case CLIENT_COULD_NOT_CONNECT:
-        // defer error to allow other plugins which may be handling errors to execute first
-        _.defer(() => {
+    // defer error to allow other plugins which may be handling errors to execute first
+    _.defer(() => {
+      if ('value' in error.data) {
+        // because some browsers (e.g. Firefox) don't like displaying very long strings in the window.confirm dialog
+        if (error.data.value.length && error.data.value.length > 80) error.data.value = error.data.value.slice(0, 80) + '...';
+        // if the value being set is an empty string, ensure it displays in the error as ''
+        if (error.data.value === '') error.data.value = '\'\'';
+      }
+      const config = Adapt.course.get('_spoor');
+      const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
+      const message = Handlebars.compile(messages[error.name])(error.data);
+      this.logger.error(message);
+      if (this.isUnsupportedErrorCode(error.data.errorCode)) return;
+      switch (error.name) {
+        case CLIENT_COULD_NOT_CONNECT:
           // don't show if error notification already handled by other plugins
           if (!Notify.isOpen) {
             // prevent course load execution
@@ -562,11 +562,11 @@ class ScormWrapper {
               body: message
             });
           }
-        });
-    }
-    if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
-      this.showDebugWindow();
-    }
+      }
+      if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
+        this.showDebugWindow();
+      }
+    });
   }
 
   recordScore(cmiPrefix, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
