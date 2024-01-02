@@ -621,7 +621,7 @@ class ScormWrapper {
       : this.logUnsupported(`${cmiPrefix}.student_response`);
     children.includes('result') ? this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong')
       : this.logUnsupported(`${cmiPrefix}.result`);
-    if (latency != null) {
+    if (latency !== null && latency !== undefined) {
       children.includes('latency') ? this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency))
       : this.logUnsupported(`${cmiPrefix}.latency`);
     }
