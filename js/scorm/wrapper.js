@@ -636,7 +636,7 @@ class ScormWrapper {
     this.setValue(`${cmiPrefix}.type`, type);
     this.setValue(`${cmiPrefix}.learner_response`, response);
     this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'incorrect');
-    if (latency != null) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM2004Time(latency));
+    if (latency !== null && latency !== undefined) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM2004Time(latency));
     this.setValue(`${cmiPrefix}.timestamp`, this.getISO8601Timestamp());
   }
 
