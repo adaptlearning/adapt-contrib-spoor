@@ -368,24 +368,19 @@ class ScormWrapper {
       this.logger.info('ScormWrapper::recordInteraction: cmi.interactions are not supported by this LMS...');
       return;
     }
-
     switch (type) {
       case 'choice':
         this.recordInteractionMultipleChoice.apply(this, arguments);
         break;
-
       case 'matching':
         this.recordInteractionMatching.apply(this, arguments);
         break;
-
       case 'numeric':
         this.isSCORM2004() ? this.recordInteractionScorm2004.apply(this, arguments) : this.recordInteractionScorm12.apply(this, arguments);
         break;
-
       case 'fill-in':
         this.recordInteractionFillIn.apply(this, arguments);
         break;
-
       default:
         console.error(`ScormWrapper.recordInteraction: unknown interaction type of '${type}' encountered...`);
     }
@@ -474,19 +469,20 @@ class ScormWrapper {
    */
   isSupported(property) {
     this.logger.debug(`ScormWrapper::isSupported: _property=${property}`);
-
     if (this.finishCalled) {
       this.logger.debug('ScormWrapper::isSupported: ignoring request as \'finish\' has been called');
       return;
     }
-
     if (!this.lmsConnected) {
       this.handleConnectionError();
       return false;
     }
-
     this.scorm.get(property);
-    return (this.scorm.debug.getCode() !== 401); // 401 is the 'not implemented' error code
+    return !this.isUnsupportedErrorCode(this.scorm.debug.getCode());
+  }
+
+  isUnsupportedErrorCode(code) {
+    return code === 401;
   }
 
   initTimedCommit() {
@@ -528,7 +524,7 @@ class ScormWrapper {
 
   async handleDataError(error) {
     if (!Data.isReady) await Data.whenReady();
-    Adapt.trigger('tracking:dataError');
+    if (!this.isUnsupportedErrorCode(error.data.errorCode)) Adapt.trigger('tracking:dataError');
     this.handleError(error);
   }
 
@@ -551,6 +547,8 @@ class ScormWrapper {
       const config = Adapt.course.get('_spoor');
       const messages = Object.assign({}, ScormError.defaultMessages, config && config._messages);
       const message = Handlebars.compile(messages[error.name])(error.data);
+      this.logger.error(message);
+      if (this.isUnsupportedErrorCode(error.data.errorCode)) return;
       switch (error.name) {
         case CLIENT_COULD_NOT_CONNECT:
           // don't show if error notification already handled by other plugins
@@ -565,7 +563,6 @@ class ScormWrapper {
             });
           }
       }
-      this.logger.error(message);
       if (!this.suppressErrors && (!this.logOutputWin || this.logOutputWin.closed) && confirm(`${messages.title}:\n\n${message}\n\n${messages.pressOk}`)) {
         this.showDebugWindow();
       }
