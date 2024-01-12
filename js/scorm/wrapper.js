@@ -273,12 +273,7 @@ class ScormWrapper {
       this.setValue('cmi.learner_preference.language', lang);
       return;
     }
-    const children = this.getValue('cmi.student_preference._children');
-    if (this.isUnsupportedLastError() || !children.includes('language')) {
-      this.logUnsupported('cmi.student_preference.language');
-      return;
-    }
-    this.setValue('cmi.student_preference.language', lang);
+    if (this.isChildSupported('cmi.student_preference.language')) this.setValue('cmi.student_preference.language', lang);
   }
 
   commit() {
@@ -470,7 +465,31 @@ class ScormWrapper {
       return false;
     }
     this.scorm.get(property);
-    return !this.isUnsupportedLastError();
+    const isSupported = !this.isUnsupportedLastError();
+    if (!isSupported) this.logUnsupported(property);
+    return isSupported;
+  }
+
+  isChildSupported(property) {
+    if (property.includes('_children')) return this.isSupported(property);
+    this.logger.debug(`ScormWrapper::isChildSupported: _property=${property}`);
+    if (this.finishCalled) {
+      this.logger.debug('ScormWrapper::isChildSupported: ignoring request as \'finish\' has been called');
+      return;
+    }
+    if (!this.lmsConnected) {
+      this.handleConnectionError();
+      return false;
+    }
+    const paths = property.split('.');
+    const element = paths.pop();
+    // remove last path if contains indexes
+    if (/^\d+$|^n$/.test(paths[paths.length - 1])) paths.pop();
+    const parentPath = paths.join('.');
+    const children = this.scorm.get(`${parentPath}._children`);
+    const isSupported = !this.isUnsupportedLastError() && children.includes(element);
+    if (!isSupported) this.logUnsupported(property);
+    return isSupported;
   }
 
   isUnsupportedErrorCode(code) {
@@ -482,7 +501,7 @@ class ScormWrapper {
   }
 
   logUnsupported(property) {
-    property = property.replace(/[0-9]+/g, 'n');
+    property = property.replace(/\d+/g, 'n');
     this.logger.info(`ScormWrapper::${property} not supported by this LMS...`);
   }
 
@@ -593,12 +612,8 @@ class ScormWrapper {
       validate(`${cmiPrefix}.score.max`, maxScore);
     }
     this.setValue(`${cmiPrefix}.score.raw`, score);
-    const children = this.getValue(`${cmiPrefix}.score._children`);
-    if (this.isUnsupportedLastError()) return;
-    children.includes('min') ? this.setValue(`${cmiPrefix}.score.min`, minScore)
-      : this.logUnsupported(`${cmiPrefix}.score.min`);
-    children.includes('max') ? this.setValue(`${cmiPrefix}.score.max`, maxScore)
-      : this.logUnsupported(`${cmiPrefix}.score.max`);
+    if (this.isChildSupported(`${cmiPrefix}.score.min`)) this.setValue(`${cmiPrefix}.score.min`, minScore);
+    if (this.isChildSupported(`${cmiPrefix}.score.max`)) this.setValue(`${cmiPrefix}.score.max`, maxScore);
   }
 
   getInteractionCount() {
@@ -607,26 +622,15 @@ class ScormWrapper {
   }
 
   recordInteractionScorm12(id, response, correct, latency, type) {
-    const children = this.getValue('cmi.interactions._children');
-    if (this.isUnsupportedLastError() || !children.includes('id') || !this.isSupported('cmi.interactions._count')) {
-      this.logUnsupported('cmi.interactions');
-      return;
-    }
+    if (!this.isChildSupported('cmi.interactions.n.id') || !this.isSupported('cmi.interactions._count')) return;
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
-    children.includes('type') ? this.setValue(`${cmiPrefix}.type`, type)
-      : this.logUnsupported(`${cmiPrefix}.type`);
-    children.includes('student_response') ? this.setValue(`${cmiPrefix}.student_response`, response)
-      : this.logUnsupported(`${cmiPrefix}.student_response`);
-    children.includes('result') ? this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong')
-      : this.logUnsupported(`${cmiPrefix}.result`);
-    if (latency !== null && latency !== undefined) {
-      children.includes('latency') ? this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency))
-      : this.logUnsupported(`${cmiPrefix}.latency`);
-    }
-    children.includes('time') ? this.setValue(`${cmiPrefix}.time`, this.getCMITime())
-      : this.logUnsupported(`${cmiPrefix}.time`);
+    if (this.isChildSupported(`${cmiPrefix}.type`)) this.setValue(`${cmiPrefix}.type`, type);
+    if (this.isChildSupported(`${cmiPrefix}.student_response`)) this.setValue(`${cmiPrefix}.student_response`, response);
+    if (this.isChildSupported(`${cmiPrefix}.result`)) this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong');
+    if (latency !== null && latency !== undefined && this.isChildSupported(`${cmiPrefix}.latency`)) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency));
+    if (this.isChildSupported(`${cmiPrefix}.time`)) this.setValue(`${cmiPrefix}.time`, this.getCMITime());
   }
 
   recordInteractionScorm2004(id, response, correct, latency, type) {
@@ -697,11 +701,7 @@ class ScormWrapper {
   }
 
   recordObjectiveScore(id, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
-    const children = this.getValue('cmi.objectives._children');
-    if (this.isUnsupportedLastError() || !children.includes('id') || !this.isSupported('cmi.objectives._count')) {
-      this.logUnsupported('cmi.objectives');
-      return;
-    }
+    if (!this.isChildSupported('cmi.objectives.n.id') || !this.isSupported('cmi.objectives._count')) return;
     id = id.trim();
     const index = this.getObjectiveIndexById(id);
     const cmiPrefix = `cmi.objectives.${index}`;
@@ -710,11 +710,7 @@ class ScormWrapper {
   }
 
   recordObjectiveStatus(id, completionStatus, successStatus = SUCCESS_STATE.UNKNOWN.asLowerCase) {
-    const children = this.getValue('cmi.objectives._children');
-    if (this.isUnsupportedLastError() || !children.includes('id') || !this.isSupported('cmi.objectives._count')) {
-      this.logUnsupported('cmi.objectives');
-      return;
-    }
+    if (!this.isChildSupported('cmi.objectives.n.id') || !this.isSupported('cmi.objectives._count')) return;
     if (!this.isValidCompletionStatus(completionStatus)) {
       this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { completionStatus }));
       return;
@@ -732,10 +728,7 @@ class ScormWrapper {
       this.setValue(`${cmiPrefix}.success_status`, successStatus);
       return;
     }
-    if (!children.includes('status')) {
-      this.logUnsupported(`${cmiPrefix}.status`);
-      return;
-    }
+    if (!this.isChildSupported(`${cmiPrefix}.status`)) return;
     if (completionStatus === COMPLETION_STATE.COMPLETED.asLowerCase && successStatus !== SUCCESS_STATE.UNKNOWN.asLowerCase) completionStatus = successStatus;
     this.setValue(`${cmiPrefix}.status`, completionStatus);
   }
