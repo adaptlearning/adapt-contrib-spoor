@@ -363,6 +363,7 @@ class ScormWrapper {
   }
 
   recordInteraction(id, response, correct, latency, type) {
+    if (!this.isChildSupported('cmi.interactions.n.id') || !this.isSupported('cmi.interactions._count')) return;
     switch (type) {
       case 'choice':
         this.recordInteractionMultipleChoice(...arguments);
@@ -622,7 +623,6 @@ class ScormWrapper {
   }
 
   recordInteractionScorm12(id, response, correct, latency, type) {
-    if (!this.isChildSupported('cmi.interactions.n.id') || !this.isSupported('cmi.interactions._count')) return;
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
