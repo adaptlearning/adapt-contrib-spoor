@@ -273,7 +273,7 @@ class ScormWrapper {
       this.setValue('cmi.learner_preference.language', lang);
       return;
     }
-    if (this.isChildSupported('cmi.student_preference.language')) this.setValue('cmi.student_preference.language', lang);
+    this.setValueIfChildSupported('cmi.student_preference.language', lang);
   }
 
   commit() {
@@ -450,6 +450,11 @@ class ScormWrapper {
     return success;
   }
 
+  setValueIfChildSupported(property, value) {
+    if (!this.isChildSupported(property)) return;
+    this.setValue(property, value);
+  }
+
   /**
    * used for checking any data field that is not 'LMS Mandatory' to see whether the LMS we're running on supports it or not.
    * Note that the way this check is being performed means it wouldn't work for any element that is
@@ -613,8 +618,8 @@ class ScormWrapper {
       validate(`${cmiPrefix}.score.max`, maxScore);
     }
     this.setValue(`${cmiPrefix}.score.raw`, score);
-    if (this.isChildSupported(`${cmiPrefix}.score.min`)) this.setValue(`${cmiPrefix}.score.min`, minScore);
-    if (this.isChildSupported(`${cmiPrefix}.score.max`)) this.setValue(`${cmiPrefix}.score.max`, maxScore);
+    this.setValueIfChildSupported(`${cmiPrefix}.score.min`, minScore);
+    this.setValueIfChildSupported(`${cmiPrefix}.score.max`, maxScore);
   }
 
   getInteractionCount() {
@@ -626,11 +631,11 @@ class ScormWrapper {
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
-    if (this.isChildSupported(`${cmiPrefix}.type`)) this.setValue(`${cmiPrefix}.type`, type);
-    if (this.isChildSupported(`${cmiPrefix}.student_response`)) this.setValue(`${cmiPrefix}.student_response`, response);
-    if (this.isChildSupported(`${cmiPrefix}.result`)) this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong');
-    if (latency !== null && latency !== undefined && this.isChildSupported(`${cmiPrefix}.latency`)) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency));
-    if (this.isChildSupported(`${cmiPrefix}.time`)) this.setValue(`${cmiPrefix}.time`, this.getCMITime());
+    this.setValueIfChildSupported(`${cmiPrefix}.type`, type);
+    this.setValueIfChildSupported(`${cmiPrefix}.student_response`, response);
+    this.setValueIfChildSupported(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong');
+    if (latency !== null && latency !== undefined) this.setValueIfChildSupported(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency));
+    this.setValueIfChildSupported(`${cmiPrefix}.time`, this.getCMITime());
   }
 
   recordInteractionScorm2004(id, response, correct, latency, type) {
