@@ -235,7 +235,7 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   onContentObjectCompleteChange(model) {
-    if (!this.shouldRecordInteractions) return;
+    if (!this.shouldRecordObjectives) return;
     if (model.isTypeGroup('course')) return;
     const id = model.get('_id');
     const completionStatus = (model.get('_isComplete') ? COMPLETION_STATE.COMPLETED : COMPLETION_STATE.INCOMPLETE).asLowerCase;
