@@ -130,12 +130,16 @@ export default class OfflineStorageScorm extends Backbone.Controller {
 
     switch (name.toLowerCase()) {
       case 'interaction':
+        if (!this.statefulSession.shouldRecordInteractions) return;
         return this.scorm.recordInteraction(...args);
       case 'objectivedescription':
+        if (!this.statefulSession.shouldRecordObjectives) return;
         return this.scorm.recordObjectiveDescription(...args);
       case 'objectivestatus':
+        if (!this.statefulSession.shouldRecordObjectives) return;
         return this.scorm.recordObjectiveStatus(...args);
       case 'objectivescore':
+        if (!this.statefulSession.shouldRecordObjectives) return;
         return this.scorm.recordObjectiveScore(...args);
       case 'location':
         return this.scorm.setLessonLocation(...args);

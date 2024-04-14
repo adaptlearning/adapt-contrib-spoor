@@ -19,8 +19,17 @@ export default class StatefulSession extends Backbone.Controller {
     this._shouldStoreResponses = true;
     this._shouldStoreAttempts = false;
     this._shouldRecordInteractions = true;
+    this._shouldRecordObjectives = true;
     this._uniqueInteractionIds = false;
     this.beginSession();
+  }
+
+  get shouldRecordInteractions() {
+    return this._shouldRecordInteractions;
+  }
+
+  get shouldRecordObjectives() {
+    return this._shouldRecordObjectives;
   }
 
   beginSession() {
@@ -44,6 +53,9 @@ export default class StatefulSession extends Backbone.Controller {
     // _shouldRecordInteractions is set to false
     if (tracking?._shouldRecordInteractions === false) {
       this._shouldRecordInteractions = false;
+    }
+    if (tracking?._shouldRecordObjectives === false) {
+      this._shouldRecordObjectives = false;
     }
     const settings = config._advancedSettings;
     if (!settings) {
@@ -166,6 +178,7 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   initializeContentObjectives() {
+    if (!this.shouldRecordObjectives) return;
     Adapt.contentObjects.forEach(model => {
       if (model.isTypeGroup('course')) return;
       const id = model.get('_id');
@@ -195,6 +208,7 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   onPageViewReady(view) {
+    if (!this.shouldRecordObjectives) return;
     const model = view.model;
     if (model.get('_isComplete')) return;
     const id = model.get('_id');
@@ -203,7 +217,7 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   onQuestionRecordInteraction(questionView) {
-    if (!this._shouldRecordInteractions) return;
+    if (!this.shouldRecordInteractions) return;
     if (!this.scorm.isSupported('cmi.interactions._count')) return;
     // View functions are deprecated: getResponseType, getResponse, isCorrect, getLatency
     const questionModel = questionView.model;
@@ -221,6 +235,7 @@ export default class StatefulSession extends Backbone.Controller {
   }
 
   onContentObjectCompleteChange(model) {
+    if (!this.shouldRecordInteractions) return;
     if (model.isTypeGroup('course')) return;
     const id = model.get('_id');
     const completionStatus = (model.get('_isComplete') ? COMPLETION_STATE.COMPLETED : COMPLETION_STATE.INCOMPLETE).asLowerCase;
