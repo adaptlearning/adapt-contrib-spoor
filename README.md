@@ -82,7 +82,7 @@ Determines whether the user's responses to questions should be tracked to  the `
 
 ##### \_shouldRecordObjectives (boolean)
 
-Determines whether the user's content objects and their statuses should be tracked to the `cmi.objectives` fields of the SCORM data model or not. Acceptable values are `true` or `false`. The default is `true`. Note that not all SCORM 1.2 conformant Learning Management Systems support `cmi.objectives`. The code will attempt to detect whether support is implemented or not and, if not, will fail gracefully. Occasionally the code is unable to detect when `cmi.objectives` are not supported, in those (rare) instances you can switch off interaction tracking using this property so as to avoid 'not supported' errors.
+Determines whether the user's content objects and their statuses should be tracked to the `cmi.objectives` fields of the SCORM data model or not. Acceptable values are `true` or `false`. The default is `true`. Note that not all SCORM 1.2 conformant Learning Management Systems support `cmi.objectives`. The code will attempt to detect whether support is implemented or not and, if not, will fail gracefully. Occasionally the code is unable to detect when `cmi.objectives` are not supported, in those (rare) instances you can switch off objectives using this property so as to avoid 'not supported' errors.
 
 ##### \_shouldCompress (boolean)
 
