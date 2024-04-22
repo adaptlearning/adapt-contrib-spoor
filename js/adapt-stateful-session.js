@@ -90,7 +90,7 @@ define([
 
     // Session In Progress
     setupEventListeners: function() {
-      $(window).on('beforeunload unload', this._onWindowUnload);
+      $(window).on('beforeunload unload pagehide', this._onWindowUnload);
 
       if (this._shouldStoreResponses) {
         this.listenTo(Adapt.components, 'change:_isInteractionComplete', this.onQuestionComponentComplete);
@@ -109,7 +109,7 @@ define([
     },
 
     removeEventListeners: function () {
-      $(window).off('beforeunload unload', this._onWindowUnload);
+      $(window).off('beforeunload unload pagehide', this._onWindowUnload);
       this.stopListening();
     },
 
