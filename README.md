@@ -80,6 +80,10 @@ Determines whether the history of the user's responses to questions should be pe
 
 Determines whether the user's responses to questions should be tracked to  the `cmi.interactions` fields of the SCORM data model or not. Acceptable values are `true` or `false`. The default is `true`. Note that not all SCORM 1.2 conformant Learning Management Systems support `cmi.interactions`. The code will attempt to detect whether support is implemented or not and, if not, will fail gracefully. Occasionally the code is unable to detect when `cmi.interactions` are not supported, in those (rare) instances you can switch off interaction tracking using this property so as to avoid 'not supported' errors. You can also switch off interaction tracking for any individual question using the `_recordInteraction` property of question components. All core question components support recording of interactions, community components will not necessarily do so.
 
+##### \_shouldRecordObjectives (boolean)
+
+Determines whether the user's content objects and their statuses should be tracked to the `cmi.objectives` fields of the SCORM data model or not. Acceptable values are `true` or `false`. The default is `true`. Note that not all SCORM 1.2 conformant Learning Management Systems support `cmi.objectives`. The code will attempt to detect whether support is implemented or not and, if not, will fail gracefully. Occasionally the code is unable to detect when `cmi.objectives` are not supported, in those (rare) instances you can switch off objectives using this property so as to avoid 'not supported' errors.
+
 ##### \_shouldCompress (boolean)
 
 Allow variable LZMA compress on component state data. The default is `false`.

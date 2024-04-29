@@ -57,6 +57,15 @@
                       "validators": [],
                       "help": "If enabled, the course will record the user's responses to questions to the cmi.interactions SCORM data fields."
                     },
+                    "_shouldRecordObjectives": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": true,
+                      "title": "Record objectives",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "If enabled, the course will be able to record the status and scores of the course objectives to the cmi.objectives SCORM data fields."
+                    },
                     "_shouldCompress": {
                       "type": "boolean",
                       "required": false,

@@ -81,7 +81,7 @@ class ScormWrapper {
     this.finishCalled = false;
     this.logger = Logger.getInstance();
     this.scorm = pipwerks.SCORM;
-    this.maxCharLimitOverride = null
+    this.maxCharLimitOverride = null;
     /**
      * Prevent the Pipwerks SCORM API wrapper's handling of the exit status
      */
@@ -612,7 +612,7 @@ class ScormWrapper {
       const validate = (attribute, value) => {
         const isValid = value >= 0 && score <= 100;
         if (!isValid) this.logger.warn(`${attribute} must be between 0-100.`);
-      }
+      };
       validate(`${cmiPrefix}.score.raw`, score);
       validate(`${cmiPrefix}.score.min`, minScore);
       validate(`${cmiPrefix}.score.max`, maxScore);
@@ -687,6 +687,15 @@ class ScormWrapper {
     return count === '' ? 0 : count;
   }
 
+  hasObjectiveById(id) {
+    const count = this.getObjectiveCount();
+    for (let i = 0; i < count; i++) {
+      const storedId = this.getValue(`cmi.objectives.${i}.id`);
+      if (storedId === id) return true;
+    }
+    return false;
+  }
+
   getObjectiveIndexById(id) {
     const count = this.getObjectiveCount();
     for (let i = 0; i < count; i++) {
@@ -699,18 +708,20 @@ class ScormWrapper {
   recordObjectiveDescription(id, description) {
     if (!this.isSCORM2004() || !description) return;
     id = id.trim();
+    const hasObjective = this.hasObjectiveById(id);
     const index = this.getObjectiveIndexById(id);
     const cmiPrefix = `cmi.objectives.${index}`;
-    this.setValue(`${cmiPrefix}.id`, id);
+    if (!hasObjective) this.setValue(`${cmiPrefix}.id`, id);
     this.setValue(`${cmiPrefix}.description`, description);
   }
 
   recordObjectiveScore(id, score, minScore = 0, maxScore = 100, isPercentageBased = true) {
     if (!this.isChildSupported('cmi.objectives.n.id') || !this.isSupported('cmi.objectives._count')) return;
     id = id.trim();
+    const hasObjective = this.hasObjectiveById(id);
     const index = this.getObjectiveIndexById(id);
     const cmiPrefix = `cmi.objectives.${index}`;
-    this.setValue(`${cmiPrefix}.id`, id);
+    if (!hasObjective) this.setValue(`${cmiPrefix}.id`, id);
     this.recordScore(cmiPrefix, score, minScore, maxScore, isPercentageBased);
   }
 
@@ -725,9 +736,10 @@ class ScormWrapper {
       return;
     }
     id = id.trim();
+    const hasObjective = this.hasObjectiveById(id);
     const index = this.getObjectiveIndexById(id);
     const cmiPrefix = `cmi.objectives.${index}`;
-    this.setValue(`${cmiPrefix}.id`, id);
+    if (!hasObjective) this.setValue(`${cmiPrefix}.id`, id);
     if (this.isSCORM2004()) {
       this.setValue(`${cmiPrefix}.completion_status`, completionStatus);
       this.setValue(`${cmiPrefix}.success_status`, successStatus);
@@ -741,7 +753,7 @@ class ScormWrapper {
   isValidCompletionStatus(status) {
     status = status.toLowerCase(); // workaround for some LMSs (e.g. Arena) not adhering to the all-lowercase rule
     if (this.isSCORM2004()) {
-      switch(status) {
+      switch (status) {
         case COMPLETION_STATE.UNKNOWN.asLowerCase:
         case COMPLETION_STATE.NOTATTEMPTED.asLowerCase:
         case COMPLETION_STATE.NOT_ATTEMPTED.asLowerCase: // mentioned in SCORM 2004 spec - mapped to 'not attempted'
@@ -750,7 +762,7 @@ class ScormWrapper {
           return true;
       }
     } else {
-      switch(status) {
+      switch (status) {
         case COMPLETION_STATE.NOTATTEMPTED.asLowerCase:
         case COMPLETION_STATE.BROWSED.asLowerCase:
         case COMPLETION_STATE.INCOMPLETE.asLowerCase:
@@ -766,7 +778,7 @@ class ScormWrapper {
   isValidSuccessStatus(status) {
     status = status.toLowerCase(); // workaround for some LMSs (e.g. Arena) not adhering to the all-lowercase rule
     if (this.isSCORM2004()) {
-      switch(status) {
+      switch (status) {
         case SUCCESS_STATE.UNKNOWN.asLowerCase:
         case SUCCESS_STATE.PASSED.asLowerCase:
         case SUCCESS_STATE.FAILED.asLowerCase:

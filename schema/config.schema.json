@@ -41,6 +41,12 @@
                   "title": "Record interactions",
                   "description": "If enabled, the course will record the user's responses to questions to the cmi.interactions SCORM data fields",
                   "default": true
+                },
+                "_shouldRecordObjectives": {
+                  "type": "boolean",
+                  "title": "Record objectives",
+                  "description": "If enabled, the course will be able to record the status and scores of the course objectives to the cmi.objectives SCORM data fields",
+                  "default": true
                 }
               }
             },
