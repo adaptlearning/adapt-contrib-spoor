@@ -362,7 +362,7 @@ class ScormWrapper {
     }));
   }
 
-  recordInteraction(id, response, correct, latency, type) {
+  recordInteraction(id, response, correct, latency, type, correctResponsesPattern, description) {
     if (!this.isChildSupported('cmi.interactions.n.id') || !this.isSupported('cmi.interactions._count')) return;
     switch (type) {
       case 'choice':
@@ -627,7 +627,7 @@ class ScormWrapper {
     return count === '' ? 0 : count;
   }
 
-  recordInteractionScorm12(id, response, correct, latency, type) {
+  recordInteractionScorm12(id, response, correct, latency, type, correctResponsesPattern, objectiveIds) {
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
@@ -635,10 +635,20 @@ class ScormWrapper {
     this.setValueIfChildSupported(`${cmiPrefix}.student_response`, response);
     this.setValueIfChildSupported(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong');
     if (latency !== null && latency !== undefined) this.setValueIfChildSupported(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency));
+    if (this.isChildSupported(`${cmiPrefix}.correct_responses`) && correctResponsesPattern?.length) {
+      correctResponsesPattern.forEach((response, index) => {
+        this.setValue(`${cmiPrefix}.correct_responses.${index}.pattern`, response);
+      });
+    }
+    if (this.isChildSupported(`${cmiPrefix}.objectives`) && objectiveIds?.length) {
+      objectiveIds.forEach((id, index) => {
+        this.setValue(`${cmiPrefix}.objectives.${index}.id`, id);
+      });
+    }
     this.setValueIfChildSupported(`${cmiPrefix}.time`, this.getCMITime());
   }
 
-  recordInteractionScorm2004(id, response, correct, latency, type) {
+  recordInteractionScorm2004(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
@@ -646,32 +656,50 @@ class ScormWrapper {
     this.setValue(`${cmiPrefix}.learner_response`, response);
     this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'incorrect');
     if (latency !== null && latency !== undefined) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM2004Time(latency));
+    if (correctResponsesPattern?.length) {
+      correctResponsesPattern.forEach((response, index) => {
+        this.setValue(`${cmiPrefix}.correct_responses.${index}.pattern`, response);
+      });
+    }
+    if (objectiveIds?.length) {
+      objectiveIds.forEach((id, index) => {
+        this.setValue(`${cmiPrefix}.objectives.${index}.id`, id);
+      });
+    }
+    if (description) {
+      const maxLength = 250;
+      if (description.length > maxLength) description = description.substr(0, maxLength).trim();
+      this.setValue(`${cmiPrefix}.description`, description);
+    }
     this.setValue(`${cmiPrefix}.timestamp`, this.getISO8601Timestamp());
   }
 
-  recordInteractionMultipleChoice(id, response, correct, latency, type) {
+  recordInteractionMultipleChoice(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     if (this.isSCORM2004()) {
       response = response.replace(/,|#/g, '[,]');
     } else {
       response = response.replace(/#/g, ',');
       response = this.checkResponse(response, 'choice');
+      correctResponsesPattern = correctResponsesPattern.map(response => response.replace(/\[,\]/g, ','));
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
   }
 
-  recordInteractionMatching(id, response, correct, latency, type) {
+  recordInteractionMatching(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     response = response.replace(/#/g, ',');
     if (this.isSCORM2004()) {
       response = response.replace(/,/g, '[,]').replace(/\./g, '[.]');
     } else {
       response = this.checkResponse(response, 'matching');
+      // @todo: source prefix on target is not allowed in SCORM 1.2 - see https://github.com/adaptlearning/adapt-contrib-matching/issues/199
+      correctResponsesPattern = correctResponsesPattern.map(response => response.replace(/\[\.\]/g, '.').replace(/\[,\]/g, ','));
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
   }
 
-  recordInteractionFillIn(id, response, correct, latency, type) {
+  recordInteractionFillIn(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     let maxLength = this.isSCORM2004() ? 250 : 255;
     maxLength = this.maxCharLimitOverride ?? maxLength;
     if (response.length > maxLength) {
@@ -679,7 +707,7 @@ class ScormWrapper {
       this.logger.warn(`ScormWrapper::recordInteractionFillIn: response data for ${id} is longer than the maximum allowed length of ${maxLength} characters; data will be truncated to avoid an error.`);
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
   }
 
   getObjectiveCount() {
