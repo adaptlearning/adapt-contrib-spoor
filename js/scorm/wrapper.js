@@ -627,7 +627,7 @@ class ScormWrapper {
     return count === '' ? 0 : count;
   }
 
-  recordInteractionScorm12(id, response, correct, latency, type, correctResponsesPattern, objectiveIds) {
+  recordInteractionScorm12(id, response, correct, latency, type) {
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
@@ -635,16 +635,6 @@ class ScormWrapper {
     this.setValueIfChildSupported(`${cmiPrefix}.student_response`, response);
     this.setValueIfChildSupported(`${cmiPrefix}.result`, correct ? 'correct' : 'wrong');
     if (latency !== null && latency !== undefined) this.setValueIfChildSupported(`${cmiPrefix}.latency`, this.convertToSCORM12Time(latency));
-    if (this.isChildSupported(`${cmiPrefix}.correct_responses`) && correctResponsesPattern?.length) {
-      correctResponsesPattern.forEach((response, index) => {
-        this.setValue(`${cmiPrefix}.correct_responses.${index}.pattern`, response);
-      });
-    }
-    if (this.isChildSupported(`${cmiPrefix}.objectives`) && objectiveIds?.length) {
-      objectiveIds.forEach((id, index) => {
-        this.setValue(`${cmiPrefix}.objectives.${index}.id`, id);
-      });
-    }
     this.setValueIfChildSupported(`${cmiPrefix}.time`, this.getCMITime());
   }
 
@@ -680,7 +670,6 @@ class ScormWrapper {
     } else {
       response = response.replace(/#/g, ',');
       response = this.checkResponse(response, 'choice');
-      correctResponsesPattern = correctResponsesPattern.map(response => response.replace(/\[,\]/g, ','));
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
     scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
@@ -692,8 +681,6 @@ class ScormWrapper {
       response = response.replace(/,/g, '[,]').replace(/\./g, '[.]');
     } else {
       response = this.checkResponse(response, 'matching');
-      // @todo: source prefix on target is not allowed in SCORM 1.2 - see https://github.com/adaptlearning/adapt-contrib-matching/issues/199
-      correctResponsesPattern = correctResponsesPattern.map(response => response.replace(/\[\.\]/g, '.').replace(/\[,\]/g, ','));
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
     scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
