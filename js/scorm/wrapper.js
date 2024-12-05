@@ -362,7 +362,7 @@ class ScormWrapper {
     }));
   }
 
-  recordInteraction(id, response, correct, latency, type, correctResponsesPattern, description) {
+  recordInteraction(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     if (!this.isChildSupported('cmi.interactions.n.id') || !this.isSupported('cmi.interactions._count')) return;
     switch (type) {
       case 'choice':
