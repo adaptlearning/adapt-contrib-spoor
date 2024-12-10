@@ -955,8 +955,8 @@ class ScormWrapper {
   }
 
   setExitState() {
-    const dataModel = this.isSCORM2004() ? 'cmi.exit' : 'cmi.core.exit';
-    this.setValue(dataModel, this.getExitState());
+    const property = this.isSCORM2004() ? 'cmi.exit' : 'cmi.core.exit';
+    this.setValue(property, this.getExitState());
   }
 
 }
