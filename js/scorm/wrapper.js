@@ -940,9 +940,9 @@ class ScormWrapper {
     const endTime = new Date();
     if (this.isSCORM2004()) {
       this.setValue('cmi.session_time', this.convertToSCORM2004Time(endTime.getTime() - this.startTime.getTime()));
-    } else {
-      this.setValue('cmi.core.session_time', this.convertToSCORM12Time(endTime.getTime() - this.startTime.getTime()));
+      return;
     }
+    this.setValue('cmi.core.session_time', this.convertToSCORM12Time(endTime.getTime() - this.startTime.getTime()));
   }
 
   getExitState() {
