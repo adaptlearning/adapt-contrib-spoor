@@ -169,6 +169,7 @@ class ScormWrapper {
 
     this.startTime = new Date();
     this.initTimedCommit();
+    this.setExitState();
     return this.lmsConnected;
   }
 
@@ -289,6 +290,8 @@ class ScormWrapper {
       return;
     }
 
+    this.setSessionTime();
+
     if (this.scorm.save()) {
       this.commitRetries = 0;
       this.lastCommitSuccessTime = new Date();
@@ -335,15 +338,8 @@ class ScormWrapper {
       this.logOutputWin.close();
     }
 
-    this.endTime = new Date();
-
-    if (this.isSCORM2004()) {
-      this.scorm.set('cmi.session_time', this.convertToSCORM2004Time(this.endTime.getTime() - this.startTime.getTime()));
-      this.scorm.set('cmi.exit', this.getExitState());
-    } else {
-      this.scorm.set('cmi.core.session_time', this.convertToSCORM12Time(this.endTime.getTime() - this.startTime.getTime()));
-      this.scorm.set('cmi.core.exit', this.getExitState());
-    }
+    this.setSessionTime();
+    this.setExitState();
 
     if (this._connection) {
       this._connection.stop();
@@ -940,6 +936,15 @@ class ScormWrapper {
     return response.join(',');
   }
 
+  setSessionTime() {
+    const endTime = new Date();
+    if (this.isSCORM2004()) {
+      this.setValue('cmi.session_time', this.convertToSCORM2004Time(endTime.getTime() - this.startTime.getTime()));
+      return;
+    }
+    this.setValue('cmi.core.session_time', this.convertToSCORM12Time(endTime.getTime() - this.startTime.getTime()));
+  }
+
   getExitState() {
     const completionStatus = this.scorm.data.completionStatus;
     const isIncomplete = completionStatus === COMPLETION_STATE.INCOMPLETE.asLowerCase || completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase;
@@ -947,6 +952,11 @@ class ScormWrapper {
     if (exitState !== 'auto') return exitState;
     if (this.isSCORM2004()) return (isIncomplete ? 'suspend' : 'normal');
     return '';
+  }
+
+  setExitState() {
+    const property = this.isSCORM2004() ? 'cmi.exit' : 'cmi.core.exit';
+    this.setValue(property, this.getExitState());
   }
 
 }
