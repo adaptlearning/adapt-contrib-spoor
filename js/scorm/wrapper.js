@@ -358,7 +358,7 @@ class ScormWrapper {
     }));
   }
 
-  recordInteraction(id, response, correct, latency, type) {
+  recordInteraction(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     if (!this.isChildSupported('cmi.interactions.n.id') || !this.isSupported('cmi.interactions._count')) return;
     switch (type) {
       case 'choice':
@@ -634,7 +634,7 @@ class ScormWrapper {
     this.setValueIfChildSupported(`${cmiPrefix}.time`, this.getCMITime());
   }
 
-  recordInteractionScorm2004(id, response, correct, latency, type) {
+  recordInteractionScorm2004(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     id = id.trim();
     const cmiPrefix = `cmi.interactions.${this.getInteractionCount()}`;
     this.setValue(`${cmiPrefix}.id`, id);
@@ -642,10 +642,27 @@ class ScormWrapper {
     this.setValue(`${cmiPrefix}.learner_response`, response);
     this.setValue(`${cmiPrefix}.result`, correct ? 'correct' : 'incorrect');
     if (latency !== null && latency !== undefined) this.setValue(`${cmiPrefix}.latency`, this.convertToSCORM2004Time(latency));
+    if (correctResponsesPattern?.length) {
+      correctResponsesPattern.forEach((response, index) => {
+        this.setValue(`${cmiPrefix}.correct_responses.${index}.pattern`, response);
+      });
+    }
+    if (objectiveIds?.length) {
+      objectiveIds.forEach((id, index) => {
+        this.setValue(`${cmiPrefix}.objectives.${index}.id`, id);
+      });
+    }
+    if (description) {
+      const maxLength = this.maxCharLimitOverride ?? 250;
+      // strip HTML
+      description = $(`<p>${description}</p>`).text();
+      if (description.length > maxLength) description = description.substr(0, maxLength).trim();
+      this.setValue(`${cmiPrefix}.description`, description);
+    }
     this.setValue(`${cmiPrefix}.timestamp`, this.getISO8601Timestamp());
   }
 
-  recordInteractionMultipleChoice(id, response, correct, latency, type) {
+  recordInteractionMultipleChoice(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     if (this.isSCORM2004()) {
       response = response.replace(/,|#/g, '[,]');
     } else {
@@ -653,10 +670,10 @@ class ScormWrapper {
       response = this.checkResponse(response, 'choice');
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
   }
 
-  recordInteractionMatching(id, response, correct, latency, type) {
+  recordInteractionMatching(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     response = response.replace(/#/g, ',');
     if (this.isSCORM2004()) {
       response = response.replace(/,/g, '[,]').replace(/\./g, '[.]');
@@ -664,10 +681,10 @@ class ScormWrapper {
       response = this.checkResponse(response, 'matching');
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
   }
 
-  recordInteractionFillIn(id, response, correct, latency, type) {
+  recordInteractionFillIn(id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description) {
     let maxLength = this.isSCORM2004() ? 250 : 255;
     maxLength = this.maxCharLimitOverride ?? maxLength;
     if (response.length > maxLength) {
@@ -675,7 +692,7 @@ class ScormWrapper {
       this.logger.warn(`ScormWrapper::recordInteractionFillIn: response data for ${id} is longer than the maximum allowed length of ${maxLength} characters; data will be truncated to avoid an error.`);
     }
     const scormRecordInteraction = this.isSCORM2004() ? this.recordInteractionScorm2004 : this.recordInteractionScorm12;
-    scormRecordInteraction.call(this, id, response, correct, latency, type);
+    scormRecordInteraction.call(this, id, response, correct, latency, type, correctResponsesPattern, objectiveIds, description);
   }
 
   getObjectiveCount() {

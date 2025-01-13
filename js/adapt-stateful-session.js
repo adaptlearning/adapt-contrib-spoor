@@ -216,22 +216,27 @@ export default class StatefulSession extends Backbone.Controller {
     offlineStorage.set('objectiveStatus', id, completionStatus);
   }
 
-  onQuestionRecordInteraction(questionView) {
+  onQuestionRecordInteraction(view) {
     if (!this.shouldRecordInteractions) return;
     if (!this.scorm.isSupported('cmi.interactions._count')) return;
-    // View functions are deprecated: getResponseType, getResponse, isCorrect, getLatency
-    const questionModel = questionView.model;
-    const responseType = (questionModel.getResponseType ? questionModel.getResponseType() : questionView.getResponseType());
+    const model = view.model;
+    const responseType = model.getResponseType();
     // If responseType doesn't contain any data, assume that the question
     // component hasn't been set up for cmi.interaction tracking
     if (_.isEmpty(responseType)) return;
+    const modelId = model.get('_id');
     const id = this._uniqueInteractionIds
-      ? `${this.scorm.getInteractionCount()}-${questionModel.get('_id')}`
-      : questionModel.get('_id');
-    const response = (questionModel.getResponse ? questionModel.getResponse() : questionView.getResponse());
-    const result = (questionModel.isCorrect ? questionModel.isCorrect() : questionView.isCorrect());
-    const latency = (questionModel.getLatency ? questionModel.getLatency() : questionView.getLatency());
-    offlineStorage.set('interaction', id, response, result, latency, responseType);
+      ? `${this.scorm.getInteractionCount()}-${modelId}`
+      : modelId;
+    const response = model.getResponse();
+    const result = model.isCorrect();
+    const latency = model?.getLatency?.() ?? view.getLatency();
+    const correctResponsesPattern = model.getInteractionObject()?.correctResponsesPattern;
+    const objectiveIds = Adapt?.scoring?.getSubsetsByModelId(modelId)
+      .filter(set => set.type !== 'adapt')
+      .map(({ id }) => id);
+    const description = model.get('body');
+    offlineStorage.set('interaction', id, response, result, latency, responseType, correctResponsesPattern, objectiveIds, description);
   }
 
   onContentObjectCompleteChange(model) {
