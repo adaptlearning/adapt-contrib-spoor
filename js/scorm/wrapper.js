@@ -657,7 +657,7 @@ class ScormWrapper {
       });
     }
     if (description) {
-      const maxLength = 250;
+      const maxLength = this.maxCharLimitOverride ?? 250;
       // strip HTML
       description = $(`<p>${description}</p>`).text();
       if (description.length > maxLength) description = description.substr(0, maxLength).trim();
