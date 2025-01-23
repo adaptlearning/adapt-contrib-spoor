@@ -13,8 +13,8 @@ function hasKey(object, key) {
   return Object.hasOwn(object, key);
 }
 
-describe('adapt-contrib-spoor - v1 to v2.0.2', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v1 to v2.0.2', { name: 'adapt-contrib-spoor', version: '<2.0.2'});
+describe('adapt-contrib-spoor - v2.0.0 to v2.0.2', async () => {
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.2', { name: 'adapt-contrib-spoor', version: '<2.0.2'});
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where _spoor._advancedSettings._scormVersion', async content => {
     spoorConfig = getSpoorConfig(content);
@@ -42,8 +42,8 @@ describe('adapt-contrib-spoor - v1 to v2.0.2', async () => {
  * _advancedSettings: _scormVersion, _showDebugWindow, _commitOnStatusChange, _timedCommitFrequency, _maxCommitRetries, _commitRetryDelay
  */
 
-describe('adapt-contrib-spoor - v1 to v2.0.5', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v1 to v2.0.5', { name: 'adapt-contrib-spoor', version: '<2.0.5'});
+describe('adapt-contrib-spoor - v2.0.0 to v2.0.5', async () => {
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.5', { name: 'adapt-contrib-spoor', version: '<2.0.5'});
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._suppressErrors', async content => {
     spoorConfig = getSpoorConfig(content);
@@ -63,8 +63,8 @@ describe('adapt-contrib-spoor - v1 to v2.0.5', async () => {
   updatePlugin('adapt-contrib-spoor - update to v2.0.5', {name: 'adapt-contrib-spoor', version: '2.0.5', framework: '>=2'})
 });
 
-describe('adapt-contrib-spoor - v1 to v2.0.11', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v1 to v2.0.11', { name: 'adapt-contrib-spoor', version: '<2.0.11'});
+describe('adapt-contrib-spoor - v2.0.0 to v2.0.11', async () => {
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.11', { name: 'adapt-contrib-spoor', version: '<2.0.11'});
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._commitOnVisibilityChangeHidden', async content => {
     spoorConfig = getSpoorConfig(content);
@@ -84,8 +84,8 @@ describe('adapt-contrib-spoor - v1 to v2.0.11', async () => {
   updatePlugin('adapt-contrib-spoor - update to v2.0.11', {name: 'adapt-contrib-spoor', version: '2.0.11', framework: '>=2'})
 });
 
-describe('adapt-contrib-spoor - v1 to v2.0.13', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v1 to v2.0.13', { name: 'adapt-contrib-spoor', version: '<2.0.13'});
+describe('adapt-contrib-spoor - v2.0.0 to v2.0.13', async () => {
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.13', { name: 'adapt-contrib-spoor', version: '<2.0.13'});
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where missing _spoor._reporting._resetStatusOnLanguageChange', async content => {
     spoorConfig = getSpoorConfig(content);
@@ -105,8 +105,8 @@ describe('adapt-contrib-spoor - v1 to v2.0.13', async () => {
   updatePlugin('adapt-contrib-spoor - update to v2.0.13', {name: 'adapt-contrib-spoor', version: '2.0.13', framework: '>=2.0.16'})
 });
 
-describe('adapt-contrib-spoor - v1 to v2.1.1', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v1 to v2.1.1', { name: 'adapt-contrib-spoor', version: '<2.1.1'});
+describe('adapt-contrib-spoor - v2.0.0 to v2.1.1', async () => {
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.1.1', { name: 'adapt-contrib-spoor', version: '<2.1.1'});
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where missing _spoor._tracking._shouldRecordInteractions', async content => {
     spoorConfig = getSpoorConfig(content);

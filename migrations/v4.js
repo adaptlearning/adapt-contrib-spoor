@@ -13,9 +13,9 @@ function hasKey(object, key) {
   return Object.hasOwn(object, key);
 }
 
-// @todo: removal was missed from legacy schema - should this be bumped to v5.0 where fully removed?
-describe('adapt-contrib-spoor - v1 to v4.1.1', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v1 to v4.1.1', { name: 'adapt-contrib-spoor', version: '<4.1.1'});
+// @note: removal was missed from legacy schema in v4.1.1 and applied in v5.0.0
+describe('adapt-contrib-spoor - v2.0.0 to v4.1.1', async () => {
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v4.1.1', { name: 'adapt-contrib-spoor', version: '<4.1.1'});
   let config, spoorConfig;
   whereContent('adapt-contrib-spoor - where _spoor._tracking._shouldSubmitScore', async content => {
     config = getConfig(content);
@@ -37,8 +37,8 @@ describe('adapt-contrib-spoor - v1 to v4.1.1', async () => {
   updatePlugin('adapt-contrib-spoor - update to v4.1.1', {name: 'adapt-contrib-spoor', version: '4.1.1', framework: '>=5.17.8'})
 });
 
-describe('adapt-contrib-spoor - v1 to v4.2', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v1 to v4.2', { name: 'adapt-contrib-spoor', version: '<4.2'});
+describe('adapt-contrib-spoor - v2.0.0 to v4.2.0', async () => {
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v4.2.0', { name: 'adapt-contrib-spoor', version: '<4.2.0'});
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where missing _spoor._tracking._shouldCompress', async content => {
     spoorConfig = getSpoorConfig(content);
@@ -55,5 +55,5 @@ describe('adapt-contrib-spoor - v1 to v4.2', async () => {
     if (!isValid) throw new Error('_spoor._tracking._shouldCompress not added');
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v4.2', {name: 'adapt-contrib-spoor', version: '4.2', framework: '>=5.17.8'})
+  updatePlugin('adapt-contrib-spoor - update to v4.2.0', {name: 'adapt-contrib-spoor', version: '4.2.0', framework: '>=5.17.8'})
 });
