@@ -1,7 +1,7 @@
 import { describe , whereContent, whereFromPlugin, whereToPlugin, mutateContent, checkContent, updatePlugin } from 'adapt-migrations';
 
 function getConfig(content) {
-  return content.find(({ __path__ }) => __path__ === 'src/course/config.json');
+  return content.find(({ __path__ }) => __path__.endsWith('config.json'))
 }
 
 function getSpoorConfig(content) {
@@ -13,24 +13,41 @@ function hasKey(object, key) {
   return Object.hasOwn(object, key);
 }
 
-/**
- * v3.0.0 - the following attributes default values changed - migration not included as not possible to discern author values from defaults:
- * _tracking: _shouldStoreResponses
- */
+function setObjectPathValue(object, path, value) {
+  if (!object) return;
+  const paths = path.split('.');
+  const key = paths.pop();
+  const target = paths.reduce((o, p) => {
+    if (!hasKey(o, p)) o[p] = {};
+    return o?.[p];
+  }, object);
+  if (hasKey(target, key)) return;
+  target[key] = value;
+}
 
+/**
+ * `_tracking._shouldStoreResponse` default updated to `true` - also applied in v2.0.2 task when added with a different default value
+ */
 describe('adapt-contrib-spoor - v2.0.0 to v3.0.0', async () => {
   whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.0.0', { name: 'adapt-contrib-spoor', version: '<3.0.0'});
   let config, spoorConfig;
-  whereContent('adapt-contrib-spoor - where using legacy tracking config', async content => {
+  whereContent('adapt-contrib-spoor - where _spoor', async content => {
     config = getConfig(content);
     spoorConfig = getSpoorConfig(content);
-    if (!spoorConfig) return false;
-    if (!hasKey(spoorConfig._tracking, '_requireCourseCompleted') && !hasKey(spoorConfig._tracking, '_requireAssessmentPassed')) return false;
+    return spoorConfig;
+  });
+  mutateContent('adapt-contrib-spoor - add _spoor._tracking._shouldStoreResponses', async () => {
+    setObjectPathValue(spoorConfig, '_tracking._shouldStoreResponses', true);
+    return true;
+  });
+  checkContent('adapt-contrib-spoor - check _spoor._tracking._shouldStoreResponses added', async () => {
+    const isValid = hasKey(spoorConfig._tracking, '_shouldStoreResponses');
+    if (!isValid) throw new Error('_spoor._tracking._shouldStoreResponses not added');
     return true;
   });
   mutateContent('adapt-contrib-spoor - replace _spoor._tracking._requireCourseCompleted with _completionCriteria._requireContentCompleted', async () => {
-    if (!hasKey(config._completionCriteria, '_requireContentCompleted')) config._completionCriteria._requireContentCompleted = spoorConfig?._tracking?._requireCourseCompleted ?? true;
-    delete spoorConfig._tracking._requireCourseCompleted;
+    if (!hasKey(config._completionCriteria, '_requireContentCompleted')) setObjectPathValue(config, '_completionCriteria._requireContentCompleted', spoorConfig?._tracking?._requireCourseCompleted ?? true);
+    delete spoorConfig?._tracking?._requireCourseCompleted;
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._tracking._requireCourseCompleted replaced', async () => {
@@ -39,8 +56,8 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.0.0', async () => {
     return true;
   });
   mutateContent('adapt-contrib-spoor - replace _spoor._tracking._requireAssessmentPassed with _completionCriteria._requireAssessmentCompleted', async () => {
-    if (!hasKey(config._completionCriteria, '_requireAssessmentCompleted')) config._completionCriteria._requireAssessmentCompleted = spoorConfig?._tracking?._requireAssessmentPassed ?? false;
-    delete spoorConfig._tracking._requireAssessmentPassed;
+    if (!hasKey(config._completionCriteria, '_requireAssessmentCompleted')) setObjectPathValue(config, '_completionCriteria._requireAssessmentCompleted', spoorConfig?._tracking?._requireAssessmentPassed ?? false);
+    delete spoorConfig?._tracking?._requireAssessmentPassed;
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._tracking._requireAssessmentPassed replaced', async () => {
@@ -48,7 +65,7 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.0.0', async () => {
     if (!isValid) throw new Error('_spoor._tracking._requireAssessmentPassed not replaced');
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v3', {name: 'adapt-contrib-spoor', version: '3.0.0', framework: '>=3'})
+  updatePlugin('adapt-contrib-spoor - update to v3', {name: 'adapt-contrib-spoor', version: '3.0.0', framework: '>=3.0.0'})
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.2.0', async () => {
@@ -57,11 +74,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.2.0', async () => {
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._manifestIdentifier', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    if (hasKey(spoorConfig._advancedSettings, '_manifestIdentifier')) return false;
-    return true;
+    return !hasKey(spoorConfig._advancedSettings, '_manifestIdentifier');
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._manifestIdentifier', async () => {
-    spoorConfig._advancedSettings._manifestIdentifier = 'adapt_manifest';
+    setObjectPathValue(spoorConfig, '_advancedSettings._manifestIdentifier', 'adapt_manifest');
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._manifestIdentifier added', async () => {
@@ -69,7 +85,7 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.2.0', async () => {
     if (!isValid) throw new Error('_spoor._advancedSettings._manifestIdentifier not added');
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v3.2.0', {name: 'adapt-contrib-spoor', version: '3.2.0', framework: '>=3.5'})
+  updatePlugin('adapt-contrib-spoor - update to v3.2.0', {name: 'adapt-contrib-spoor', version: '3.2.0', framework: '>=3.5.0'})
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.3.0', async () => {
@@ -78,11 +94,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.3.0', async () => {
   whereContent('adapt-contrib-spoor - where missing exit status', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    if (hasKey(spoorConfig._advancedSettings, '_exitStateIfIncomplete') && hasKey(spoorConfig._advancedSettings, '_exitStateIfComplete')) return false;
-    return true;
+    return !hasKey(spoorConfig._advancedSettings, '_exitStateIfIncomplete') || !hasKey(spoorConfig._advancedSettings, '_exitStateIfComplete');
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._exitStateIfIncomplete', async () => {
-    if (!hasKey(spoorConfig._advancedSettings, '_exitStateIfIncomplete')) spoorConfig._advancedSettings._exitStateIfIncomplete = 'auto';
+    setObjectPathValue(spoorConfig, '_advancedSettings._exitStateIfIncomplete', 'auto');
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._exitStateIfIncomplete added', async () => {
@@ -91,7 +106,7 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.3.0', async () => {
     return true;
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._exitStateIfComplete', async () => {
-    if (!hasKey(spoorConfig._advancedSettings, '_exitStateIfComplete')) spoorConfig._advancedSettings._exitStateIfComplete = 'auto';
+    setObjectPathValue(spoorConfig, '_advancedSettings._exitStateIfComplete', 'auto');
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._exitStateIfComplete added', async () => {
@@ -99,7 +114,7 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.3.0', async () => {
     if (!isValid) throw new Error('_spoor._advancedSettings._exitStateIfComplete not added');
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v3.3.0', {name: 'adapt-contrib-spoor', version: '3.3.0', framework: '>=3.5'})
+  updatePlugin('adapt-contrib-spoor - update to v3.3.0', {name: 'adapt-contrib-spoor', version: '3.3.0', framework: '>=3.5.0'})
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.4.0', async () => {
@@ -108,11 +123,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.4.0', async () => {
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._shouldStoreAttempts', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    if (hasKey(spoorConfig._advancedSettings, '_shouldStoreAttempts')) return false;
-    return true;
+    return !hasKey(spoorConfig._advancedSettings, '_shouldStoreAttempts');
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._shouldStoreAttempts', async () => {
-    spoorConfig._advancedSettings._shouldStoreAttempts = false;
+    setObjectPathValue(spoorConfig, '_advancedSettings._shouldStoreAttempts', false);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._shouldStoreAttempts added', async () => {
@@ -129,11 +143,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.5.0', async () => {
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._commitOnAnyChange', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    if (hasKey(spoorConfig._advancedSettings, '_commitOnAnyChange')) return false;
-    return true;
+    return !hasKey(spoorConfig._advancedSettings, '_commitOnAnyChange');
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._commitOnAnyChange', async () => {
-    spoorConfig._advancedSettings._commitOnAnyChange = false;
+    setObjectPathValue(spoorConfig, '_advancedSettings._commitOnAnyChange', false);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._commitOnAnyChange added', async () => {
@@ -150,8 +163,7 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.6.0', async () => {
   whereContent('adapt-contrib-spoor - where missing _spoor._messages', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    if (spoorConfig._messages) return false;
-    return true;
+    return !spoorConfig._messages;
   });
   mutateContent('adapt-contrib-spoor - add _spoor._messages', async () => {
     spoorConfig._messages = {};
