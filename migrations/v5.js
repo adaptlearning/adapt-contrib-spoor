@@ -1,4 +1,5 @@
-import { describe , whereContent, whereFromPlugin, whereToPlugin, mutateContent, checkContent, updatePlugin } from 'adapt-migrations';
+import { describe, whereContent, whereFromPlugin, mutateContent, checkContent, updatePlugin } from 'adapt-migrations';
+import _ from 'lodash';
 
 function getConfig(content) {
   return content.find(({ __path__ }) => __path__.endsWith('config.json'))
@@ -8,163 +9,131 @@ function getSpoorConfig(content) {
   return getConfig(content)?._spoor;
 }
 
-function hasKey(object, key) {
-  if (!object) return false;
-  return Object.hasOwn(object, key);
-}
-
-function setObjectPathValue(object, path, value) {
-  if (!object) return;
-  const paths = path.split('.');
-  const key = paths.pop();
-  const target = paths.reduce((o, p) => {
-    if (!hasKey(o, p)) o[p] = {};
-    return o?.[p];
-  }, object);
-  if (hasKey(target, key)) return;
-  target[key] = value;
-}
-
 /**
  * removal was missed from legacy schema in v4.1.1
  */
 describe('adapt-contrib-spoor - v2.0.0 to v5.0.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.0.0', { name: 'adapt-contrib-spoor', version: '<5.0.0'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.0.0', { name: 'adapt-contrib-spoor', version: '<5.0.0' });
   let config, spoorConfig;
+  const oldShouldSubmitScorePath = '_tracking._shouldSubmitScore';
+  const shouldSubmitScorePath = '_completionCriteria._shouldSubmitScore';
   whereContent('adapt-contrib-spoor - where _spoor', async content => {
     config = getConfig(content);
     spoorConfig = getSpoorConfig(content);
     return spoorConfig;
   });
   mutateContent('adapt-contrib-spoor - replace _spoor._tracking._shouldSubmitScore with _completionCriteria._shouldSubmitScore', async () => {
-    setObjectPathValue(config, '_completionCriteria._shouldSubmitScore', spoorConfig?._tracking?._shouldSubmitScore ?? false);
-    delete spoorConfig?._tracking?._shouldSubmitScore;
+    if (!_.has(config, shouldSubmitScorePath)) _.set(config, shouldSubmitScorePath, _.get(spoorConfig, oldShouldSubmitScorePath, false));
+    _.unset(spoorConfig, oldShouldSubmitScorePath);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._tracking._shouldSubmitScore replaced', async () => {
-    const isValid = !hasKey(spoorConfig._tracking, '_shouldSubmitScore') && hasKey(config._completionCriteria, '_shouldSubmitScore');
-    if (!isValid) throw new Error('_spoor._tracking._shouldSubmitScore not replaced');
+    const isValid = !_.has(spoorConfig, oldShouldSubmitScorePath) && _.has(config, shouldSubmitScorePath);
+    if (!isValid) throw new Error(`_spoor.${oldShouldSubmitScorePath} not replaced`);
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.0.0', {name: 'adapt-contrib-spoor', version: '5.0.0', framework: '>=5.19.1'})
+  updatePlugin('adapt-contrib-spoor - update to v5.0.0', { name: 'adapt-contrib-spoor', version: '5.0.0', framework: '>=5.19.1' });
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v5.3.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.3.0', { name: 'adapt-contrib-spoor', version: '<5.3.0'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.3.0', { name: 'adapt-contrib-spoor', version: '<5.3.0' });
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where missing _spoor._showCookieLmsResetButton', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig, '_showCookieLmsResetButton');
+    return !_.has(spoorConfig, '_showCookieLmsResetButton');
   });
   mutateContent('adapt-contrib-spoor - add _spoor._showCookieLmsResetButton', async () => {
     spoorConfig._showCookieLmsResetButton = false;
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._showCookieLmsResetButton added', async () => {
-    const isValid = hasKey(spoorConfig, '_showCookieLmsResetButton');
+    const isValid = _.has(spoorConfig, '_showCookieLmsResetButton');
     if (!isValid) throw new Error('_spoor._showCookieLmsResetButton not added');
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.3.0', {name: 'adapt-contrib-spoor', version: '5.3.0', framework: '>=5.19.6'})
+  updatePlugin('adapt-contrib-spoor - update to v5.3.0', { name: 'adapt-contrib-spoor', version: '5.3.0', framework: '>=5.19.6' });
 });
 
 /**
  * `_advancedSettings._setCompletedWhenFailed` added to legacy schema but task updated to use v5.5.2 value
  */
 describe('adapt-contrib-spoor - v2.0.0 to v5.4.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.4.0', { name: 'adapt-contrib-spoor', version: '<5.4.0'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.4.0', { name: 'adapt-contrib-spoor', version: '<5.4.0' });
   let spoorConfig;
+  const setCompletedWhenFailedPath = '_advancedSettings._setCompletedWhenFailed';
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._setCompletedWhenFailed', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig._advancedSettings, '_setCompletedWhenFailed');
+    return !_.has(spoorConfig, setCompletedWhenFailedPath);
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._setCompletedWhenFailed', async () => {
-    setObjectPathValue(spoorConfig, '_advancedSettings._setCompletedWhenFailed', true);
+    _.set(spoorConfig, setCompletedWhenFailedPath, true);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._setCompletedWhenFailed added', async () => {
-    const isValid = hasKey(spoorConfig._advancedSettings, '_setCompletedWhenFailed');
-    if (!isValid) throw new Error('_spoor._advancedSettings._setCompletedWhenFailed not added');
+    const isValid = _.has(spoorConfig, setCompletedWhenFailedPath);
+    if (!isValid) throw new Error(`_spoor.${setCompletedWhenFailedPath} not added`);
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.4.0', {name: 'adapt-contrib-spoor', version: '5.4.0', framework: '>=5.19.6'})
-});
-
-describe('adapt-contrib-spoor - v2.0.0 to v5.5.1', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.5.1', { name: 'adapt-contrib-spoor', version: '<5.5.1'});
-  let spoorConfig;
-  whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._scormVersion', async content => {
-    spoorConfig = getSpoorConfig(content);
-    if (!spoorConfig) return false;
-    return !hasKey(spoorConfig._advancedSettings, '_scormVersion');
-  });
-  mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._scormVersion', async () => {
-    setObjectPathValue(spoorConfig, '_advancedSettings._scormVersion', '1.2');
-    return true;
-  });
-  checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._scormVersion added', async () => {
-    const isValid = hasKey(spoorConfig._advancedSettings, '_scormVersion');
-    if (!isValid) throw new Error('_spoor._advancedSettings._scormVersion not added');
-    return true;
-  });
-  updatePlugin('adapt-contrib-spoor - update to v5.5.1', {name: 'adapt-contrib-spoor', version: '5.5.1', framework: '>=5.24'})
+  updatePlugin('adapt-contrib-spoor - update to v5.4.0', { name: 'adapt-contrib-spoor', version: '5.4.0', framework: '>=5.19.6' });
 });
 
 /**
  * `_tracking._shouldStoreResponse` default updated to `true` - also applied in v5.4.0 task when added to legacy schema with a different default value
  */
 describe('adapt-contrib-spoor - v2.0.0 to v5.5.2', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v5.4.0 to v5.5.2', { name: 'adapt-contrib-spoor', version: '<5.5.2'});
+  whereFromPlugin('adapt-contrib-spoor - from v5.4.0 to v5.5.2', { name: 'adapt-contrib-spoor', version: '<5.5.2' });
   let spoorConfig;
+  const setCompletedWhenFailedPath = '_advancedSettings._setCompletedWhenFailed';
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._setCompletedWhenFailed', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig._advancedSettings, '_setCompletedWhenFailed');
+    return !_.has(spoorConfig, setCompletedWhenFailedPath);
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._setCompletedWhenFailed', async () => {
-    setObjectPathValue(spoorConfig, '_advancedSettings._setCompletedWhenFailed', true);
+    _.set(spoorConfig, setCompletedWhenFailedPath, true);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._setCompletedWhenFailed added', async () => {
-    const isValid = hasKey(spoorConfig._advancedSettings, '_setCompletedWhenFailed');
-    if (!isValid) throw new Error('_spoor._advancedSettings._setCompletedWhenFailed not added');
+    const isValid = _.has(spoorConfig, setCompletedWhenFailedPath);
+    if (!isValid) throw new Error(`_spoor.${setCompletedWhenFailedPath} not added`);
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.5.2', {name: 'adapt-contrib-spoor', version: '5.5.2', framework: '>=5.24'})
+  updatePlugin('adapt-contrib-spoor - update to v5.5.2', { name: 'adapt-contrib-spoor', version: '5.5.2', framework: '>=5.24' });
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v5.5.7', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.5.7', { name: 'adapt-contrib-spoor', version: '<5.5.7'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.5.7', { name: 'adapt-contrib-spoor', version: '<5.5.7' });
   let spoorConfig;
   whereContent('adapt-contrib-spoor - where missing _spoor._shouldPersistCookieLMSData', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig, '_shouldPersistCookieLMSData');
+    return !_.has(spoorConfig, '_shouldPersistCookieLMSData');
   });
   mutateContent('adapt-contrib-spoor - add _spoor._shouldPersistCookieLMSData', async () => {
     spoorConfig._shouldPersistCookieLMSData = true;
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._shouldPersistCookieLMSData added', async () => {
-    const isValid = hasKey(spoorConfig, '_shouldPersistCookieLMSData');
+    const isValid = _.has(spoorConfig, '_shouldPersistCookieLMSData');
     if (!isValid) throw new Error('_spoor._shouldPersistCookieLMSData not added');
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.5.7', {name: 'adapt-contrib-spoor', version: '5.5.7', framework: '>=5.24'})
+  updatePlugin('adapt-contrib-spoor - update to v5.5.7', { name: 'adapt-contrib-spoor', version: '5.5.7', framework: '>=5.24' });
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v5.6.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.6.0', { name: 'adapt-contrib-spoor', version: '<5.6.0'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.6.0', { name: 'adapt-contrib-spoor', version: '<5.6.0' });
   let spoorConfig;
+  const connectionTestPath = '_advancedSettings._connectionTest';
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._connectionTest', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig._advancedSettings, '_connectionTest');
+    return !_.has(spoorConfig, connectionTestPath);
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._connectionTest', async () => {
-    setObjectPathValue(spoorConfig, '_advancedSettings._connectionTest', {
+    _.set(spoorConfig, connectionTestPath, {
       _isEnabled: true,
       _testOnSetValue: true,
       _silentRetryLimit: 2,
@@ -173,72 +142,75 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.6.0', async () => {
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._connectionTest added', async () => {
-    const isValid = hasKey(spoorConfig._advancedSettings, '_connectionTest');
-    if (!isValid) throw new Error('_spoor._advancedSettings._connectionTest not added');
+    const isValid = _.has(spoorConfig, connectionTestPath);
+    if (!isValid) throw new Error(`_spoor.${connectionTestPath} not added`);
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.6.0', {name: 'adapt-contrib-spoor', version: '5.6.0', framework: '>=5.28.1'})
+  updatePlugin('adapt-contrib-spoor - update to v5.6.0', { name: 'adapt-contrib-spoor', version: '5.6.0', framework: '>=5.28.1' });
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v5.7.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.7.0', { name: 'adapt-contrib-spoor', version: '<5.7.0'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.7.0', { name: 'adapt-contrib-spoor', version: '<5.7.0' });
   let spoorConfig;
+  const uniqueInteractionIdsPath = '_advancedSettings._uniqueInteractionIds';
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._uniqueInteractionIds', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig._advancedSettings, '_uniqueInteractionIds');
+    return !_.has(spoorConfig, uniqueInteractionIdsPath);
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._uniqueInteractionIds', async () => {
-    setObjectPathValue(spoorConfig, '_advancedSettings._uniqueInteractionIds', false);
+    _.set(spoorConfig, uniqueInteractionIdsPath, false);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._uniqueInteractionIds added', async () => {
-    const isValid = hasKey(spoorConfig._advancedSettings, '_uniqueInteractionIds');
-    if (!isValid) throw new Error('_spoor._advancedSettings._uniqueInteractionIds not added');
+    const isValid = _.has(spoorConfig, uniqueInteractionIdsPath);
+    if (!isValid) throw new Error(`_spoor.${uniqueInteractionIdsPath} not added`);
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.7.0', {name: 'adapt-contrib-spoor', version: '5.7.0', framework: '>=5.28.1'})
+  updatePlugin('adapt-contrib-spoor - update to v5.7.0', { name: 'adapt-contrib-spoor', version: '5.7.0', framework: '>=5.28.1' });
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v5.8.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.8.0', { name: 'adapt-contrib-spoor', version: '<5.8.0'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.8.0', { name: 'adapt-contrib-spoor', version: '<5.8.0' });
   let spoorConfig;
+  const maxCharLimitOverridePath = '_advancedSettings._maxCharLimitOverride';
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._maxCharLimitOverride', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig._advancedSettings, '_maxCharLimitOverride');
+    return !_.has(spoorConfig, maxCharLimitOverridePath);
   });
   mutateContent('adapt-contrib-spoor - add _spoor._advancedSettings._maxCharLimitOverride', async () => {
-    setObjectPathValue(spoorConfig, '_advancedSettings._maxCharLimitOverride', 0);
+    _.set(spoorConfig, maxCharLimitOverridePath, 0);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._advancedSettings._maxCharLimitOverride added', async () => {
-    const isValid = hasKey(spoorConfig._advancedSettings, '_maxCharLimitOverride');
-    if (!isValid) throw new Error('_spoor._advancedSettings._maxCharLimitOverride not added');
+    const isValid = _.has(spoorConfig, maxCharLimitOverridePath);
+    if (!isValid) throw new Error(`_spoor.${maxCharLimitOverridePath} not added`);
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.8.0', {name: 'adapt-contrib-spoor', version: '5.8.0', framework: '>=5.28.1'})
+  updatePlugin('adapt-contrib-spoor - update to v5.8.0', { name: 'adapt-contrib-spoor', version: '5.8.0', framework: '>=5.28.1' });
 });
 
 /**
  * added to schemas in v5.9.8 but attribute added in v5.9.0
  */
 describe('adapt-contrib-spoor - v2.0.0 to v5.9.8', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.9.8', { name: 'adapt-contrib-spoor', version: '<5.9.8'});
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.9.8', { name: 'adapt-contrib-spoor', version: '<5.9.8' });
   let spoorConfig;
+  const shouldRecordObjectivesPath = '_tracking._shouldRecordObjectives';
   whereContent('adapt-contrib-spoor - where missing _spoor._tracking._shouldRecordObjectives', async content => {
     spoorConfig = getSpoorConfig(content);
     if (!spoorConfig) return false;
-    return !hasKey(spoorConfig._tracking, '_shouldRecordObjectives');
+    return !_.has(spoorConfig, shouldRecordObjectivesPath);
   });
   mutateContent('adapt-contrib-spoor - add _spoor._tracking._shouldRecordObjectives', async () => {
-    setObjectPathValue(spoorConfig, '_tracking._shouldRecordObjectives', true);
+    _.set(spoorConfig, shouldRecordObjectivesPath, true);
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._tracking._shouldRecordObjectives added', async () => {
-    const isValid = hasKey(spoorConfig._tracking, '_shouldRecordObjectives');
-    if (!isValid) throw new Error('_spoor._tracking._shouldRecordObjectives not added');
+    const isValid = _.has(spoorConfig, shouldRecordObjectivesPath);
+    if (!isValid) throw new Error(`_spoor.${shouldRecordObjectivesPath} not added`);
     return true;
   });
-  updatePlugin('adapt-contrib-spoor - update to v5.9.8', {name: 'adapt-contrib-spoor', version: '5.9.8', framework: '>=5.31.31'})
+  updatePlugin('adapt-contrib-spoor - update to v5.9.8', { name: 'adapt-contrib-spoor', version: '5.9.8', framework: '>=5.31.31' });
 });
