@@ -1,28 +1,32 @@
-import { describe, whereContent, whereFromPlugin, mutateContent, checkContent, updatePlugin } from 'adapt-migrations';
+import {
+  describe,
+  whereFromPlugin,
+  whereContent,
+  mutateContent,
+  checkContent,
+  updatePlugin,
+  getConfig
+} from 'adapt-migrations';
 import _ from 'lodash';
 
-function getConfig(content) {
-  return content.find(({ __path__ }) => __path__.endsWith('config.json'))
-}
-
-function getSpoorConfig(content) {
-  return getConfig(content)?._spoor;
+function getSpoorConfig() {
+  return getConfig()?._spoor;
 }
 
 /**
  * `_tracking._shouldStoreResponse` default updated to `true` - also applied in v2.0.2 task when added with a different default value
  */
 describe('adapt-contrib-spoor - v2.0.0 to v3.0.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.0.0', { name: 'adapt-contrib-spoor', version: '<3.0.0' });
   let config, spoorConfig;
   const shouldStoreResponsesPath = '_tracking._shouldStoreResponses';
   const oldRequireCourseCompletedPath = '_tracking._requireCourseCompleted';
   const requireContentCompletedPath = '_completionCriteria._requireContentCompleted';
   const oldRequireAssessmentPassedPath = '_tracking._requireAssessmentPassed';
   const requireAssessmentCompletedPath = '_completionCriteria._requireAssessmentCompleted';
-  whereContent('adapt-contrib-spoor - where _spoor', async content => {
-    config = getConfig(content);
-    spoorConfig = getSpoorConfig(content);
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.0.0', { name: 'adapt-contrib-spoor', version: '<3.0.0' });
+  whereContent('adapt-contrib-spoor - where _spoor', async () => {
+    config = getConfig();
+    spoorConfig = getSpoorConfig();
     return spoorConfig;
   });
   mutateContent('adapt-contrib-spoor - add _spoor._tracking._shouldStoreResponses', async () => {
@@ -30,7 +34,7 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.0.0', async () => {
     return true;
   });
   checkContent('adapt-contrib-spoor - check _spoor._tracking._shouldStoreResponses added', async () => {
-    const isValid = _.has(spoorConfig, shouldStoreResponsesPath)
+    const isValid = _.has(spoorConfig, shouldStoreResponsesPath);
     if (!isValid) throw new Error(`_spoor.${shouldStoreResponsesPath} not added`);
     return true;
   });
@@ -58,11 +62,11 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.0.0', async () => {
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.2.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.2.0', { name: 'adapt-contrib-spoor', version: '<3.2.0' });
   let spoorConfig;
   const manifestIdentifierPath = '_advancedSettings._manifestIdentifier';
-  whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._manifestIdentifier', async content => {
-    spoorConfig = getSpoorConfig(content);
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.2.0', { name: 'adapt-contrib-spoor', version: '<3.2.0' });
+  whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._manifestIdentifier', async () => {
+    spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
     return !_.has(spoorConfig, manifestIdentifierPath);
   });
@@ -79,12 +83,12 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.2.0', async () => {
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.3.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.3.0', { name: 'adapt-contrib-spoor', version: '<3.3.0' });
   let spoorConfig;
   const exitStateIfIncompletePath = '_advancedSettings._exitStateIfIncomplete';
   const exitStateIfCompletePath = '_advancedSettings._exitStateIfComplete';
-  whereContent('adapt-contrib-spoor - where missing exit status', async content => {
-    spoorConfig = getSpoorConfig(content);
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.3.0', { name: 'adapt-contrib-spoor', version: '<3.3.0' });
+  whereContent('adapt-contrib-spoor - where missing exit status', async () => {
+    spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
     return !_.has(spoorConfig, exitStateIfIncompletePath) || !_.has(spoorConfig, exitStateIfCompletePath);
   });
@@ -110,11 +114,11 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.3.0', async () => {
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.4.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.4.0', { name: 'adapt-contrib-spoor', version: '<3.4.0' });
   let spoorConfig;
   const shouldStoreAttemptsPath = '_advancedSettings._shouldStoreAttempts';
-  whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._shouldStoreAttempts', async content => {
-    spoorConfig = getSpoorConfig(content);
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.4.0', { name: 'adapt-contrib-spoor', version: '<3.4.0' });
+  whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._shouldStoreAttempts', async () => {
+    spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
     return !_.has(spoorConfig, shouldStoreAttemptsPath);
   });
@@ -131,11 +135,11 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.4.0', async () => {
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.5.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.5.0', { name: 'adapt-contrib-spoor', version: '<3.5.0' });
   let spoorConfig;
   const commitOnAnyChangePath = '_advancedSettings._commitOnAnyChange';
-  whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._commitOnAnyChange', async content => {
-    spoorConfig = getSpoorConfig(content);
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.5.0', { name: 'adapt-contrib-spoor', version: '<3.5.0' });
+  whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._commitOnAnyChange', async () => {
+    spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
     return !_.has(spoorConfig, commitOnAnyChangePath);
   });
@@ -152,10 +156,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v3.5.0', async () => {
 });
 
 describe('adapt-contrib-spoor - v2.0.0 to v3.6.0', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.6.0', { name: 'adapt-contrib-spoor', version: '<3.6.0' });
   let spoorConfig;
-  whereContent('adapt-contrib-spoor - where missing _spoor._messages', async content => {
-    spoorConfig = getSpoorConfig(content);
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v3.6.0', { name: 'adapt-contrib-spoor', version: '<3.6.0' });
+  whereContent('adapt-contrib-spoor - where missing _spoor._messages', async () => {
+    spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
     return !spoorConfig._messages;
   });

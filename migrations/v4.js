@@ -1,25 +1,29 @@
-import { describe, whereContent, whereFromPlugin, mutateContent, checkContent, updatePlugin } from 'adapt-migrations';
+import {
+  describe,
+  whereFromPlugin,
+  whereContent,
+  mutateContent,
+  checkContent,
+  updatePlugin,
+  getConfig
+} from 'adapt-migrations';
 import _ from 'lodash';
 
-function getConfig(content) {
-  return content.find(({ __path__ }) => __path__.endsWith('config.json'))
-}
-
-function getSpoorConfig(content) {
-  return getConfig(content)?._spoor;
+function getSpoorConfig() {
+  return getConfig()?._spoor;
 }
 
 /**
  * removal was missed from legacy schema in v4.1.1 and applied in v5.0.0
  */
 describe('adapt-contrib-spoor - v2.0.0 to v4.1.1', async () => {
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v4.1.1', { name: 'adapt-contrib-spoor', version: '<4.1.1' });
   let config, spoorConfig;
   const oldShouldSubmitScorePath = '_tracking._shouldSubmitScore';
   const shouldSubmitScorePath = '_completionCriteria._shouldSubmitScore';
-  whereContent('adapt-contrib-spoor - where _spoor', async content => {
-    config = getConfig(content);
-    spoorConfig = getSpoorConfig(content);
+  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v4.1.1', { name: 'adapt-contrib-spoor', version: '<4.1.1' });
+  whereContent('adapt-contrib-spoor - where _spoor', async () => {
+    config = getConfig();
+    spoorConfig = getSpoorConfig();
     return spoorConfig;
   });
   mutateContent('adapt-contrib-spoor - replace _spoor._tracking._shouldSubmitScore with _completionCriteria._shouldSubmitScore', async () => {
