@@ -21,11 +21,11 @@ function getSpoorConfig() {
  * _reporting: _onTrackingCriteriaMet, _onAssessmentFailure
  * _advancedSettings: _showDebugWindow, _commitOnStatusChange, _timedCommitFrequency, _maxCommitRetries, _commitRetryDelay
  */
-describe('adapt-contrib-spoor - v2.0.0 to v2.0.2', async () => {
+describe('adapt-contrib-spoor - to v2.0.2', async () => {
   let spoorConfig;
   const shouldStoreResponsesPath = '_tracking._shouldStoreResponses';
   const scormVersionPath = '_advancedSettings._scormVersion';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.2', { name: 'adapt-contrib-spoor', version: '<2.0.2' });
+  whereFromPlugin('adapt-contrib-spoor - from <v2.0.2', { name: 'adapt-contrib-spoor', version: '<2.0.2' });
   whereContent('adapt-contrib-spoor - where _spoor', async () => {
     spoorConfig = getSpoorConfig();
     return spoorConfig;
@@ -51,10 +51,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v2.0.2', async () => {
   updatePlugin('adapt-contrib-spoor - update to v2.0.2', { name: 'adapt-contrib-spoor', version: '2.0.2', framework: '>=2.0.0' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v2.0.5', async () => {
+describe('adapt-contrib-spoor - to v2.0.5', async () => {
   let spoorConfig;
   const suppressErrorsPath = '_advancedSettings._suppressErrors';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.5', { name: 'adapt-contrib-spoor', version: '<2.0.5' });
+  whereFromPlugin('adapt-contrib-spoor - from <v2.0.5', { name: 'adapt-contrib-spoor', version: '<2.0.5' });
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._suppressErrors', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -72,10 +72,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v2.0.5', async () => {
   updatePlugin('adapt-contrib-spoor - update to v2.0.5', { name: 'adapt-contrib-spoor', version: '2.0.5', framework: '>=2.0.0' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v2.0.11', async () => {
+describe('adapt-contrib-spoor - to v2.0.11', async () => {
   let spoorConfig;
   const commitOnVisibilityChangeHiddenPath = '_advancedSettings._commitOnVisibilityChangeHidden';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.11', { name: 'adapt-contrib-spoor', version: '<2.0.11' });
+  whereFromPlugin('adapt-contrib-spoor - from <v2.0.11', { name: 'adapt-contrib-spoor', version: '<2.0.11' });
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._commitOnVisibilityChangeHidden', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -93,10 +93,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v2.0.11', async () => {
   updatePlugin('adapt-contrib-spoor - update to v2.0.11', { name: 'adapt-contrib-spoor', version: '2.0.11', framework: '>=2.0.0' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v2.0.13', async () => {
+describe('adapt-contrib-spoor - to v2.0.13', async () => {
   let spoorConfig;
   const resetStatusOnLanguageChangePath = '_reporting._resetStatusOnLanguageChange';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.0.13', { name: 'adapt-contrib-spoor', version: '<2.0.13' });
+  whereFromPlugin('adapt-contrib-spoor - from <v2.0.13', { name: 'adapt-contrib-spoor', version: '<2.0.13' });
   whereContent('adapt-contrib-spoor - where missing _spoor._reporting._resetStatusOnLanguageChange', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -117,10 +117,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v2.0.13', async () => {
 /**
  * added to schemas in v2.1.1 but attribute added in v2.0.5
  */
-describe('adapt-contrib-spoor - v2.0.0 to v2.1.1', async () => {
+describe('adapt-contrib-spoor - to v2.1.1', async () => {
   let spoorConfig;
   const shouldRecordInteractionsPath = '_tracking._shouldRecordInteractions';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v2.1.1', { name: 'adapt-contrib-spoor', version: '<2.1.1' });
+  whereFromPlugin('adapt-contrib-spoor - from <v2.1.1', { name: 'adapt-contrib-spoor', version: '<2.1.1' });
   whereContent('adapt-contrib-spoor - where missing _spoor._tracking._shouldRecordInteractions', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;

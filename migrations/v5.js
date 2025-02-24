@@ -16,11 +16,11 @@ function getSpoorConfig() {
 /**
  * removal was missed from legacy schema in v4.1.1
  */
-describe('adapt-contrib-spoor - v2.0.0 to v5.0.0', async () => {
+describe('adapt-contrib-spoor - to v5.0.0', async () => {
   let config, spoorConfig;
   const oldShouldSubmitScorePath = '_tracking._shouldSubmitScore';
   const shouldSubmitScorePath = '_completionCriteria._shouldSubmitScore';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.0.0', { name: 'adapt-contrib-spoor', version: '<5.0.0' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.0.0', { name: 'adapt-contrib-spoor', version: '<5.0.0' });
   whereContent('adapt-contrib-spoor - where _spoor', async () => {
     config = getConfig();
     spoorConfig = getSpoorConfig();
@@ -39,9 +39,9 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.0.0', async () => {
   updatePlugin('adapt-contrib-spoor - update to v5.0.0', { name: 'adapt-contrib-spoor', version: '5.0.0', framework: '>=5.19.1' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v5.3.0', async () => {
+describe('adapt-contrib-spoor - to v5.3.0', async () => {
   let spoorConfig;
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.3.0', { name: 'adapt-contrib-spoor', version: '<5.3.0' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.3.0', { name: 'adapt-contrib-spoor', version: '<5.3.0' });
   whereContent('adapt-contrib-spoor - where missing _spoor._showCookieLmsResetButton', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -62,10 +62,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.3.0', async () => {
 /**
  * `_advancedSettings._setCompletedWhenFailed` added to legacy schema but task updated to use v5.5.2 value
  */
-describe('adapt-contrib-spoor - v2.0.0 to v5.4.0', async () => {
+describe('adapt-contrib-spoor - to v5.4.0', async () => {
   let spoorConfig;
   const setCompletedWhenFailedPath = '_advancedSettings._setCompletedWhenFailed';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.4.0', { name: 'adapt-contrib-spoor', version: '<5.4.0' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.4.0', { name: 'adapt-contrib-spoor', version: '<5.4.0' });
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._setCompletedWhenFailed', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -86,10 +86,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.4.0', async () => {
 /**
  * `_tracking._shouldStoreResponse` default updated to `true` - also applied in v5.4.0 task when added to legacy schema with a different default value
  */
-describe('adapt-contrib-spoor - v2.0.0 to v5.5.2', async () => {
+describe('adapt-contrib-spoor - v5.4.0 to v5.5.2', async () => {
   let spoorConfig;
   const setCompletedWhenFailedPath = '_advancedSettings._setCompletedWhenFailed';
-  whereFromPlugin('adapt-contrib-spoor - from v5.4.0 to v5.5.2', { name: 'adapt-contrib-spoor', version: '<5.5.2' });
+  whereFromPlugin('adapt-contrib-spoor - from v5.4.0 to v5.5.2', { name: 'adapt-contrib-spoor', version: '>=5.4.0 <5.5.2' });
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._setCompletedWhenFailed', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -107,9 +107,9 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.5.2', async () => {
   updatePlugin('adapt-contrib-spoor - update to v5.5.2', { name: 'adapt-contrib-spoor', version: '5.5.2', framework: '>=5.24' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v5.5.7', async () => {
+describe('adapt-contrib-spoor - to v5.5.7', async () => {
   let spoorConfig;
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.5.7', { name: 'adapt-contrib-spoor', version: '<5.5.7' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.5.7', { name: 'adapt-contrib-spoor', version: '<5.5.7' });
   whereContent('adapt-contrib-spoor - where missing _spoor._shouldPersistCookieLMSData', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -127,10 +127,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.5.7', async () => {
   updatePlugin('adapt-contrib-spoor - update to v5.5.7', { name: 'adapt-contrib-spoor', version: '5.5.7', framework: '>=5.24' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v5.6.0', async () => {
+describe('adapt-contrib-spoor - to v5.6.0', async () => {
   let spoorConfig;
   const connectionTestPath = '_advancedSettings._connectionTest';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.6.0', { name: 'adapt-contrib-spoor', version: '<5.6.0' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.6.0', { name: 'adapt-contrib-spoor', version: '<5.6.0' });
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._connectionTest', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -153,10 +153,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.6.0', async () => {
   updatePlugin('adapt-contrib-spoor - update to v5.6.0', { name: 'adapt-contrib-spoor', version: '5.6.0', framework: '>=5.28.1' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v5.7.0', async () => {
+describe('adapt-contrib-spoor - to v5.7.0', async () => {
   let spoorConfig;
   const uniqueInteractionIdsPath = '_advancedSettings._uniqueInteractionIds';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.7.0', { name: 'adapt-contrib-spoor', version: '<5.7.0' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.7.0', { name: 'adapt-contrib-spoor', version: '<5.7.0' });
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._uniqueInteractionIds', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -174,10 +174,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.7.0', async () => {
   updatePlugin('adapt-contrib-spoor - update to v5.7.0', { name: 'adapt-contrib-spoor', version: '5.7.0', framework: '>=5.28.1' });
 });
 
-describe('adapt-contrib-spoor - v2.0.0 to v5.8.0', async () => {
+describe('adapt-contrib-spoor - to v5.8.0', async () => {
   let spoorConfig;
   const maxCharLimitOverridePath = '_advancedSettings._maxCharLimitOverride';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.8.0', { name: 'adapt-contrib-spoor', version: '<5.8.0' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.8.0', { name: 'adapt-contrib-spoor', version: '<5.8.0' });
   whereContent('adapt-contrib-spoor - where missing _spoor._advancedSettings._maxCharLimitOverride', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;
@@ -198,10 +198,10 @@ describe('adapt-contrib-spoor - v2.0.0 to v5.8.0', async () => {
 /**
  * added to schemas in v5.9.8 but attribute added in v5.9.0
  */
-describe('adapt-contrib-spoor - v2.0.0 to v5.9.8', async () => {
+describe('adapt-contrib-spoor - to v5.9.8', async () => {
   let spoorConfig;
   const shouldRecordObjectivesPath = '_tracking._shouldRecordObjectives';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v5.9.8', { name: 'adapt-contrib-spoor', version: '<5.9.8' });
+  whereFromPlugin('adapt-contrib-spoor - from <v5.9.8', { name: 'adapt-contrib-spoor', version: '<5.9.8' });
   whereContent('adapt-contrib-spoor - where missing _spoor._tracking._shouldRecordObjectives', async () => {
     spoorConfig = getSpoorConfig();
     if (!spoorConfig) return false;

@@ -16,11 +16,11 @@ function getSpoorConfig() {
 /**
  * removal was missed from legacy schema in v4.1.1 and applied in v5.0.0
  */
-describe('adapt-contrib-spoor - v2.0.0 to v4.1.1', async () => {
+describe('adapt-contrib-spoor - to v4.1.1', async () => {
   let config, spoorConfig;
   const oldShouldSubmitScorePath = '_tracking._shouldSubmitScore';
   const shouldSubmitScorePath = '_completionCriteria._shouldSubmitScore';
-  whereFromPlugin('adapt-contrib-spoor - from v2.0.0 to v4.1.1', { name: 'adapt-contrib-spoor', version: '<4.1.1' });
+  whereFromPlugin('adapt-contrib-spoor - from <v4.1.1', { name: 'adapt-contrib-spoor', version: '<4.1.1' });
   whereContent('adapt-contrib-spoor - where _spoor', async () => {
     config = getConfig();
     spoorConfig = getSpoorConfig();
