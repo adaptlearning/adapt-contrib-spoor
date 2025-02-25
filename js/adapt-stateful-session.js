@@ -106,7 +106,10 @@ export default class StatefulSession extends Backbone.Controller {
   setupEventListeners() {
     this.removeEventListeners();
     this.listenTo(Adapt.components, 'change:_isComplete', this.debouncedSaveSession);
-    this.listenTo(Adapt.contentObjects, 'change:_isComplete', this.onContentObjectCompleteChange);
+    this.listenTo(Adapt.contentObjects, {
+      'change:_isAvailable': this.onContentObjectAvailabilityChange,
+      'change:_isComplete': this.onContentObjectCompleteChange
+    });
     this.listenTo(Adapt.course, 'change:_isComplete', this.debouncedSaveSession);
     if (this._shouldStoreResponses) {
       this.listenTo(data, 'change:_isSubmitted change:_userAnswer', this.debouncedSaveSession);
@@ -179,15 +182,16 @@ export default class StatefulSession extends Backbone.Controller {
 
   initializeContentObjectives() {
     if (!this.shouldRecordObjectives) return;
-    Adapt.contentObjects.forEach(model => {
-      if (model.isTypeGroup('course')) return;
-      const id = model.get('_id');
-      const description = model.get('title') || model.get('displayTitle');
-      offlineStorage.set('objectiveDescription', id, description);
-      if (model.get('_isVisited')) return;
-      const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
-      offlineStorage.set('objectiveStatus', id, completionStatus);
-    });
+    Adapt.contentObjects.forEach(model => this.initializeContentObjective(model));
+  }
+
+  initializeContentObjective(model) {
+    if (!this.shouldRecordObjectives || !model.get('_isAvailable') || model.isTypeGroup('course') || model.get('_isVisited')) return;
+    const id = model.get('_id');
+    const description = model.get('title') || model.get('displayTitle');
+    offlineStorage.set('objectiveDescription', id, description);
+    const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+    offlineStorage.set('objectiveStatus', id, completionStatus);
   }
 
   onAdaptStart() {
@@ -237,6 +241,10 @@ export default class StatefulSession extends Backbone.Controller {
       .map(({ id }) => id);
     const description = model.get('body');
     offlineStorage.set('interaction', id, response, result, latency, responseType, correctResponsesPattern, objectiveIds, description);
+  }
+
+  onContentObjectAvailabilityChange(model) {
+    this.initializeContentObjective(model);
   }
 
   onContentObjectCompleteChange(model) {
