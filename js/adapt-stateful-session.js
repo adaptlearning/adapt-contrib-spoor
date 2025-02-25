@@ -232,9 +232,13 @@ export default class StatefulSession extends Backbone.Controller {
     const result = model.isCorrect();
     const latency = model?.getLatency?.() ?? view.getLatency();
     const correctResponsesPattern = model.getInteractionObject()?.correctResponsesPattern;
-    const objectiveIds = Adapt?.scoring?.getSubsetsByModelId(modelId)
+    const contentObjectIds = model.getAncestorModels()
+      .filter(model => !model.isTypeGroup('course') && model.isTypeGroup('contentobject'))
+      .map(model => model.get('_id'));
+    const scoringSetIds = Adapt?.scoring?.getSubsetsByModelId(modelId)
       .filter(set => set.type !== 'adapt')
       .map(({ id }) => id);
+    const objectiveIds = contentObjectIds.concat(scoringSetIds);
     const description = model.get('body');
     offlineStorage.set('interaction', id, response, result, latency, responseType, correctResponsesPattern, objectiveIds, description);
   }
