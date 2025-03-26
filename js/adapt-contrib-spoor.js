@@ -4,7 +4,7 @@ import StatefulSession from './adapt-stateful-session';
 import OfflineStorage from './adapt-offlineStorage-scorm';
 import offlineStorage from 'core/js/offlineStorage';
 import { shouldStart as shouldStartCookieLMS, start as startCookieLMS } from './scorm/cookieLMS';
-import './../libraries/jquery.keycombo';
+import 'libraries/jquery.keycombo';
 
 class Spoor extends Backbone.Controller {
 
