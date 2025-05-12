@@ -195,19 +195,19 @@ class ScormWrapper {
     if (this.isSCORM2004()) {
       this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase, options);
       this.setValue('cmi.success_status', SUCCESS_STATE.PASSED.asLowerCase, options);
-    } else {
-      this.setValue('cmi.core.lesson_status', SUCCESS_STATE.PASSED.asLowerCase, options);
+      return;
     }
+    this.setValue('cmi.core.lesson_status', SUCCESS_STATE.PASSED.asLowerCase, options);
   }
 
   setFailed() {
     const options = { shouldCommit: this.commitOnStatusChange || this.commitOnAnyChange };
     if (this.isSCORM2004()) {
-      this.setValue('cmi.success_status', SUCCESS_STATE.FAILED.asLowerCase);
+      this.setValue('cmi.success_status', SUCCESS_STATE.FAILED.asLowerCase, options);
       if (this.setCompletedWhenFailed) this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase, options);
-    } else {
-      this.setValue('cmi.core.lesson_status', SUCCESS_STATE.FAILED.asLowerCase, options);
+      return;
     }
+    this.setValue('cmi.core.lesson_status', SUCCESS_STATE.FAILED.asLowerCase, options);
   }
 
   getStatus() {
