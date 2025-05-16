@@ -14,9 +14,6 @@
             <item identifier="I_A001" identifierref="A001">
                 <title><![CDATA[@@course.title]]></title>
                 <imsss:sequencing>
-                    <imsss:objectives>
-                        <imsss:primaryObjective satisfiedByMeasure="false" objectiveID="Results" />
-                    </imsss:objectives>
                     <imsss:deliveryControls completionSetByContent="true" objectiveSetByContent="true" />
                 </imsss:sequencing>
                 <adlnav:presentation>
