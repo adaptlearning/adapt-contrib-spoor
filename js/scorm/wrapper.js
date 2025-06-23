@@ -181,33 +181,33 @@ class ScormWrapper {
   }
 
   setIncomplete() {
-    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', COMPLETION_STATE.INCOMPLETE.asLowerCase);
-    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
+    const options = { shouldCommit: this.commitOnStatusChange || this.commitOnAnyChange };
+    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', COMPLETION_STATE.INCOMPLETE.asLowerCase, options);
   }
 
   setCompleted() {
-    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', COMPLETION_STATE.COMPLETED.asLowerCase);
-    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
+    const options = { shouldCommit: this.commitOnStatusChange || this.commitOnAnyChange };
+    this.setValue(this.isSCORM2004() ? 'cmi.completion_status' : 'cmi.core.lesson_status', COMPLETION_STATE.COMPLETED.asLowerCase, options);
   }
 
   setPassed() {
+    const options = { shouldCommit: this.commitOnStatusChange || this.commitOnAnyChange };
     if (this.isSCORM2004()) {
-      this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase);
-      this.setValue('cmi.success_status', SUCCESS_STATE.PASSED.asLowerCase);
-    } else {
-      this.setValue('cmi.core.lesson_status', SUCCESS_STATE.PASSED.asLowerCase);
+      this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase, options);
+      this.setValue('cmi.success_status', SUCCESS_STATE.PASSED.asLowerCase, options);
+      return;
     }
-    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
+    this.setValue('cmi.core.lesson_status', SUCCESS_STATE.PASSED.asLowerCase, options);
   }
 
   setFailed() {
+    const options = { shouldCommit: this.commitOnStatusChange || this.commitOnAnyChange };
     if (this.isSCORM2004()) {
-      this.setValue('cmi.success_status', SUCCESS_STATE.FAILED.asLowerCase);
-      if (this.setCompletedWhenFailed) this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase);
-    } else {
-      this.setValue('cmi.core.lesson_status', SUCCESS_STATE.FAILED.asLowerCase);
+      this.setValue('cmi.success_status', SUCCESS_STATE.FAILED.asLowerCase, options);
+      if (this.setCompletedWhenFailed) this.setValue('cmi.completion_status', COMPLETION_STATE.COMPLETED.asLowerCase, options);
+      return;
     }
-    if (this.commitOnStatusChange && !this.commitOnAnyChange) this.commit();
+    this.setValue('cmi.core.lesson_status', SUCCESS_STATE.FAILED.asLowerCase, options);
   }
 
   getStatus() {
@@ -411,7 +411,7 @@ class ScormWrapper {
     return value + '';
   }
 
-  setValue(property, value) {
+  setValue(property, value, { shouldCommit = this.commitOnAnyChange } = {}) {
     this.logger.debug(`ScormWrapper::setValue: _property=${property} _value=${value}`);
     if (this.finishCalled) {
       this.logger.debug('ScormWrapper::setValue: ignoring request as \'finish\' has been called');
@@ -441,7 +441,7 @@ class ScormWrapper {
       }
       this.logger.warn('ScormWrapper::setValue: LMS reported that the \'set\' call failed but then said there was no error!');
     }
-    if (this.commitOnAnyChange) this.debouncedCommit();
+    if (shouldCommit) this.debouncedCommit();
     return success;
   }
 
@@ -953,12 +953,13 @@ class ScormWrapper {
   }
 
   setSessionTime() {
+    const options = { shouldCommit: false };
     const endTime = new Date();
     if (this.isSCORM2004()) {
-      this.setValue('cmi.session_time', this.convertToSCORM2004Time(endTime.getTime() - this.startTime.getTime()));
+      this.setValue('cmi.session_time', this.convertToSCORM2004Time(endTime.getTime() - this.startTime.getTime()), options);
       return;
     }
-    this.setValue('cmi.core.session_time', this.convertToSCORM12Time(endTime.getTime() - this.startTime.getTime()));
+    this.setValue('cmi.core.session_time', this.convertToSCORM12Time(endTime.getTime() - this.startTime.getTime()), options);
   }
 
   getExitState() {
