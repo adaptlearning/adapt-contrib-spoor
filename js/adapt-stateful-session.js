@@ -237,7 +237,7 @@ export default class StatefulSession extends Backbone.Controller {
     const result = model.isCorrect();
     const latency = model?.getLatency?.() ?? view.getLatency();
     const correctResponsesPattern = model.getInteractionObject()?.correctResponsesPattern;
-    const objectiveIds = model.getContextActivities()
+    const objectiveIds = model.contextActivities
       .filter(activity => activity.type !== 'course')
       .map(activity => activity.id);
     const description = model.get('body');
