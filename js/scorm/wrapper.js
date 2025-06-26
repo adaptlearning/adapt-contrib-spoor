@@ -595,7 +595,7 @@ class ScormWrapper {
       // range split into negative/positive ranges (rather than minScore-maxScore) depending on score
       const range = (score < 0) ? Math.abs(minScore) : maxScore;
       // `scaled` converted to -1-1 range to indicate negative/positive weighting now that negative values can be assigned to questions
-      const scaledScore = (score === 0 && range === 0)
+      const scaledScore = (range === 0)
         ? 0
         : score / range;
       this.setValue(`${cmiPrefix}.score.scaled`, parseFloat(scaledScore.toFixed(7)));
