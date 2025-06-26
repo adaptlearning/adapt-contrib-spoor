@@ -180,15 +180,13 @@ export default class StatefulSession extends Backbone.Controller {
 
   initializeContentObjectives() {
     if (!this.shouldRecordObjectives) return;
-    Adapt.contentObjects.forEach(model => this.initializeContentObjective(model));
-  }
-
-  initializeContentObjective(model) {
-    if (!this.shouldRecordObjectives || model.get('_recordObjective') === false || model.isTypeGroup('course')) return;
-    const id = model.get('_id');
-    const description = model.get('title') || model.get('displayTitle');
-    offlineStorage.set('objectiveDescription', id, description);
-    this.setContentObjectiveStatus(model);
+    Adapt.contentObjects.forEach(model => {
+      if (model.get('_recordObjective') === false || model.isTypeGroup('course')) return;
+      const id = model.get('_id');
+      const description = model.get('title') || model.get('displayTitle');
+      offlineStorage.set('objectiveDescription', id, description);
+      this.setContentObjectiveStatus(model);
+    });
   }
 
   setContentObjectiveStatus(model) {
