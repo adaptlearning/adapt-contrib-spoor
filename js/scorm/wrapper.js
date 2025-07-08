@@ -743,6 +743,10 @@ class ScormWrapper {
 
   recordObjectiveStatus(id, completionStatus, successStatus = SUCCESS_STATE.UNKNOWN.asLowerCase) {
     if (!this.isChildSupported('cmi.objectives.n.id') || !this.isSupported('cmi.objectives._count')) return;
+    if (!this.isSCORM2004() && completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase) {
+      // "unknown" is not a valid status in SCORM 1.2 - switch to "not attempted" to denote unavailable objectives
+      completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+    }
     if (!this.isValidCompletionStatus(completionStatus)) {
       this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { completionStatus }));
       return;
