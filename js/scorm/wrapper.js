@@ -602,7 +602,7 @@ class ScormWrapper {
     } else if (isPercentageBased) {
       // convert values to 0-100 range
       // negative scores are capped to 0 due to SCORM 1.2 limitations
-      score = (score < 0 || (score === 0 && maxScore === 0))
+      score = (score < 0 || maxScore === 0)
         ? 0
         : Math.round((score / maxScore) * 100);
       minScore = 0;
