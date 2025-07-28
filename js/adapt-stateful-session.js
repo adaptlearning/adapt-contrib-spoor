@@ -106,7 +106,9 @@ export default class StatefulSession extends Backbone.Controller {
   setupEventListeners() {
     this.removeEventListeners();
     this.listenTo(Adapt.components, 'change:_isComplete', this.debouncedSaveSession);
-    this.listenTo(Adapt.contentObjects, 'change:_isComplete', this.onContentObjectCompleteChange);
+    this.listenTo(Adapt.contentObjects, {
+      'change:_isAvailable change:_isVisited change:_isComplete': this.setContentObjectiveStatus
+    });
     this.listenTo(Adapt.course, 'change:_isComplete', this.debouncedSaveSession);
     if (this._shouldStoreResponses) {
       this.listenTo(data, 'change:_isSubmitted change:_userAnswer', this.debouncedSaveSession);
@@ -115,7 +117,6 @@ export default class StatefulSession extends Backbone.Controller {
       'app:dataReady': this.restoreSession,
       'adapt:start': this.onAdaptStart,
       'app:languageChanged': this.onLanguageChanged,
-      'pageView:ready': this.onPageViewReady,
       'questionView:recordInteraction': this.onQuestionRecordInteraction,
       'tracking:complete': this.onTrackingComplete
     });
@@ -180,14 +181,25 @@ export default class StatefulSession extends Backbone.Controller {
   initializeContentObjectives() {
     if (!this.shouldRecordObjectives) return;
     Adapt.contentObjects.forEach(model => {
-      if (model.isTypeGroup('course')) return;
+      if (model.get('_recordObjective') === false || model.isTypeGroup('course') || model.get('_isVisited')) return;
       const id = model.get('_id');
       const description = model.get('title') || model.get('displayTitle');
       offlineStorage.set('objectiveDescription', id, description);
-      if (model.get('_isVisited')) return;
-      const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
-      offlineStorage.set('objectiveStatus', id, completionStatus);
+      this.setContentObjectiveStatus(model);
     });
+  }
+
+  setContentObjectiveStatus(model) {
+    if (!this.shouldRecordObjectives || model.get('_recordObjective') === false || model.isTypeGroup('course')) return;
+    const id = model.get('_id');
+    const isAvailable = model.get('_isAvailable');
+    const isVisited = model.get('_isVisited');
+    const isComplete = model.get('_isComplete');
+    let completionStatus = COMPLETION_STATE.UNKNOWN.asLowerCase;
+    if (isAvailable && !isVisited) completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+    if (isAvailable && isVisited && !isComplete) completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
+    if (isAvailable && isComplete) completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
+    offlineStorage.set('objectiveStatus', id, completionStatus);
   }
 
   onAdaptStart() {
@@ -207,15 +219,6 @@ export default class StatefulSession extends Backbone.Controller {
     if (document.visibilityState === 'hidden') this.scorm.commit();
   }
 
-  onPageViewReady(view) {
-    if (!this.shouldRecordObjectives) return;
-    const model = view.model;
-    if (model.get('_isComplete')) return;
-    const id = model.get('_id');
-    const completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
-    offlineStorage.set('objectiveStatus', id, completionStatus);
-  }
-
   onQuestionRecordInteraction(view) {
     if (!this.shouldRecordInteractions) return;
     if (!this.scorm.isSupported('cmi.interactions._count')) return;
@@ -232,19 +235,11 @@ export default class StatefulSession extends Backbone.Controller {
     const result = model.isCorrect();
     const latency = model?.getLatency?.() ?? view.getLatency();
     const correctResponsesPattern = model.getInteractionObject()?.correctResponsesPattern;
-    const objectiveIds = Adapt?.scoring?.getSubsetsByModelId(modelId)
-      .filter(set => set.type !== 'adapt')
-      .map(({ id }) => id);
+    const objectiveIds = model.contextActivities
+      .filter(activity => activity.type !== 'course')
+      .map(activity => activity.id);
     const description = model.get('body');
     offlineStorage.set('interaction', id, response, result, latency, responseType, correctResponsesPattern, objectiveIds, description);
-  }
-
-  onContentObjectCompleteChange(model) {
-    if (!this.shouldRecordObjectives) return;
-    if (model.isTypeGroup('course')) return;
-    const id = model.get('_id');
-    const completionStatus = (model.get('_isComplete') ? COMPLETION_STATE.COMPLETED : COMPLETION_STATE.INCOMPLETE).asLowerCase;
-    offlineStorage.set('objectiveStatus', id, completionStatus);
   }
 
   onTrackingComplete(completionData) {

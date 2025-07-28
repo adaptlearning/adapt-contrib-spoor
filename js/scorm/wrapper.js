@@ -595,12 +595,16 @@ class ScormWrapper {
       // range split into negative/positive ranges (rather than minScore-maxScore) depending on score
       const range = (score < 0) ? Math.abs(minScore) : maxScore;
       // `scaled` converted to -1-1 range to indicate negative/positive weighting now that negative values can be assigned to questions
-      const scaledScore = score / range;
+      const scaledScore = (range === 0)
+        ? 0
+        : score / range;
       this.setValue(`${cmiPrefix}.score.scaled`, parseFloat(scaledScore.toFixed(7)));
     } else if (isPercentageBased) {
       // convert values to 0-100 range
       // negative scores are capped to 0 due to SCORM 1.2 limitations
-      score = (score < 0) ? 0 : Math.round((score / maxScore) * 100);
+      score = (score < 0 || maxScore === 0)
+        ? 0
+        : Math.round((score / maxScore) * 100);
       minScore = 0;
       maxScore = 100;
     } else {
@@ -739,6 +743,10 @@ class ScormWrapper {
 
   recordObjectiveStatus(id, completionStatus, successStatus = SUCCESS_STATE.UNKNOWN.asLowerCase) {
     if (!this.isChildSupported('cmi.objectives.n.id') || !this.isSupported('cmi.objectives._count')) return;
+    if (!this.isSCORM2004() && completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase) {
+      // "unknown" is not a valid status in SCORM 1.2 - switch to "not attempted" to denote unavailable objectives
+      completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+    }
     if (!this.isValidCompletionStatus(completionStatus)) {
       this.handleDataError(new ScormError(CLIENT_STATUS_UNSUPPORTED, { completionStatus }));
       return;
