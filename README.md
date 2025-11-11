@@ -102,7 +102,7 @@ Specifies the status that is reported to the LMS when the assessment is failed. 
 
 ##### \_resetStatusOnLanguageChange (boolean)
 
-If set to `true` the status of the course is set to "incomplete" when the languge is changed using the [adapt-contrib-languagePicker](https://github.com/adaptlearning/adapt-contrib-languagepicker) plugin. Acceptable values are `true` or `false`. The default is `false`.
+If set to `true` the status of the course is set to "incomplete" when the language is changed using the [adapt-contrib-languagePicker](https://github.com/adaptlearning/adapt-contrib-languagepicker) plugin. Acceptable values are `true` or `false`. The default is `false`.
 
 #### \_advancedSettings (object)
 
