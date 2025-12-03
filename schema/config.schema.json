@@ -47,6 +47,12 @@
                   "title": "Record objectives",
                   "description": "If enabled, the course will be able to record the status and scores of the course objectives to the cmi.objectives SCORM data fields",
                   "default": true
+                },
+                "_shouldCompress": {
+                  "type": "boolean",
+                  "title": "Compress data",
+                  "description": "If enabled, the data stored at the LMS will be further compressed",
+                  "default": false
                 }
               }
             },
