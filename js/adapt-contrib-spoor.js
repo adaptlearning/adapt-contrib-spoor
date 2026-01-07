@@ -5,6 +5,7 @@ import OfflineStorage from './adapt-offlineStorage-scorm';
 import offlineStorage from 'core/js/offlineStorage';
 import { shouldStart as shouldStartCookieLMS, start as startCookieLMS } from './scorm/cookieLMS';
 import 'libraries/jquery.keycombo';
+import './fixes/harden';
 
 class Spoor extends Backbone.Controller {
 
