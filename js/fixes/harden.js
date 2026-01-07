@@ -8,7 +8,7 @@ import Adapt from 'core/js/adapt';
 Adapt.on('adapt:start', () => {
   const config = Adapt.config.get('_fixes');
   if (config?._harden !== true) return;
-  if (window.ADAPT_BUILD_TYPE !== 'development') return;
+  if (window.ADAPT_BUILD_TYPE === 'development') return;
   applyHarden();
 });
 
