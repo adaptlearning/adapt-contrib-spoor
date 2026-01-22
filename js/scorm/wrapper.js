@@ -246,10 +246,12 @@ class ScormWrapper {
   }
 
   getLessonLocation() {
-    return this.getValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location');
+    const location = this.getValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location');
+    return location === 'null' ? '' : location;
   }
 
   setLessonLocation(location) {
+    if (location.trim() === '') location = 'null';
     this.setValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location', location);
   }
 
