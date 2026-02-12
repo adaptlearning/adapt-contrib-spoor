@@ -251,7 +251,7 @@ class ScormWrapper {
   }
 
   setLessonLocation(location) {
-    if (location.trim() === '') location = 'null';
+    if (!location?.trim()) location = 'null';
     this.setValue(this.isSCORM2004() ? 'cmi.location' : 'cmi.core.lesson_location', location);
   }
 
