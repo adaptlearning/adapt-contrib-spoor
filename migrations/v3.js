@@ -5,6 +5,7 @@ import {
   mutateContent,
   checkContent,
   updatePlugin,
+  getCourse,
   getConfig,
   testStopWhere,
   testSuccessWhere
@@ -13,6 +14,10 @@ import _ from 'lodash';
 
 function getSpoorConfig() {
   return getConfig()?._spoor;
+}
+
+function getSpoorCourse() {
+  return getCourse()?._spoor;
 }
 
 /**
@@ -330,46 +335,46 @@ describe('adapt-contrib-spoor - to v3.5.0', async () => {
 });
 
 describe('adapt-contrib-spoor - to v3.6.0', async () => {
-  let spoorConfig;
+  let spoorCourse;
   whereFromPlugin('adapt-contrib-spoor - from <v3.6.0', { name: 'adapt-contrib-spoor', version: '<3.6.0' });
 
   whereContent('adapt-contrib-spoor - where missing _spoor._messages', async () => {
-    spoorConfig = getSpoorConfig();
-    if (!spoorConfig) return false;
-    return !spoorConfig._messages;
+    spoorCourse = getSpoorCourse();
+    if (!spoorCourse) return false;
+    return !spoorCourse._messages;
   });
 
   mutateContent('adapt-contrib-spoor - add _spoor._messages', async () => {
-    spoorConfig._messages = {};
+    spoorCourse._messages = {};
     return true;
   });
 
   checkContent('adapt-contrib-spoor - check _spoor._messages added', async () => {
-    const isValid = spoorConfig._messages;
+    const isValid = spoorCourse._messages;
     if (!isValid) throw new Error('_spoor._messages not added');
     return true;
   });
 
   updatePlugin('adapt-contrib-spoor - update to v3.6.0', { name: 'adapt-contrib-spoor', version: '3.6.0', framework: '>=5.5' });
 
-  testSuccessWhere('config with empty spoor', {
+  testSuccessWhere('course with empty spoor', {
     fromPlugins: [{ name: 'adapt-contrib-spoor', version: '3.5.0' }],
     content: [
-      { _type: 'config', _spoor: {} }
+      { _type: 'course', _spoor: {} }
     ]
   });
 
-  testStopWhere('config with spoor._messages', {
+  testStopWhere('course with spoor._messages', {
     fromPlugins: [{ name: 'adapt-contrib-spoor', version: '3.5.0' }],
     content: [
-      { _type: 'config', _spoor: { _messages: {} } }
+      { _type: 'course', _spoor: { _messages: {} } }
     ]
   });
 
   testStopWhere('no spoor', {
     fromPlugins: [{ name: 'adapt-contrib-spoor', version: '3.5.0' }],
     content: [
-      { _type: 'config' }
+      { _type: 'course' }
     ]
   });
 
