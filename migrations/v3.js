@@ -334,51 +334,77 @@ describe('adapt-contrib-spoor - to v3.5.0', async () => {
   });
 });
 
-describe('adapt-contrib-spoor - to v3.6.0', async () => {
+/**
+ * added to schemas in v3.6.0 but `_messages` can be invalid in later plugins via legacy AAT form validation or framework course config
+ * causing migration issues during an AAT import.
+ */
+describe('adapt-contrib-spoor - fix invalid _spoor._messages', async () => {
   let spoorCourse;
-  whereFromPlugin('adapt-contrib-spoor - from <v3.6.0', { name: 'adapt-contrib-spoor', version: '<3.6.0' });
+  whereFromPlugin('adapt-contrib-spoor - no minimum version', { name: 'adapt-contrib-spoor' });
 
-  whereContent('adapt-contrib-spoor - where missing _spoor._messages', async () => {
+  whereContent('adapt-contrib-spoor - where invalid _spoor._messages', async () => {
     spoorCourse = getSpoorCourse();
     if (!spoorCourse) return false;
     return !_.isPlainObject(spoorCourse._messages);
   });
 
-  mutateContent('adapt-contrib-spoor - add _spoor._messages', async () => {
+  mutateContent('adapt-contrib-spoor - update _spoor._messages to plain object', async () => {
     spoorCourse._messages = {};
     return true;
   });
 
-  checkContent('adapt-contrib-spoor - check _spoor._messages added', async () => {
-    const isValid = spoorCourse._messages;
-    if (!isValid) throw new Error('_spoor._messages not added');
+  checkContent('adapt-contrib-spoor - check _spoor._messages validity', async () => {
+    const isValid = _.isPlainObject(spoorCourse._messages);
+    if (!isValid) throw new Error('invalid _spoor._messages');
     return true;
   });
 
-  updatePlugin('adapt-contrib-spoor - update to v3.6.0', { name: 'adapt-contrib-spoor', version: '3.6.0', framework: '>=5.5' });
-
   testSuccessWhere('course with empty spoor', {
-    fromPlugins: [{ name: 'adapt-contrib-spoor', version: '3.5.0' }],
+    fromPlugins: [{ name: 'adapt-contrib-spoor' }],
     content: [
       { _type: 'course', _spoor: {} }
     ]
   });
 
-  testStopWhere('course with spoor._messages', {
-    fromPlugins: [{ name: 'adapt-contrib-spoor', version: '3.5.0' }],
+  testSuccessWhere('course with invalid spoor._messages as string', {
+    fromPlugins: [{ name: 'adapt-contrib-spoor' }],
+    content: [
+      { _type: 'course', _spoor: { _messages: "" } }
+    ]
+  });
+
+  testSuccessWhere('course with invalid spoor._messages as array', {
+    fromPlugins: [{ name: 'adapt-contrib-spoor' }],
+    content: [
+      { _type: 'course', _spoor: { _messages: [] } }
+    ]
+  });
+
+  testSuccessWhere('course with invalid spoor._messages as number', {
+    fromPlugins: [{ name: 'adapt-contrib-spoor' }],
+    content: [
+      { _type: 'course', _spoor: { _messages: 123 } }
+    ]
+  });
+
+  testSuccessWhere('course with invalid spoor._messages as boolean', {
+    fromPlugins: [{ name: 'adapt-contrib-spoor' }],
+    content: [
+      { _type: 'course', _spoor: { _messages: true } }
+    ]
+  });
+
+  testStopWhere('course with valid spoor._messages', {
+    fromPlugins: [{ name: 'adapt-contrib-spoor' }],
     content: [
       { _type: 'course', _spoor: { _messages: {} } }
     ]
   });
 
   testStopWhere('no spoor', {
-    fromPlugins: [{ name: 'adapt-contrib-spoor', version: '3.5.0' }],
+    fromPlugins: [{ name: 'adapt-contrib-spoor' }],
     content: [
       { _type: 'course' }
     ]
-  });
-
-  testStopWhere('spoor incorrect version', {
-    fromPlugins: [{ name: 'adapt-contrib-spoor', version: '3.6.0' }]
   });
 });
