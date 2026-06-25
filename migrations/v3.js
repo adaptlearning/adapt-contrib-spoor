@@ -341,7 +341,7 @@ describe('adapt-contrib-spoor - to v3.6.0', async () => {
   whereContent('adapt-contrib-spoor - where missing _spoor._messages', async () => {
     spoorCourse = getSpoorCourse();
     if (!spoorCourse) return false;
-    return !spoorCourse._messages;
+    return !_.isPlainObject(spoorCourse._messages);
   });
 
   mutateContent('adapt-contrib-spoor - add _spoor._messages', async () => {
