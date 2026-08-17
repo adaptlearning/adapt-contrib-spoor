@@ -156,6 +156,8 @@ Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2
 
 Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2004) to set when the course has been completed. The default behaviour will cause the exit state to be set to an empty string for SCORM 1.2 courses, or `"normal"` for SCORM 2004 courses. The default behaviour should be left in place unless you are confident you know what you are doing! Note: if you are using SCORM 2004, you can set this to `"suspend"` to prevent the LMS from clearing all progress tracking when a previously-completed course is re-launched by the learner.
 
+For SCORM 2004, this also sets `adl.nav.request` on exit, based on the provided value (`"suspend"` maps to `"suspendAll"`, `"normal"` maps to `"exitAll"`). This instructs the LMS to reclaim control once the course has finished communicating. 
+
 ##### \_setCompletedWhenFailed (boolean)
 
 Determines whether the `cmi.completion_status` is set to "completed" if the assessment is "failed". Only valid for SCORM 2004, where the logic for completion and success is separate. The default is `true`.
