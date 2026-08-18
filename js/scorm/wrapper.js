@@ -327,6 +327,9 @@ class ScormWrapper {
 
     this.setSessionTime();
     this.setExitState();
+    if (this.isSCORM2004()) {
+      this.setAdlNavRequest();
+    }
     this.finishCalled = true;
 
     if (this.timedCommitIntervalID !== null) {
@@ -984,6 +987,20 @@ class ScormWrapper {
   setExitState() {
     const property = this.isSCORM2004() ? 'cmi.exit' : 'cmi.core.exit';
     this.setValue(property, this.getExitState());
+  }
+
+  getAdlNavRequest() {
+    const exitState = this.getExitState();
+    if (exitState === 'suspend') return 'suspendAll';
+    if (exitState === 'normal') return 'exitAll';
+    // fall back to safe default based on completion so that a navigation request is always issued
+    const completionStatus = this.scorm.data.completionStatus;
+    const isIncomplete = completionStatus === COMPLETION_STATE.INCOMPLETE.asLowerCase || completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase;
+    return isIncomplete ? 'suspendAll' : 'exitAll';
+  }
+
+  setAdlNavRequest() {
+    this.setValue('adl.nav.request', this.getAdlNavRequest());
   }
 
 }
