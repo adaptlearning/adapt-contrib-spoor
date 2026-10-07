@@ -35,7 +35,14 @@ export default class StatefulSession extends Backbone.Controller {
   beginSession() {
     this.listenTo(Adapt, {
       'app:dataReady': this.restoreSession,
-      'adapt:start': this.onAdaptStart
+      'adapt:start': this.onAdaptStart,
+      // Subscribe before the restore completion cascade. A course locked behind
+      // trickle can flip _isComplete during the app:dataReady restore (trickle
+      // buttons are recreated only on adapt:start, so restored blocks complete
+      // from their saved components). Core fires tracking:complete in that
+      // window; without this early listener the completed status is lost and the
+      // LMS stays incomplete. See spoor #319.
+      'tracking:complete': this.onTrackingComplete
     });
     this._trackingIdType = Adapt.build.get('trackingIdType') || 'block';
     // suppress SCORM errors if 'nolmserrors' is found in the querystring
