@@ -156,7 +156,9 @@ Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2
 
 Determines the 'exit state' (`cmi.core.exit` in SCORM 1.2, `cmi.exit` in SCORM 2004) to set when the course has been completed. The default behaviour will cause the exit state to be set to an empty string for SCORM 1.2 courses, or `"normal"` for SCORM 2004 courses. The default behaviour should be left in place unless you are confident you know what you are doing! Note: if you are using SCORM 2004, you can set this to `"suspend"` to prevent the LMS from clearing all progress tracking when a previously-completed course is re-launched by the learner.
 
-For SCORM 2004, this also sets `adl.nav.request` on exit, based on the provided value (`"suspend"` maps to `"suspendAll"`, `"normal"` maps to `"exitAll"`). This instructs the LMS to reclaim control once the course has finished communicating. 
+##### \_shouldSetNavRequestOnExit (boolean)
+
+SCORM 2004 only. If enabled, `adl.nav.request` is set on exit to match the exit state: `"suspend"` sets `"suspendAll"` and `"normal"` sets `"exitAll"`. This asks the LMS to take back control once the course has finished communicating. No request is made for any other exit state (e.g. `""`). The default is `false`. Only enable this if your LMS requires it, as `"exitAll"` and `"suspendAll"` apply to the whole activity tree.
 
 ##### \_setCompletedWhenFailed (boolean)
 

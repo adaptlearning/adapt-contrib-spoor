@@ -28,6 +28,7 @@
             "_commitOnVisibilityChangeHidden": true,
             "_exitStateIfIncomplete": "auto",
             "_exitStateIfComplete": "auto",
+            "_shouldSetNavRequestOnExit": false,
             "_setCompletedWhenFailed": true,
             "_connectionTest": {
               "_isEnabled": true,
