@@ -178,6 +178,12 @@
                   "enum": ["auto", "suspend", "normal", ""],
                   "_backboneForms": "Select"
                 },
+                "_shouldSetNavRequestOnExit": {
+                  "type": "boolean",
+                  "title": "Set navigation request on exit",
+                  "description": "SCORM 2004 only. If enabled, `adl.nav.request` is set on exit to match the exit state (\"suspend\" sets \"suspendAll\", \"normal\" sets \"exitAll\"), asking the LMS to take back control. Leave disabled unless your LMS requires it.",
+                  "default": false
+                },
                 "_setCompletedWhenFailed": {
                   "type": "boolean",
                   "title": "Completed when failed",

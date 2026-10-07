@@ -88,6 +88,7 @@ class ScormWrapper {
     this.scorm.handleExitMode = false;
 
     this.suppressErrors = false;
+    this.shouldSetNavRequestOnExit = false;
     this.commit = this.commit.bind(this);
     this.doRetryCommit = this.doRetryCommit.bind(this);
     this.debouncedCommit = _.debounce(this.commit, 100);
@@ -146,6 +147,9 @@ class ScormWrapper {
       }
       if ('_exitStateIfComplete' in settings) {
         this.exitStateIfComplete = settings._exitStateIfComplete;
+      }
+      if (_.isBoolean(settings._shouldSetNavRequestOnExit)) {
+        this.shouldSetNavRequestOnExit = settings._shouldSetNavRequestOnExit;
       }
       if (_.isBoolean(settings._setCompletedWhenFailed)) {
         this.setCompletedWhenFailed = settings._setCompletedWhenFailed;
@@ -327,7 +331,7 @@ class ScormWrapper {
 
     this.setSessionTime();
     this.setExitState();
-    if (this.isSCORM2004()) {
+    if (this.isSCORM2004() && this.shouldSetNavRequestOnExit) {
       this.setAdlNavRequest();
     }
     this.finishCalled = true;
@@ -975,9 +979,13 @@ class ScormWrapper {
     this.setValue('cmi.core.session_time', this.convertToSCORM12Time(endTime.getTime() - this.startTime.getTime()), options);
   }
 
-  getExitState() {
+  isIncomplete() {
     const completionStatus = this.scorm.data.completionStatus;
-    const isIncomplete = completionStatus === COMPLETION_STATE.INCOMPLETE.asLowerCase || completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase;
+    return completionStatus === COMPLETION_STATE.INCOMPLETE.asLowerCase || completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase;
+  }
+
+  getExitState() {
+    const isIncomplete = this.isIncomplete();
     const exitState = isIncomplete ? this.exitStateIfIncomplete : this.exitStateIfComplete;
     if (exitState !== 'auto') return exitState;
     if (this.isSCORM2004()) return (isIncomplete ? 'suspend' : 'normal');
@@ -989,18 +997,24 @@ class ScormWrapper {
     this.setValue(property, this.getExitState());
   }
 
+  /**
+   * SCORM 2004 navigation request matching the exit state, or null when there's no mapping
+   * (e.g. an exit state of "" means the author has chosen not to set one)
+   */
   getAdlNavRequest() {
     const exitState = this.getExitState();
     if (exitState === 'suspend') return 'suspendAll';
     if (exitState === 'normal') return 'exitAll';
-    // fall back to safe default based on completion so that a navigation request is always issued
-    const completionStatus = this.scorm.data.completionStatus;
-    const isIncomplete = completionStatus === COMPLETION_STATE.INCOMPLETE.asLowerCase || completionStatus === COMPLETION_STATE.UNKNOWN.asLowerCase;
-    return isIncomplete ? 'suspendAll' : 'exitAll';
+    return null;
   }
 
   setAdlNavRequest() {
-    this.setValue('adl.nav.request', this.getAdlNavRequest());
+    const navRequest = this.getAdlNavRequest();
+    if (!navRequest) return;
+    // Called during unload, so an LMS rejecting adl.nav.request is logged rather than surfaced
+    if (this.scorm.set('adl.nav.request', navRequest)) return;
+    const errorCode = this.scorm.debug.getCode();
+    this.logger.warn(`ScormWrapper::setAdlNavRequest: LMS rejected adl.nav.request "${navRequest}" (error ${errorCode})`);
   }
 
 }

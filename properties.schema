@@ -259,6 +259,15 @@
                       "validators": [],
                       "help": "What exit status to use if the course is complete."
                     },
+                    "_shouldSetNavRequestOnExit": {
+                      "type": "boolean",
+                      "required": false,
+                      "default": false,
+                      "title": "Set navigation request on exit",
+                      "inputType": "Checkbox",
+                      "validators": [],
+                      "help": "SCORM 2004 only. If enabled, `adl.nav.request` is set on exit to match the exit state (\"suspend\" sets \"suspendAll\", \"normal\" sets \"exitAll\"), asking the LMS to take back control. Leave disabled unless your LMS requires it."
+                    },
                     "_setCompletedWhenFailed": {
                       "type": "boolean",
                       "required": false,
